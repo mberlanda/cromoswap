@@ -138,6 +138,20 @@ describe('App', () => {
     expect(content).toContain('USA13');
   });
 
+  it('best-effort syncs the session and scans after a change', async () => {
+    const syncSession = vi.fn();
+    render(<App deps={makeDeps({ syncSession })} />);
+    await startSession('Mauro');
+    await userEvent.type(screen.getByLabelText(/^code$/i), 'USA13');
+    await userEvent.click(screen.getByRole('button', { name: /^add$/i }));
+
+    const lastCall = syncSession.mock.calls.at(-1);
+    expect(lastCall?.[0]).toMatchObject({ userName: 'Mauro' });
+    expect(lastCall?.[1].map((s: { normalizedCode: string }) => s.normalizedCode)).toContain(
+      'USA13',
+    );
+  });
+
   it('resumes an existing session and shows its scans', async () => {
     const deps = makeDeps();
     const { unmount } = render(<App deps={deps} />);

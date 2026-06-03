@@ -5,7 +5,10 @@ import { IdbSessionRepo, IdbScanRepo, IdbImageStore } from './storage/idb-repos'
 import { TesseractAdapter } from './ocr/tesseract-adapter';
 import { runPipeline } from './ocr/pipeline';
 import { requestCamera } from './ui/camera-permission';
+import { pushSession } from './storage/sync-client';
 import type { RgbaImage } from './ocr/image';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 
 /**
  * Composition root: wires real IndexedDB repos, the camera, and the Tesseract
@@ -68,5 +71,9 @@ export async function createAppDeps(video: HTMLVideoElement): Promise<AppDeps> {
     now: nowIso,
     downloadText: (name, content) => triggerDownload(name, content, 'text/plain'),
     downloadJson: (name, content) => triggerDownload(name, content, 'application/json'),
+    syncSession: (session, scans) => {
+      if (API_BASE_URL === '') return;
+      void pushSession(session, scans, API_BASE_URL, (url, init) => fetch(url, init));
+    },
   };
 }

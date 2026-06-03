@@ -23,6 +23,8 @@ export interface AppDeps {
   now: Clock;
   downloadText: (filename: string, content: string) => void;
   downloadJson: (filename: string, content: string) => void;
+  /** Optional best-effort push of codes + metadata to the backend. */
+  syncSession?: (session: Session, scans: Scan[]) => void;
 }
 
 export function App({ deps }: { deps: AppDeps }) {
@@ -38,8 +40,8 @@ export function App({ deps }: { deps: AppDeps }) {
   }, [deps]);
 
   const refreshScans = useCallback(
-    async (sessionId: string) => {
-      const list = await deps.scanRepo.listBySession(sessionId);
+    async (session: Session) => {
+      const list = await deps.scanRepo.listBySession(session.id);
       setScans(list);
       const thumbs: Record<string, string> = {};
       for (const scan of list) {
@@ -47,6 +49,7 @@ export function App({ deps }: { deps: AppDeps }) {
         if (dataUrl !== undefined) thumbs[scan.id] = dataUrl;
       }
       setThumbnails(thumbs);
+      deps.syncSession?.(session, list);
     },
     [deps],
   );
@@ -62,7 +65,7 @@ export function App({ deps }: { deps: AppDeps }) {
     const session = await deps.sessionRepo.get(sessionId);
     if (!session) return;
     setActive(session);
-    await refreshScans(sessionId);
+    await refreshScans(session);
   }
 
   async function storeScan(
@@ -80,7 +83,7 @@ export function App({ deps }: { deps: AppDeps }) {
       capturedAt: deps.now(),
     });
     if (imageDataUrl !== undefined) await deps.imageStore.put(scan.id, imageDataUrl);
-    await refreshScans(active.id);
+    await refreshScans(active);
   }
 
   async function handleCapture() {
@@ -112,13 +115,13 @@ export function App({ deps }: { deps: AppDeps }) {
 
   async function handleEdit(id: string, code: string) {
     await deps.scanRepo.update(id, { normalizedCode: code });
-    if (active) await refreshScans(active.id);
+    if (active) await refreshScans(active);
   }
 
   async function handleDelete(id: string) {
     await deps.scanRepo.delete(id);
     await deps.imageStore.delete(id);
-    if (active) await refreshScans(active.id);
+    if (active) await refreshScans(active);
   }
 
   function handleExportText() {
