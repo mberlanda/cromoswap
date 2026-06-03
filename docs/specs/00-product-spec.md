@@ -32,7 +32,7 @@ manually → 10. Export the list and evidence.
 - Canonical form: `<PREFIX><NN>` — three-letter prefix + number `01`–`20`
   (e.g. `ARG01`, `USA13`, `FWC07`).
 - Tolerant input normalized to canonical: `ARG 1`, `ARG 01`, `ARG-01`, `arg01` → `ARG01`.
-- Prefix must be in the known list (51 prefixes; canonical source: `assets/prefixes.json`):
+- Prefix must be in the known list (49 prefixes; canonical source: `assets/prefixes.json`):
   `ALG ARG AUS AUT BEL BIH BRA CAN CPV COL CRO CUW CZE COD ECU EGY ENG FRA GER GHA HAI
   IRN IRQ CIV JPN JOR MEX MAR NED NZL NOR PAN PAR POR QAT KSA SCO SEN RSA KOR ESP SWE
   SUI TUN TUR URU USA UZB FWC`.
