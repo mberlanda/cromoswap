@@ -29,6 +29,11 @@ describe('MemorySessionRepo', () => {
     const repo = new MemorySessionRepo(ids, clock);
     expect(await repo.get('nope')).toBeUndefined();
   });
+
+  it('throws when updating a missing session', async () => {
+    const repo = new MemorySessionRepo(ids, clock);
+    await expect(repo.update('nope', { userName: 'x' })).rejects.toThrow(/not found/);
+  });
 });
 
 describe('MemoryScanRepo', () => {
@@ -57,6 +62,11 @@ describe('MemoryScanRepo', () => {
 
     await repo.delete('id-1');
     expect(await repo.listBySession('s1')).toEqual([]);
+  });
+
+  it('throws when updating a missing scan', async () => {
+    const repo = new MemoryScanRepo(ids, clock);
+    await expect(repo.update('nope', { normalizedCode: 'ARG01' })).rejects.toThrow(/not found/);
   });
 });
 

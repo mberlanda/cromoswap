@@ -31,4 +31,9 @@ describe('requestCamera', () => {
     const result = await requestCamera(rejectingWith('OverconstrainedError'));
     expect(result.state).toBe('error');
   });
+
+  it('handles a non-Error rejection with a fallback message', async () => {
+    const result = await requestCamera(() => Promise.reject('boom'));
+    expect(result).toEqual({ state: 'error', message: 'Unknown error' });
+  });
 });

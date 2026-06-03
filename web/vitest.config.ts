@@ -14,6 +14,7 @@ export default defineConfig({
       include: ['src/**/*.{ts,tsx}'],
       exclude: [
         'src/main.tsx',
+        'src/composition.ts',
         'src/vite-env.d.ts',
         'src/**/*.d.ts',
         'src/ocr/tesseract-adapter.ts',

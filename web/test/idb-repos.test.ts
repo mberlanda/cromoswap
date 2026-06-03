@@ -62,6 +62,14 @@ describe('IndexedDB repos', () => {
     expect(await scans.listBySession('s1')).toEqual([]);
   });
 
+  it('throws when updating missing records', async () => {
+    const db = await openStickerDb();
+    const sessions = new IdbSessionRepo(db, ids, clock);
+    const scans = new IdbScanRepo(db, ids, clock);
+    await expect(sessions.update('nope', { userName: 'x' })).rejects.toThrow(/not found/);
+    await expect(scans.update('nope', { normalizedCode: 'ARG01' })).rejects.toThrow(/not found/);
+  });
+
   it('stores and removes images', async () => {
     const db = await openStickerDb();
     const images = new IdbImageStore(db);
