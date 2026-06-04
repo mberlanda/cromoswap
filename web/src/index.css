@@ -552,3 +552,11 @@ section[aria-label="Resume"] li button {
   font-weight: 700;
   margin: 0 0 var(--space-2);
 }
+
+/* ── Recent prefix chips ─────────────────────────── */
+.recent-prefixes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
