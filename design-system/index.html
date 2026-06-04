@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cromoswap Design System</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#overview" aria-label="Cromoswap design system home">
+        <img src="assets/cromoswap-mark.svg" alt="" />
+        <span>cromoswap</span>
+      </a>
+      <nav class="topnav" aria-label="Design system sections">
+        <a href="#stories">Stories</a>
+        <a href="#tokens">Tokens</a>
+        <a href="#components">Components</a>
+        <a href="#mockups">Mockups</a>
+      </nav>
+    </header>
+
+    <main>
+      <section id="overview" class="overview">
+        <div class="overview-copy">
+          <p class="eyebrow">Design system v0.1</p>
+          <h1>Cromoswap turns duplicate sticker piles into clean swap-ready lists.</h1>
+          <p>
+            A scanner-first web experience for collectors and kids: guide the sticker,
+            verify the code, keep the list tidy, and export when the pile is done.
+          </p>
+        </div>
+        <aside class="logo-panel" aria-label="Cromoswap brand assets">
+          <img class="logo-full" src="assets/cromoswap-logo.svg" alt="Cromoswap logo" />
+          <div class="asset-row">
+            <a class="button secondary" href="assets/cromoswap-logo.svg">Logo SVG</a>
+            <a class="button secondary" href="assets/cromoswap-mark.svg">Mark SVG</a>
+          </div>
+        </aside>
+      </section>
+
+      <section id="stories" class="section-grid">
+        <div>
+          <p class="eyebrow">User stories</p>
+          <h2>Flow states represented as design surfaces</h2>
+          <p class="section-intro">
+            Select a story to see the intended state, main UI decision, and a compact
+            phone mockup. These map to the MVP journeys in the product spec.
+          </p>
+          <div class="story-controls" role="tablist" aria-label="Cromoswap user stories">
+            <button class="story-tab is-active" type="button" role="tab" data-story="start">Start</button>
+            <button class="story-tab" type="button" role="tab" data-story="permission">Permission</button>
+            <button class="story-tab" type="button" role="tab" data-story="scan">Scan</button>
+            <button class="story-tab" type="button" role="tab" data-story="confirm">Confirm</button>
+            <button class="story-tab" type="button" role="tab" data-story="correct">Correct</button>
+            <button class="story-tab" type="button" role="tab" data-story="collection">Collection</button>
+            <button class="story-tab" type="button" role="tab" data-story="export">Export</button>
+          </div>
+        </div>
+
+        <article class="story-card">
+          <div class="story-meta">
+            <p class="eyebrow" id="story-kicker">Story 1</p>
+            <h3 id="story-title">Create or resume a sticker session</h3>
+            <p id="story-copy">
+              The first screen asks for a name and makes resume visible when local data
+              exists. The product opens directly into the scanner workflow.
+            </p>
+            <ul id="story-points">
+              <li>Primary action: Start scanning.</li>
+              <li>Resume shows count, unique codes, and last update.</li>
+              <li>Privacy promise stays short and concrete.</li>
+            </ul>
+          </div>
+          <div class="phone" aria-live="polite">
+            <div class="phone-screen" id="story-screen"></div>
+          </div>
+        </article>
+      </section>
+
+      <section id="tokens" class="tokens-section">
+        <div class="section-heading">
+          <p class="eyebrow">Visual tokens</p>
+          <h2>Friendly scanner utility, not generic dashboard</h2>
+        </div>
+        <div class="token-grid">
+          <div class="token"><span class="swatch ink"></span><strong>Ink</strong><code>#17211f</code></div>
+          <div class="token"><span class="swatch scan"></span><strong>Scan</strong><code>#1f8a5f</code></div>
+          <div class="token"><span class="swatch info"></span><strong>Info</strong><code>#2f74d0</code></div>
+          <div class="token"><span class="swatch review"></span><strong>Review</strong><code>#f2b84b</code></div>
+          <div class="token"><span class="swatch danger"></span><strong>Danger</strong><code>#d94f4f</code></div>
+          <div class="token"><span class="swatch privacy"></span><strong>Privacy</strong><code>#6d57c7</code></div>
+        </div>
+      </section>
+
+      <section id="components" class="components-section">
+        <div class="section-heading">
+          <p class="eyebrow">Components</p>
+          <h2>Reusable pieces for the MVP</h2>
+        </div>
+        <div class="component-grid">
+          <article class="component-card">
+            <h3>Buttons</h3>
+            <div class="stack">
+              <button class="button primary" type="button">Save sticker</button>
+              <button class="button secondary" type="button">Correct</button>
+              <button class="button quiet" type="button">Enter manually</button>
+            </div>
+          </article>
+          <article class="component-card">
+            <h3>Status badges</h3>
+            <div class="inline-wrap">
+              <span class="badge success">High match</span>
+              <span class="badge review">Check code</span>
+              <span class="badge info">Local only</span>
+              <span class="badge danger">Blocked</span>
+            </div>
+          </article>
+          <article class="component-card">
+            <h3>Code entry</h3>
+            <div class="entry-grid">
+              <label>Prefix <span>ARG</span></label>
+              <label>No. <span>07</span></label>
+            </div>
+            <p class="hint">Normalize tolerant input into ARG07.</p>
+          </article>
+          <article class="component-card">
+            <h3>Scan row</h3>
+            <div class="scan-row">
+              <span class="thumb"></span>
+              <span><strong>ARG07</strong><small>OCR, today 18:12</small></span>
+              <span class="badge success">x2</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="mockups" class="mockups-section">
+        <div class="section-heading">
+          <p class="eyebrow">JPEG mockups</p>
+          <h2>Static exports</h2>
+          <p class="section-intro">
+            These JPEGs are generated from SVG sources so they can be regenerated without
+            browser automation.
+          </p>
+        </div>
+        <div class="mockup-links">
+          <a href="mockups/jpg/01-start.jpg">01 Start</a>
+          <a href="mockups/jpg/02-permission.jpg">02 Permission</a>
+          <a href="mockups/jpg/03-scan.jpg">03 Scan</a>
+          <a href="mockups/jpg/04-confirm.jpg">04 Confirm</a>
+          <a href="mockups/jpg/05-correct.jpg">05 Correct</a>
+          <a href="mockups/jpg/06-collection.jpg">06 Collection</a>
+          <a href="mockups/jpg/07-export.jpg">07 Export</a>
+          <a href="mockups/jpg/00-board.jpg">Board</a>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
