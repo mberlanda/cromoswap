@@ -560,3 +560,52 @@ section[aria-label="Resume"] li button {
   gap: var(--space-1);
   margin-bottom: var(--space-2);
 }
+
+/* ── Scan status line ────────────────────────────── */
+.scan-status {
+  font-size: 13px;
+  font-weight: 700;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  margin: var(--space-2) 0;
+}
+
+.scan-status.scanning {
+  background: rgba(47, 116, 208, 0.1);
+  color: var(--info);
+}
+
+.scan-status.no-detection {
+  background: rgba(242, 184, 75, 0.15);
+  color: #8a6200;
+}
+
+/* ── Orientation segmented control ──────────────── */
+.orientation-toggle {
+  display: flex;
+  border: 1px solid var(--subtle);
+  border-radius: var(--radius);
+  overflow: hidden;
+  align-self: flex-start;
+}
+
+.seg-btn {
+  flex: 1;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.seg-btn.active {
+  background: var(--scan);
+  color: white;
+}
+
+.seg-btn + .seg-btn {
+  border-left: 1px solid var(--subtle);
+}

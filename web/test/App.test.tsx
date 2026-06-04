@@ -95,7 +95,7 @@ describe('App', () => {
     expect(scanOnce).toHaveBeenLastCalledWith('portrait');
 
     // Switch to landscape and capture again.
-    await userEvent.click(screen.getByRole('radio', { name: /landscape/i }));
+    await userEvent.click(screen.getByRole('button', { name: /landscape/i }));
     await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
     await screen.findByText('ARG01');
     expect(scanOnce).toHaveBeenLastCalledWith('landscape');

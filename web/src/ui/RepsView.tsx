@@ -5,6 +5,8 @@ import { MaskOverlay } from './MaskOverlay';
 import { DetectionResult } from './DetectionResult';
 import { ManualEntry } from './ManualEntry';
 import { CollectionList } from './CollectionList';
+import { ScanStatus } from './ScanStatus';
+import { OrientationToggle } from './OrientationToggle';
 import { countByCode } from '../domain/counts';
 
 export interface RepsViewProps {
@@ -45,34 +47,11 @@ export function RepsView({
       <section aria-label="Scan" className="scan-area">
         <video ref={videoRef} playsInline muted className="camera-preview" />
         <MaskOverlay orientation={orientation} />
-        <fieldset aria-label="Orientation">
-          <legend>Sticker orientation</legend>
-          <label>
-            <input
-              type="radio"
-              name="orientation"
-              checked={orientation === 'portrait'}
-              onChange={() => onSetOrientation('portrait')}
-            />
-            Portrait
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="orientation"
-              checked={orientation === 'landscape'}
-              onChange={() => onSetOrientation('landscape')}
-            />
-            Landscape
-          </label>
-        </fieldset>
+        <OrientationToggle value={orientation} onChange={onSetOrientation} />
         <button type="button" className="primary full" onClick={onCapture} disabled={scanning}>
           {scanning ? 'Hold steady…' : 'Scan sticker'}
         </button>
-        {scanning && <p role="status">Hold the sticker steady in the frame…</p>}
-        {noDetection && (
-          <p role="status">No code detected in 5s — try again or add manually.</p>
-        )}
+        <ScanStatus state={scanning ? 'scanning' : noDetection ? 'no-detection' : 'idle'} />
         {detection && (
           <DetectionResult
             candidate={detection.candidate}
