@@ -12,6 +12,12 @@ Rails.application.routes.draw do
     end
   end
 
+  # Serve the bundled SPA for the root and any non-API GET path.
+  root "spa#index"
+  get "*path", to: "spa#index", constraints: lambda { |req|
+    !req.path.start_with?("/api/", "/up") && req.format.html?
+  }
+
   # Defines the root path route ("/")
   # root "posts#index"
 end

@@ -16,7 +16,8 @@ api/                Rails 8 + Postgres CRUD API (sessions, scans; codes + metada
 tools/asset-gen/    Build-time TS tool: corpus -> mask/OCR assets
 assets/             Generated mask-config.json, ocr-profile.json, prefixes.json
 docs/               Specs, ADRs, implementation plan
-docker-compose.yml  db + api + web
+Dockerfile          Single image: builds web, served as static assets by Rails
+docker-compose.yml  db + app (web bundle + API on one origin)
 ```
 
 ## Prerequisites
@@ -38,9 +39,9 @@ npm run build          # production build
 ```
 
 Camera requires HTTPS or `localhost`. Without a camera the app still works via manual
-entry. To enable best-effort sync to the API, set `VITE_API_BASE_URL` (e.g.
-`VITE_API_BASE_URL=http://localhost:3000 npm run dev`); unset, sync is a no-op and the
-app stays fully local.
+entry. Sync to the API is best-effort: in the bundled production build it posts to the
+same origin automatically; in dev it is off unless you set `VITE_API_BASE_URL` (e.g.
+`VITE_API_BASE_URL=http://localhost:3000 npm run dev`).
 
 ## Backend (`api/`)
 
@@ -73,12 +74,17 @@ npm run generate       # writes assets/ and web/src/assets/ from the corpus
 
 ## Full stack with Docker Compose
 
+A single image builds the web bundle and serves it as static assets from Rails, so the
+front end and API share one origin (no CORS needed; sync works out of the box).
+
 ```bash
 docker compose up --build
-# web -> http://localhost:8080
-# api -> http://localhost:3000
-# db  -> localhost:5432
+# app (web + API) -> http://localhost:3000
+# db              -> localhost:5432
 ```
+
+Verified: `GET /` serves the SPA, `/assets/*` static files load, and
+`POST /api/v1/sessions` + `GET /api/v1/sessions/:id` round-trip on the same origin.
 
 ## Testing & coverage targets
 

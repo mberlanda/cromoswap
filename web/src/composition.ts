@@ -8,7 +8,11 @@ import { requestCamera } from './ui/camera-permission';
 import { pushSession } from './storage/sync-client';
 import type { RgbaImage } from './ocr/image';
 
+// Empty base URL means same-origin (relative `/api/...`), which is how the
+// production build is served by Rails. Sync is enabled when explicitly
+// configured, or implicitly for the bundled production build.
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+const SYNC_ENABLED = API_BASE_URL !== '' || import.meta.env.PROD;
 
 /**
  * Composition root: wires real IndexedDB repos, the camera, and the Tesseract
@@ -71,9 +75,10 @@ export async function createAppDeps(video: HTMLVideoElement): Promise<AppDeps> {
     now: nowIso,
     downloadText: (name, content) => triggerDownload(name, content, 'text/plain'),
     downloadJson: (name, content) => triggerDownload(name, content, 'application/json'),
-    syncSession: (session, scans) => {
-      if (API_BASE_URL === '') return;
-      void pushSession(session, scans, API_BASE_URL, (url, init) => fetch(url, init));
-    },
+    syncSession: SYNC_ENABLED
+      ? (session, scans) => {
+          void pushSession(session, scans, API_BASE_URL, (url, init) => fetch(url, init));
+        }
+      : undefined,
   };
 }
