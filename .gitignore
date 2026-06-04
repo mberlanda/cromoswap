@@ -15,3 +15,9 @@ dist/
 /api/tmp/
 /api/log/
 /api/.bundle/
+
+# OCR fixture images (copyrighted artwork) — keep local
+web/fixtures/stickers/*.jpg
+web/fixtures/stickers/*.jpeg
+web/fixtures/stickers/*.png
+web/fixtures/stickers/*.heic
