@@ -25,6 +25,10 @@ export interface AppDeps {
   now: Clock;
   downloadText: (filename: string, content: string) => void;
   downloadJson: (filename: string, content: string) => void;
+  /** Scan-loop timing (injectable for tests). */
+  scanTimeoutMs?: number;
+  delay?: (ms: number) => Promise<void>;
+  nowMs?: () => number;
   /** Optional best-effort push of codes + metadata to the backend. */
   syncSession?: (session: Session, scans: Scan[]) => void;
   /** Optional hook to bind the camera <video> element so capture can read it. */
@@ -38,8 +42,14 @@ export function App({ deps }: { deps: AppDeps }) {
   const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
   const [detection, setDetection] = useState<Detection | null>(null);
   const [noDetection, setNoDetection] = useState(false);
+  const [scanning, setScanning] = useState(false);
   const [orientation, setOrientation] = useState<Orientation>('portrait');
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const SCAN_INTERVAL_MS = 300;
+  const scanTimeoutMs = deps.scanTimeoutMs ?? 5000;
+  const delay = deps.delay ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+  const nowMs = deps.nowMs ?? (() => Date.now());
 
   useEffect(() => {
     void deps.sessionRepo.list().then(setSessions);
@@ -97,15 +107,27 @@ export function App({ deps }: { deps: AppDeps }) {
     await refreshScans(active);
   }
 
+  // Hold-while-focused: keep scanning the framed region until a valid code is
+  // recognized or the timeout elapses, then prompt to confirm/correct or fail.
   async function handleCapture() {
+    if (scanning) return;
     setDetection(null);
     setNoDetection(false);
-    const result = await deps.scanOnce(orientation);
-    if (!result) {
+    setScanning(true);
+    const deadline = nowMs() + scanTimeoutMs;
+    try {
+      while (nowMs() < deadline) {
+        const result = await deps.scanOnce(orientation);
+        if (result) {
+          setDetection(result);
+          return;
+        }
+        await delay(SCAN_INTERVAL_MS);
+      }
       setNoDetection(true);
-      return;
+    } finally {
+      setScanning(false);
     }
-    setDetection(result);
   }
 
   async function handleConfirm(code: string) {
@@ -180,10 +202,13 @@ export function App({ deps }: { deps: AppDeps }) {
             Landscape
           </label>
         </fieldset>
-        <button type="button" onClick={handleCapture}>
-          Capture
+        <button type="button" onClick={handleCapture} disabled={scanning}>
+          {scanning ? 'Scanning… hold steady' : 'Capture'}
         </button>
-        {noDetection && <p role="status">No code detected — try again or add manually.</p>}
+        {scanning && <p role="status">Hold the sticker steady in the frame…</p>}
+        {noDetection && (
+          <p role="status">No code detected in 5s — try again or add manually.</p>
+        )}
         {detection && (
           <DetectionResult
             candidate={detection.candidate}

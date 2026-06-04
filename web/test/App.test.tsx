@@ -25,6 +25,13 @@ function makeDeps(overrides: Partial<AppDeps> = {}): AppDeps {
     now: () => '2026-06-04T12:00:00.000Z',
     downloadText: vi.fn(),
     downloadJson: vi.fn(),
+    // Fast, deterministic scan-loop timing for tests.
+    delay: async () => {},
+    nowMs: (() => {
+      let t = 0;
+      return () => (t += 300);
+    })(),
+    scanTimeoutMs: 1500,
     ...overrides,
   };
 }
@@ -73,18 +80,50 @@ describe('App', () => {
   });
 
   it('captures using the selected orientation', async () => {
-    const scanOnce = vi.fn(async () => null);
+    const scanOnce = vi.fn(async () => ({
+      candidate: { code: { prefix: 'ARG', number: 1, canonical: 'ARG01' }, confidence: 0.9 },
+      imageDataUrl: 'data:image/png;base64,AAAA',
+    }));
     render(<App deps={makeDeps({ scanOnce })} />);
     await startSession();
 
     // Defaults to portrait.
     await userEvent.click(screen.getByRole('button', { name: /capture/i }));
+    expect(await screen.findByText('ARG01')).toBeInTheDocument();
     expect(scanOnce).toHaveBeenLastCalledWith('portrait');
 
     // Switch to landscape and capture again.
     await userEvent.click(screen.getByRole('radio', { name: /landscape/i }));
     await userEvent.click(screen.getByRole('button', { name: /capture/i }));
+    await screen.findByText('ARG01');
     expect(scanOnce).toHaveBeenLastCalledWith('landscape');
+  });
+
+  it('keeps scanning until a code is recognized', async () => {
+    const scanOnce = vi
+      .fn()
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValue({
+        candidate: { code: { prefix: 'USA', number: 13, canonical: 'USA13' }, confidence: 0.8 },
+        imageDataUrl: 'data:image/png;base64,AAAA',
+      });
+    render(<App deps={makeDeps({ scanOnce })} />);
+    await startSession();
+    await userEvent.click(screen.getByRole('button', { name: /capture/i }));
+
+    expect(await screen.findByText('USA13')).toBeInTheDocument();
+    expect(scanOnce.mock.calls.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('fails after the timeout when nothing is recognized', async () => {
+    const scanOnce = vi.fn(async () => null);
+    render(<App deps={makeDeps({ scanOnce })} />);
+    await startSession();
+    await userEvent.click(screen.getByRole('button', { name: /capture/i }));
+
+    expect(await screen.findByText(/no code detected/i)).toBeInTheDocument();
+    expect(scanOnce.mock.calls.length).toBeGreaterThan(1);
   });
 
   it('shows a message when no code is detected', async () => {
