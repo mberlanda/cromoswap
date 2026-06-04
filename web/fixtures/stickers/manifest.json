@@ -1,9 +1,9 @@
 {
-  "description": "Real sticker-back fixtures for OCR validation. Image files are gitignored (Panini artwork); place them here matching `file` and run the validation harness.",
+  "description": "Real sticker-back fixtures for OCR validation. Image files are gitignored (Panini artwork); place them here matching `file` and run `npm run validate:ocr`. The harness auto-detects the sticker and applies the orientation ROI from mask-config.json.",
   "samples": [
-    { "file": "cro20.jpg", "expectedCode": "CRO20", "orientation": "portrait" },
-    { "file": "gha01.jpg", "expectedCode": "GHA01", "orientation": "portrait" },
-    { "file": "gha07.jpg", "expectedCode": "GHA07", "orientation": "portrait" },
-    { "file": "fwc17.jpg", "expectedCode": "FWC17", "orientation": "landscape" }
+    { "file": "cro20-portrait.jpeg", "expectedCode": "CRO20", "orientation": "portrait" },
+    { "file": "gha1-portrait.jpeg", "expectedCode": "GHA01", "orientation": "portrait" },
+    { "file": "gha7-portrait.jpeg", "expectedCode": "GHA07", "orientation": "portrait" },
+    { "file": "fwc17-landscape.jpeg", "expectedCode": "FWC17", "orientation": "landscape" }
   ]
 }
