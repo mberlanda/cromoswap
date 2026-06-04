@@ -5,6 +5,7 @@ import { MaskOverlay } from './MaskOverlay';
 import { DetectionResult } from './DetectionResult';
 import { ManualEntry } from './ManualEntry';
 import { CollectionList } from './CollectionList';
+import { countByCode } from '../domain/counts';
 
 export interface RepsViewProps {
   scans: Scan[];
@@ -32,6 +33,13 @@ export function RepsView({
   videoRef, onCapture, onConfirm, onCorrect, onSkip, onRescan,
   onManualAdd, onEdit, onDelete, onExportText, onExportJson, onSetOrientation,
 }: RepsViewProps) {
+  const counts = countByCode(scans);
+  const recentPrefixes = Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([code]) => code.slice(0, 3))
+    .filter((p, i, arr) => arr.indexOf(p) === i); // deduplicate
+
   return (
     <section aria-label="My Reps">
       <section aria-label="Scan" className="scan-area">
@@ -79,7 +87,7 @@ export function RepsView({
 
       <section aria-label="Manual entry">
         <h2>Add manually</h2>
-        <ManualEntry onAdd={onManualAdd} />
+        <ManualEntry onAdd={onManualAdd} recentPrefixes={recentPrefixes} />
       </section>
 
       <CollectionList
