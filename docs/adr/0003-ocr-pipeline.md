@@ -51,8 +51,9 @@ and a `MockOcrAdapter`.
 
 ### Designed extension seams (not built in MVP)
 
-- `OrientationStrategy`: MVP tries `0°`; follow-up tries `0/90/180/270°` before asking the
-  user to correct.
+- `OrientationStrategy`: implemented as `runPipelineMultiOrientation`, which tries
+  `0/90/180/270°` and keeps the highest-confidence reading per code before asking the user
+  to correct.
 - `Localizer`: MVP uses the static ROI; later adds contour detection + perspective
   rectify (Level 2, e.g. OpenCV.js), then optionally a corpus-trained detector (Level 3).
 - `OcrAdapter`: `TesseractAdapter` (runtime) and `MockOcrAdapter` (tests) implement one
