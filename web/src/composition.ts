@@ -96,9 +96,7 @@ export async function createAppDeps(): Promise<AppDeps> {
     downloadText: (name, content) => triggerDownload(name, content, 'text/plain'),
     downloadJson: (name, content) => triggerDownload(name, content, 'application/json'),
     syncSession: SYNC_ENABLED
-      ? (session, scans) => {
-          void pushSession(session, scans, API_BASE_URL, (url, init) => fetch(url, init));
-        }
+      ? (session, scans) => pushSession(session, scans, API_BASE_URL, (url, init) => fetch(url, init))
       : undefined,
   };
 }

@@ -7,6 +7,8 @@ import { SessionGate } from './SessionGate';
 import { TabBar } from './TabBar';
 import { AlbumView } from './AlbumView';
 import { RepsView } from './RepsView';
+import { SyncIndicator } from './SyncIndicator';
+import type { SyncStatus } from './SyncIndicator';
 
 export type Orientation = 'portrait' | 'landscape';
 
@@ -29,8 +31,8 @@ export interface AppDeps {
   scanTimeoutMs?: number;
   delay?: (ms: number) => Promise<void>;
   nowMs?: () => number;
-  /** Optional best-effort push of codes + metadata to the backend. */
-  syncSession?: (session: Session, scans: Scan[]) => void;
+  /** Optional best-effort push of codes + metadata to the backend. Returns sync result when async. */
+  syncSession?: (session: Session, scans: Scan[]) => void | Promise<{ ok: boolean }>;
   /** Optional hook to bind the camera <video> element so capture can read it. */
   attachVideo?: (element: HTMLVideoElement | null) => void;
 }
@@ -46,6 +48,7 @@ export function App({ deps }: { deps: AppDeps }) {
   const [scanning, setScanning] = useState(false);
   const [orientation, setOrientation] = useState<Orientation>('portrait');
   const [tab, setTab] = useState<'album' | 'reps'>('reps');
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>('local');
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const SCAN_INTERVAL_MS = 300;
@@ -80,7 +83,11 @@ export function App({ deps }: { deps: AppDeps }) {
         if (dataUrl !== undefined) thumbs[scan.id] = dataUrl;
       }
       setThumbnails(thumbs);
-      deps.syncSession?.(session, list);
+      if (deps.syncSession) {
+        setSyncStatus('pending');
+        const result = deps.syncSession(session, list);
+        if (result) void result.then((r) => setSyncStatus(r.ok ? 'synced' : 'failed'));
+      }
     },
     [deps],
   );
@@ -182,11 +189,16 @@ export function App({ deps }: { deps: AppDeps }) {
     return <SessionGate sessions={sessions} onCreate={handleCreate} onResume={handleResume} scanCounts={sessionScanCounts} />;
   }
 
+  function handleSyncRetry() {
+    if (active) void refreshScans(active);
+  }
+
   return (
     <main aria-label="Scanner">
       <header className="app-header">
         <h1 className="app-header-name">{active.userName}</h1>
         <p className="app-header-meta">{scans.length} scan{scans.length !== 1 ? 's' : ''}</p>
+        <SyncIndicator status={syncStatus} onRetry={handleSyncRetry} />
       </header>
       <TabBar active={tab} onChange={setTab} />
       {tab === 'album' && (
