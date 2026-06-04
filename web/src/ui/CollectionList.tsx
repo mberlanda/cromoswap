@@ -47,12 +47,12 @@ function ScanRow({ scan, count, thumbnail, onEdit, onDelete }: RowProps) {
       ) : (
         <>
           <span className="code">{scan.normalizedCode}</span>
-          {count > 1 && <span className="badge">×{count}</span>}
+          {count > 1 && <span className="badge duplicate">×{count}</span>}
           <time dateTime={scan.capturedAt}>{scan.capturedAt}</time>
-          <button type="button" onClick={() => setEditing(true)}>
+          <button type="button" className="quiet" onClick={() => setEditing(true)}>
             Edit
           </button>
-          <button type="button" onClick={() => onDelete(scan.id)}>
+          <button type="button" className="danger" onClick={() => onDelete(scan.id)}>
             Delete
           </button>
         </>

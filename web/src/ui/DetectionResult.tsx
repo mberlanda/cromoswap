@@ -27,17 +27,17 @@ export function DetectionResult({
       <p className="detected-code">{canonical}</p>
       <p className="confidence">Confidence: {percent}%</p>
       <div className="actions">
-        <button type="button" onClick={() => onConfirm(canonical)}>
-          Confirm
+        <button type="button" className="primary" onClick={() => onConfirm(canonical)}>
+          Save
         </button>
-        <button type="button" onClick={() => onCorrect(canonical)}>
+        <button type="button" className="secondary" onClick={() => onCorrect(canonical)}>
           Correct
         </button>
-        <button type="button" onClick={onSkip}>
-          Skip
-        </button>
-        <button type="button" onClick={onRescan}>
+        <button type="button" className="quiet" onClick={onRescan}>
           Rescan
+        </button>
+        <button type="button" className="quiet" onClick={onSkip}>
+          Skip
         </button>
       </div>
     </section>
