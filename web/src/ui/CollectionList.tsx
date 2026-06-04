@@ -47,6 +47,9 @@ function ScanRow({ scan, count, thumbnail, onEdit, onDelete }: RowProps) {
       ) : (
         <>
           <span className="code">{scan.normalizedCode}</span>
+          <span className={`badge source-${scan.source}`}>
+            {scan.source === 'ocr' ? 'OCR' : 'Manual'}
+          </span>
           {count > 1 && <span className="badge duplicate">×{count}</span>}
           <time dateTime={scan.capturedAt}>{scan.capturedAt}</time>
           <button type="button" className="quiet" onClick={() => setEditing(true)}>
@@ -64,18 +67,29 @@ function ScanRow({ scan, count, thumbnail, onEdit, onDelete }: RowProps) {
 /** Lists confirmed scans with duplicate counts and inline edit/delete. */
 export function CollectionList({ scans, thumbnails, onEdit, onDelete }: CollectionListProps) {
   const counts = countByCode(scans);
+  const total = scans.length;
+  const unique = Object.keys(counts).length;
+  const duplicates = total - unique;
+
   return (
-    <ul aria-label="Collection">
-      {scans.map((scan) => (
-        <ScanRow
-          key={scan.id}
-          scan={scan}
-          count={counts[scan.normalizedCode]}
-          thumbnail={thumbnails[scan.id]}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
-      ))}
-    </ul>
+    <>
+      {total > 0 && (
+        <p className="collection-stats" aria-label="Collection stats">
+          {total} scans · {unique} unique · {duplicates} duplicates
+        </p>
+      )}
+      <ul aria-label="Collection">
+        {scans.map((scan) => (
+          <ScanRow
+            key={scan.id}
+            scan={scan}
+            count={counts[scan.normalizedCode]}
+            thumbnail={thumbnails[scan.id]}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        ))}
+      </ul>
+    </>
   );
 }
