@@ -13,7 +13,7 @@ export interface RepsViewProps {
   noDetection: boolean;
   scanning: boolean;
   orientation: Orientation;
-  videoRef: RefObject<HTMLVideoElement>;
+  videoRef: RefObject<HTMLVideoElement | null>;
   onCapture: () => void;
   onConfirm: (code: string) => void;
   onCorrect: (code: string) => void;

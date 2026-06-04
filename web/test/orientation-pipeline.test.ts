@@ -52,6 +52,32 @@ describe('runPipelineMultiOrientation', () => {
     expect(result[0].code.canonical).toBe('USA13');
   });
 
+  it('applies the ROI relative to the located sticker before OCR', async () => {
+    const localizedFrame: RgbaImage = {
+      width: 10,
+      height: 10,
+      data: new Uint8ClampedArray(10 * 10 * 4),
+    };
+    const ocr = new SequencedOcrAdapter([{ text: 'USA13', confidence: 0.7 }]);
+    const seenImages: Array<{ width: number; height: number }> = [];
+    ocr.recognize = async (image: RgbaImage): Promise<OcrResult> => {
+      seenImages.push({ width: image.width, height: image.height });
+      ocr.calls++;
+      return { text: 'USA13', confidence: 0.7 };
+    };
+
+    const result = await runPipelineMultiOrientation(localizedFrame, {
+      ocr,
+      roi,
+      threshold: 128,
+      localizer: { locate: () => ({ x: 0, y: 0, w: 0.5, h: 0.5 }) },
+      rotations: [0],
+    });
+
+    expect(result[0].code.canonical).toBe('USA13');
+    expect(seenImages).toEqual([{ width: 5, height: 5 }]);
+  });
+
   it('returns [] when no orientation yields a valid code', async () => {
     const ocr = new SequencedOcrAdapter([{ text: 'nope', confidence: 1 }]);
     const result = await runPipelineMultiOrientation(frame, {
