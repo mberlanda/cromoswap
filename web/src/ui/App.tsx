@@ -202,8 +202,8 @@ export function App({ deps }: { deps: AppDeps }) {
             Landscape
           </label>
         </fieldset>
-        <button type="button" onClick={handleCapture} disabled={scanning}>
-          {scanning ? 'Scanning… hold steady' : 'Capture'}
+        <button type="button" className="primary full" onClick={handleCapture} disabled={scanning}>
+          {scanning ? 'Hold steady…' : 'Scan sticker'}
         </button>
         {scanning && <p role="status">Hold the sticker steady in the frame…</p>}
         {noDetection && (
@@ -234,11 +234,11 @@ export function App({ deps }: { deps: AppDeps }) {
       />
 
       <section aria-label="Export">
-        <button type="button" onClick={handleExportText}>
+        <button type="button" className="primary" onClick={handleExportText}>
           Export text
         </button>
-        <button type="button" onClick={handleExportJson}>
-          Export JSON
+        <button type="button" className="secondary" onClick={handleExportJson}>
+          Export JSON (with images)
         </button>
       </section>
     </main>

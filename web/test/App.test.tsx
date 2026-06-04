@@ -49,15 +49,15 @@ describe('App', () => {
   it('creates a session then shows the scanner', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();
-    expect(screen.getByRole('button', { name: /capture/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /scan sticker/i })).toBeInTheDocument();
   });
 
   it('captures, confirms, and stores a scan that appears in the collection', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();
-    await userEvent.click(screen.getByRole('button', { name: /capture/i }));
+    await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
     expect(await screen.findByText('ARG01')).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /confirm/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^save$/i }));
 
     const collection = screen.getByRole('list', { name: /collection/i });
     expect(within(collection).getByText('ARG01')).toBeInTheDocument();
@@ -88,13 +88,13 @@ describe('App', () => {
     await startSession();
 
     // Defaults to portrait.
-    await userEvent.click(screen.getByRole('button', { name: /capture/i }));
+    await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
     expect(await screen.findByText('ARG01')).toBeInTheDocument();
     expect(scanOnce).toHaveBeenLastCalledWith('portrait');
 
     // Switch to landscape and capture again.
     await userEvent.click(screen.getByRole('radio', { name: /landscape/i }));
-    await userEvent.click(screen.getByRole('button', { name: /capture/i }));
+    await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
     await screen.findByText('ARG01');
     expect(scanOnce).toHaveBeenLastCalledWith('landscape');
   });
@@ -110,7 +110,7 @@ describe('App', () => {
       });
     render(<App deps={makeDeps({ scanOnce })} />);
     await startSession();
-    await userEvent.click(screen.getByRole('button', { name: /capture/i }));
+    await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
 
     expect(await screen.findByText('USA13')).toBeInTheDocument();
     expect(scanOnce.mock.calls.length).toBeGreaterThanOrEqual(3);
@@ -120,7 +120,7 @@ describe('App', () => {
     const scanOnce = vi.fn(async () => null);
     render(<App deps={makeDeps({ scanOnce })} />);
     await startSession();
-    await userEvent.click(screen.getByRole('button', { name: /capture/i }));
+    await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
 
     expect(await screen.findByText(/no code detected/i)).toBeInTheDocument();
     expect(scanOnce.mock.calls.length).toBeGreaterThan(1);
@@ -129,7 +129,7 @@ describe('App', () => {
   it('shows a message when no code is detected', async () => {
     render(<App deps={makeDeps({ scanOnce: vi.fn(async () => null) })} />);
     await startSession();
-    await userEvent.click(screen.getByRole('button', { name: /capture/i }));
+    await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
     expect(await screen.findByText(/no code detected/i)).toBeInTheDocument();
   });
 
@@ -172,7 +172,7 @@ describe('App', () => {
   it('stores a corrected detection with its captured image', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();
-    await userEvent.click(screen.getByRole('button', { name: /capture/i }));
+    await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
     await screen.findByText('ARG01');
     await userEvent.click(screen.getByRole('button', { name: /correct/i }));
 
@@ -187,7 +187,7 @@ describe('App', () => {
   it('skips a detection without storing it', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();
-    await userEvent.click(screen.getByRole('button', { name: /capture/i }));
+    await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
     await screen.findByText('ARG01');
     await userEvent.click(screen.getByRole('button', { name: /skip/i }));
 

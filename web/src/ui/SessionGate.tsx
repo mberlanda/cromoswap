@@ -21,15 +21,7 @@ export function SessionGate({ sessions, onCreate, onResume }: SessionGateProps) 
 
   return (
     <main aria-label="Session">
-      <h1>WC 2026 Sticker Scanner</h1>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor={inputId}>What's your name?</label>
-        <input id={inputId} value={name} onChange={(e) => setName(e.target.value)} />
-        <button type="submit" disabled={trimmed === ''}>
-          Start scanning
-        </button>
-      </form>
-
+      <h1>Cromoswap</h1>
       {sessions.length > 0 && (
         <section aria-label="Resume">
           <h2>Resume a session</h2>
@@ -44,6 +36,14 @@ export function SessionGate({ sessions, onCreate, onResume }: SessionGateProps) 
           </ul>
         </section>
       )}
+      <form onSubmit={handleSubmit}>
+        <label htmlFor={inputId}>Your name</label>
+        <input id={inputId} value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Luca" />
+        <button type="submit" disabled={trimmed === ''}>
+          Start scanning
+        </button>
+      </form>
+      <p className="privacy-note">Images stay on this device. No account needed.</p>
     </main>
   );
 }

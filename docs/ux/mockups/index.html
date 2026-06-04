@@ -1,0 +1,1007 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WC 2026 Sticker Scanner - UX Mockups</title>
+    <style>
+      :root {
+        --ink: #17211f;
+        --muted: #60706b;
+        --subtle: #d8e1dd;
+        --paper: #f7faf8;
+        --surface: #ffffff;
+        --field: #eef4f1;
+        --scan: #1f8a5f;
+        --scan-strong: #12613f;
+        --info: #2f74d0;
+        --review: #f2b84b;
+        --danger: #d94f4f;
+        --privacy: #6d57c7;
+        --camera: #202927;
+        --shadow: 0 18px 44px rgba(23, 33, 31, 0.14);
+        --radius: 8px;
+        color: var(--ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          linear-gradient(180deg, #e9f2ed 0, #f7faf8 320px),
+          var(--paper);
+      }
+
+      .page {
+        max-width: 1480px;
+        margin: 0 auto;
+        padding: 32px 24px 56px;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 24px;
+        align-items: end;
+        margin-bottom: 28px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        max-width: 780px;
+        font-size: 40px;
+        line-height: 1.05;
+        letter-spacing: 0;
+      }
+
+      .hero p {
+        max-width: 720px;
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.5;
+      }
+
+      .legend {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .token {
+        min-width: 104px;
+        padding: 10px;
+        border: 1px solid rgba(23, 33, 31, 0.1);
+        border-radius: var(--radius);
+        background: var(--surface);
+        box-shadow: 0 8px 18px rgba(23, 33, 31, 0.06);
+      }
+
+      .swatch {
+        height: 28px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+      }
+
+      .token span {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .board {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(320px, 1fr));
+        gap: 28px;
+      }
+
+      .mock {
+        min-width: 0;
+      }
+
+      .mock h2 {
+        margin: 0 0 10px;
+        font-size: 18px;
+        line-height: 1.25;
+      }
+
+      .mock-note {
+        min-height: 44px;
+        margin-bottom: 14px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .phone {
+        width: 100%;
+        max-width: 390px;
+        min-height: 844px;
+        margin: 0 auto;
+        overflow: hidden;
+        border: 10px solid #101615;
+        border-radius: 34px;
+        background: var(--paper);
+        box-shadow: var(--shadow);
+      }
+
+      .screen {
+        position: relative;
+        display: flex;
+        min-height: 824px;
+        flex-direction: column;
+        background: var(--paper);
+      }
+
+      .screen-pad {
+        padding: 20px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 44px;
+      }
+
+      .brand {
+        font-size: 15px;
+        font-weight: 800;
+      }
+
+      .count-pill,
+      .status-pill,
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 30px;
+        padding: 0 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .count-pill {
+        background: #e6f3ed;
+        color: var(--scan-strong);
+      }
+
+      .status-pill {
+        background: #fff2cc;
+        color: #725100;
+      }
+
+      .badge {
+        background: var(--field);
+        color: var(--muted);
+      }
+
+      .title {
+        margin-top: 28px;
+        font-size: 32px;
+        line-height: 1.12;
+        letter-spacing: 0;
+      }
+
+      .subtitle {
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.45;
+      }
+
+      label {
+        display: block;
+        margin: 28px 0 8px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .input {
+        display: flex;
+        align-items: center;
+        min-height: 52px;
+        padding: 0 14px;
+        border: 1px solid var(--subtle);
+        border-radius: var(--radius);
+        background: var(--surface);
+        color: var(--ink);
+        font-size: 17px;
+        font-weight: 700;
+      }
+
+      .button-row {
+        display: flex;
+        gap: 10px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 52px;
+        padding: 0 16px;
+        border: 1px solid transparent;
+        border-radius: var(--radius);
+        font-size: 15px;
+        font-weight: 850;
+      }
+
+      .btn.primary {
+        background: var(--scan);
+        color: white;
+      }
+
+      .btn.secondary {
+        border-color: var(--subtle);
+        background: var(--surface);
+        color: var(--ink);
+      }
+
+      .btn.review {
+        background: var(--review);
+        color: #3d2a00;
+      }
+
+      .btn.danger {
+        background: #fee7e7;
+        color: #8e2727;
+      }
+
+      .btn.full {
+        width: 100%;
+      }
+
+      .resume {
+        margin-top: 18px;
+        padding: 14px;
+        border: 1px solid #dce7e2;
+        border-radius: var(--radius);
+        background: var(--surface);
+      }
+
+      .resume strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .resume p {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .privacy {
+        margin-top: auto;
+        padding: 14px;
+        border: 1px solid rgba(109, 87, 199, 0.22);
+        border-radius: var(--radius);
+        background: rgba(109, 87, 199, 0.08);
+        color: #4b3b91;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.35;
+      }
+
+      .camera-screen {
+        background: var(--camera);
+        color: white;
+      }
+
+      .camera-top {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px;
+      }
+
+      .camera-stage {
+        position: relative;
+        flex: 1;
+        min-height: 0;
+        background:
+          radial-gradient(circle at 30% 15%, rgba(255, 255, 255, 0.1), transparent 22%),
+          linear-gradient(150deg, #2f3c39, #141a19 62%, #293532);
+      }
+
+      .sticker-target {
+        position: absolute;
+        left: 50%;
+        top: 54px;
+        width: 72%;
+        aspect-ratio: 0.68;
+        transform: translateX(-50%);
+        border: 3px solid rgba(255, 255, 255, 0.86);
+        border-radius: 10px;
+        background:
+          linear-gradient(90deg, rgba(255, 255, 255, 0.09) 1px, transparent 1px),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.09) 1px, transparent 1px);
+        background-size: 36px 36px;
+      }
+
+      .sticker-target::before,
+      .sticker-target::after {
+        content: "";
+        position: absolute;
+        width: 42px;
+        height: 42px;
+        border-color: rgba(255, 255, 255, 0.9);
+        border-style: solid;
+      }
+
+      .sticker-target::before {
+        left: -3px;
+        top: -3px;
+        border-width: 4px 0 0 4px;
+        border-radius: 10px 0 0;
+      }
+
+      .sticker-target::after {
+        right: -3px;
+        bottom: -3px;
+        border-width: 0 4px 4px 0;
+        border-radius: 0 0 10px;
+      }
+
+      .roi {
+        position: absolute;
+        right: 7%;
+        top: 5%;
+        width: 34%;
+        height: 16%;
+        border: 3px solid var(--review);
+        border-radius: 8px;
+        background: rgba(242, 184, 75, 0.12);
+        box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.18);
+      }
+
+      .roi-label {
+        position: absolute;
+        right: 7%;
+        top: calc(21% + 12px);
+        padding: 5px 8px;
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.44);
+        color: white;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .scan-status {
+        position: absolute;
+        left: 18px;
+        right: 18px;
+        bottom: 126px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.91);
+        color: var(--ink);
+        font-weight: 850;
+      }
+
+      .bottom-controls {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        padding: 16px 18px 20px;
+        background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.58) 22%);
+      }
+
+      .control {
+        min-height: 54px;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.12);
+        color: white;
+        font-size: 13px;
+        font-weight: 850;
+      }
+
+      .sheet {
+        margin-top: auto;
+        padding: 16px;
+        border-top: 1px solid #dce7e2;
+        background: var(--surface);
+        box-shadow: 0 -16px 34px rgba(23, 33, 31, 0.1);
+      }
+
+      .capture {
+        height: 166px;
+        border-radius: var(--radius);
+        background:
+          linear-gradient(135deg, #eaf0ed, #ffffff),
+          var(--surface);
+        border: 1px solid #dce7e2;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .capture .mini-card {
+        position: absolute;
+        left: 50%;
+        top: 18px;
+        width: 52%;
+        height: 128px;
+        transform: translateX(-50%) rotate(-2deg);
+        border: 1px solid #c8d7d1;
+        border-radius: 8px;
+        background: #fefefe;
+      }
+
+      .capture .mini-code {
+        position: absolute;
+        right: 12px;
+        top: 12px;
+        padding: 4px 6px;
+        border: 2px solid var(--review);
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .detected-code {
+        margin-top: 18px;
+        font-size: 38px;
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      .confidence {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 750;
+      }
+
+      .meter {
+        flex: 1;
+        height: 8px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: var(--field);
+      }
+
+      .meter span {
+        display: block;
+        width: 86%;
+        height: 100%;
+        background: var(--scan);
+      }
+
+      .confirm-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .confirm-actions .wide {
+        grid-column: span 2;
+      }
+
+      .manual-grid {
+        display: grid;
+        grid-template-columns: 1fr 90px;
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      .manual-field {
+        min-height: 66px;
+        padding: 10px 12px;
+        border: 1px solid var(--subtle);
+        border-radius: var(--radius);
+        background: var(--surface);
+      }
+
+      .manual-field small {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .manual-field strong {
+        display: block;
+        margin-top: 4px;
+        font-size: 24px;
+        letter-spacing: 0;
+      }
+
+      .number-chips {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+        margin-top: 18px;
+      }
+
+      .num {
+        min-height: 42px;
+        border: 1px solid var(--subtle);
+        border-radius: var(--radius);
+        background: var(--surface);
+        color: var(--ink);
+        font-weight: 850;
+      }
+
+      .num.active {
+        border-color: var(--scan);
+        background: #e6f3ed;
+        color: var(--scan-strong);
+      }
+
+      .preview-code {
+        margin-top: 18px;
+        padding: 16px;
+        border-radius: var(--radius);
+        background: #e6f3ed;
+        color: var(--scan-strong);
+        font-size: 30px;
+        font-weight: 900;
+        text-align: center;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .stat {
+        padding: 12px;
+        border: 1px solid #dce7e2;
+        border-radius: var(--radius);
+        background: var(--surface);
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 22px;
+      }
+
+      .stat span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 750;
+      }
+
+      .scan-list {
+        display: grid;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .scan-row {
+        display: grid;
+        grid-template-columns: 48px 1fr auto;
+        gap: 12px;
+        align-items: center;
+        min-height: 72px;
+        padding: 10px;
+        border: 1px solid #dce7e2;
+        border-radius: var(--radius);
+        background: var(--surface);
+      }
+
+      .thumb {
+        width: 48px;
+        height: 52px;
+        border: 1px solid #c8d7d1;
+        border-radius: 6px;
+        background:
+          linear-gradient(135deg, transparent 52%, rgba(31, 138, 95, 0.16) 0),
+          #fefefe;
+      }
+
+      .row-code {
+        display: block;
+        font-size: 20px;
+        font-weight: 900;
+      }
+
+      .row-meta {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .row-actions {
+        display: flex;
+        gap: 6px;
+      }
+
+      .icon-btn {
+        width: 34px;
+        height: 34px;
+        border: 1px solid var(--subtle);
+        border-radius: 8px;
+        background: white;
+        color: var(--ink);
+        font-weight: 900;
+      }
+
+      .export-card {
+        margin-top: 18px;
+        padding: 16px;
+        border: 1px solid #dce7e2;
+        border-radius: var(--radius);
+        background: var(--surface);
+      }
+
+      .export-card h3 {
+        font-size: 17px;
+      }
+
+      .export-card p {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .summary-list {
+        display: grid;
+        gap: 8px;
+        margin: 18px 0;
+      }
+
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e7eeeb;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 750;
+      }
+
+      .summary-row strong {
+        color: var(--ink);
+      }
+
+      @media (max-width: 1180px) {
+        .board {
+          grid-template-columns: repeat(2, minmax(320px, 1fr));
+        }
+      }
+
+      @media (max-width: 760px) {
+        .page {
+          padding: 24px 14px 40px;
+        }
+
+        .hero {
+          grid-template-columns: 1fr;
+        }
+
+        .legend {
+          justify-content: flex-start;
+        }
+
+        .board {
+          grid-template-columns: 1fr;
+        }
+
+        h1 {
+          font-size: 30px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero" aria-labelledby="page-title">
+        <div>
+          <h1 id="page-title">Sticker scanner UX mockups</h1>
+          <p>
+            First visual direction for a mobile-first Panini WC 2026 duplicate scanner:
+            fast for collectors, clear for kids, and forgiving when OCR needs help.
+          </p>
+        </div>
+        <div class="legend" aria-label="Design token samples">
+          <div class="token">
+            <div class="swatch" style="background:#1f8a5f"></div>
+            <span>Scan</span>
+          </div>
+          <div class="token">
+            <div class="swatch" style="background:#f2b84b"></div>
+            <span>Review</span>
+          </div>
+          <div class="token">
+            <div class="swatch" style="background:#2f74d0"></div>
+            <span>Info</span>
+          </div>
+          <div class="token">
+            <div class="swatch" style="background:#d94f4f"></div>
+            <span>Danger</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="board" aria-label="Mobile screen mockups">
+        <article class="mock">
+          <h2>1. Welcome and session</h2>
+          <p class="mock-note">Immediate start or resume. No marketing detour.</p>
+          <div class="phone">
+            <div class="screen screen-pad">
+              <div class="topbar">
+                <div class="brand">Sticker Scanner</div>
+                <div class="badge">Local first</div>
+              </div>
+              <h3 class="title">Scan your duplicate stickers.</h3>
+              <p class="subtitle">
+                Build a clean WC 2026 list from the sticker backs. Save, fix, and export
+                when you are done.
+              </p>
+              <label for="name-mock">What is your name?</label>
+              <div id="name-mock" class="input">Mauro</div>
+              <div style="height:14px"></div>
+              <div class="btn primary full">Start scanning</div>
+              <div class="resume">
+                <strong>Resume Mauro's session</strong>
+                <p>42 scans, 31 unique codes. Last updated today at 18:12.</p>
+              </div>
+              <div class="privacy">Images stay on this device in the MVP.</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="mock">
+          <h2>2. Camera permission</h2>
+          <p class="mock-note">Clear camera ask with manual entry as a normal fallback.</p>
+          <div class="phone">
+            <div class="screen screen-pad">
+              <div class="topbar">
+                <div class="brand">Camera setup</div>
+                <div class="badge">Step 2</div>
+              </div>
+              <h3 class="title">Use your camera to read sticker codes.</h3>
+              <p class="subtitle">
+                The app looks for the code in the top-right corner of the sticker back.
+                Images stay on this device.
+              </p>
+              <div class="capture" style="margin-top:28px">
+                <div class="mini-card">
+                  <div class="mini-code">USA13</div>
+                </div>
+              </div>
+              <div style="margin-top:auto">
+                <div class="btn primary full">Allow camera</div>
+                <div style="height:10px"></div>
+                <div class="btn secondary full">Enter codes manually</div>
+              </div>
+              <div class="privacy">No camera? You can still build your list manually.</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="mock">
+          <h2>3. Live scan</h2>
+          <p class="mock-note">Sticker silhouette plus top-right ROI target.</p>
+          <div class="phone">
+            <div class="screen camera-screen">
+              <div class="camera-top">
+                <div class="brand">Mauro</div>
+                <div class="count-pill">42 saved</div>
+              </div>
+              <div class="camera-stage">
+                <div class="sticker-target">
+                  <div class="roi"></div>
+                  <div class="roi-label">Code corner</div>
+                </div>
+                <div class="scan-status">Place the code in the corner</div>
+                <div class="bottom-controls">
+                  <button class="control">Manual</button>
+                  <button class="control">Pause</button>
+                  <button class="control">List</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="mock">
+          <h2>4. Detection confirmation</h2>
+          <p class="mock-note">Explicit save with fast correction nearby.</p>
+          <div class="phone">
+            <div class="screen screen-pad">
+              <div class="topbar">
+                <div class="brand">Check this code</div>
+                <div class="status-pill">High match</div>
+              </div>
+              <div class="capture">
+                <div class="mini-card">
+                  <div class="mini-code">ARG07</div>
+                </div>
+              </div>
+              <div class="detected-code">ARG07</div>
+              <div class="confidence">
+                <span>Confidence</span>
+                <div class="meter"><span></span></div>
+                <strong>86%</strong>
+              </div>
+              <div class="sheet">
+                <div class="confirm-actions">
+                  <div class="btn primary wide">Save sticker</div>
+                  <div class="btn secondary">Correct</div>
+                  <div class="btn secondary">Rescan</div>
+                  <div class="btn danger wide">Skip</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="mock">
+          <h2>5. Manual correction</h2>
+          <p class="mock-note">Split prefix and number so one wrong digit is easy to fix.</p>
+          <div class="phone">
+            <div class="screen screen-pad">
+              <div class="topbar">
+                <div class="brand">Correct code</div>
+                <div class="badge">Manual</div>
+              </div>
+              <h3 class="title">Fix the sticker code.</h3>
+              <p class="subtitle">Use the three-letter team code and number 01 to 20.</p>
+              <div class="manual-grid">
+                <div class="manual-field">
+                  <small>Prefix</small>
+                  <strong>ARG</strong>
+                </div>
+                <div class="manual-field">
+                  <small>No.</small>
+                  <strong>07</strong>
+                </div>
+              </div>
+              <div class="number-chips">
+                <button class="num">01</button>
+                <button class="num">02</button>
+                <button class="num">03</button>
+                <button class="num">04</button>
+                <button class="num">05</button>
+                <button class="num">06</button>
+                <button class="num active">07</button>
+                <button class="num">08</button>
+                <button class="num">09</button>
+                <button class="num">10</button>
+              </div>
+              <div class="preview-code">ARG07</div>
+              <div style="margin-top:auto">
+                <div class="button-row">
+                  <div class="btn primary full">Save code</div>
+                  <div class="btn secondary full">Cancel</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="mock">
+          <h2>6. Collection list</h2>
+          <p class="mock-note">Codes are the anchor. Duplicates are visible at a glance.</p>
+          <div class="phone">
+            <div class="screen screen-pad">
+              <div class="topbar">
+                <div class="brand">Collection</div>
+                <div class="btn secondary" style="min-height:40px">Add</div>
+              </div>
+              <div class="stats">
+                <div class="stat"><strong>42</strong><span>scans</span></div>
+                <div class="stat"><strong>31</strong><span>unique</span></div>
+                <div class="stat"><strong>8</strong><span>dupes</span></div>
+              </div>
+              <div class="scan-list">
+                <div class="scan-row">
+                  <div class="thumb"></div>
+                  <div>
+                    <span class="row-code">ARG07</span>
+                    <span class="row-meta">OCR, today 18:12</span>
+                  </div>
+                  <div class="row-actions">
+                    <span class="badge">x2</span>
+                    <button class="icon-btn">E</button>
+                  </div>
+                </div>
+                <div class="scan-row">
+                  <div class="thumb"></div>
+                  <div>
+                    <span class="row-code">USA13</span>
+                    <span class="row-meta">OCR, today 18:10</span>
+                  </div>
+                  <div class="row-actions">
+                    <button class="icon-btn">E</button>
+                  </div>
+                </div>
+                <div class="scan-row">
+                  <div class="thumb"></div>
+                  <div>
+                    <span class="row-code">FWC04</span>
+                    <span class="row-meta">Manual, today 18:08</span>
+                  </div>
+                  <div class="row-actions">
+                    <button class="icon-btn">E</button>
+                  </div>
+                </div>
+              </div>
+              <div style="margin-top:auto">
+                <div class="button-row">
+                  <div class="btn primary full">Scan more</div>
+                  <div class="btn secondary full">Export</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="mock">
+          <h2>7. Export</h2>
+          <p class="mock-note">Text is the quick share path. JSON is the backup.</p>
+          <div class="phone">
+            <div class="screen screen-pad">
+              <div class="topbar">
+                <div class="brand">Export</div>
+                <div class="count-pill">Ready</div>
+              </div>
+              <h3 class="title">Download your list.</h3>
+              <p class="subtitle">
+                Text is best for sharing. JSON keeps session details and local image
+                evidence.
+              </p>
+              <div class="export-card">
+                <h3>Mauro's session</h3>
+                <div class="summary-list">
+                  <div class="summary-row"><span>Total scans</span><strong>42</strong></div>
+                  <div class="summary-row"><span>Unique codes</span><strong>31</strong></div>
+                  <div class="summary-row"><span>Duplicates</span><strong>8</strong></div>
+                  <div class="summary-row"><span>Images</span><strong>Local only</strong></div>
+                </div>
+                <div class="btn primary full">Download text</div>
+                <div style="height:10px"></div>
+                <div class="btn secondary full">Download JSON backup</div>
+              </div>
+              <div class="privacy">
+                Text exports only codes and counts. JSON can include local image data.
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

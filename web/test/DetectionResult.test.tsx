@@ -34,7 +34,7 @@ describe('DetectionResult', () => {
         onRescan={vi.fn()}
       />,
     );
-    await userEvent.click(screen.getByRole('button', { name: /confirm/i }));
+    await userEvent.click(screen.getByRole('button', { name: /save/i }));
     expect(onConfirm).toHaveBeenCalledWith('ARG01');
   });
 
