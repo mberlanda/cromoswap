@@ -1,7 +1,7 @@
 import maskConfig from './assets/mask-config.json';
 import type { AppDeps, Detection } from './ui/App';
 import { openStickerDb } from './storage/db';
-import { IdbSessionRepo, IdbScanRepo, IdbImageStore } from './storage/idb-repos';
+import { IdbSessionRepo, IdbScanRepo, IdbImageStore, IdbAlbumRepo } from './storage/idb-repos';
 import { TesseractAdapter } from './ocr/tesseract-adapter';
 import { runPipelineMultiOrientation } from './ocr/pipeline';
 import { BrightnessLocalizer } from './ocr/localizer';
@@ -89,6 +89,7 @@ export async function createAppDeps(): Promise<AppDeps> {
     sessionRepo: new IdbSessionRepo(db, uuid, nowIso),
     scanRepo: new IdbScanRepo(db, uuid, nowIso),
     imageStore: new IdbImageStore(db),
+    albumRepo: new IdbAlbumRepo(db, uuid, nowIso),
     scanOnce,
     attachVideo,
     now: nowIso,
