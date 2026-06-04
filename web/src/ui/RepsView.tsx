@@ -49,12 +49,10 @@ export function RepsView({
   return (
     <section aria-label="My Reps">
       <section aria-label="Scan" className="scan-area">
-        <video ref={videoRef} playsInline muted className="camera-preview" />
-        <MaskOverlay orientation={orientation} />
-        <OrientationToggle value={orientation} onChange={onSetOrientation} />
-        <button type="button" className="primary full" onClick={onCapture} disabled={scanning}>
-          {scanning ? 'Hold steady…' : 'Scan sticker'}
-        </button>
+        <div className="camera-wrap">
+          <video ref={videoRef} playsInline muted className="camera-preview" />
+          <MaskOverlay orientation={orientation} />
+        </div>
         <ScanStatus state={scanning ? 'scanning' : noDetection ? 'no-detection' : 'idle'} />
         {detection && (
           <DetectionResult
@@ -66,6 +64,12 @@ export function RepsView({
             onRescan={onRescan}
           />
         )}
+        <div className="scan-bottom">
+          <OrientationToggle value={orientation} onChange={onSetOrientation} />
+          <button type="button" className="primary full" onClick={onCapture} disabled={scanning}>
+            {scanning ? 'Hold steady…' : 'Scan sticker'}
+          </button>
+        </div>
       </section>
 
       <section aria-label="Manual entry">

@@ -186,6 +186,27 @@ form {
 
 .scan-area {
   position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.camera-wrap {
+  position: relative;
+}
+
+.scan-bottom {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background: var(--paper);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.scan-bottom button.primary {
+  min-height: 52px;
 }
 
 .mask-overlay {
@@ -646,4 +667,42 @@ section[aria-label="Resume"] li button {
   font-size: 11px;
   color: var(--muted);
   margin: var(--space-2) 0 0;
+}
+
+/* ── Sync status indicator ───────────────────────── */
+.sync-indicator {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px var(--space-2);
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+.sync-indicator.sync-local {
+  background: rgba(109, 87, 199, 0.12);
+  color: var(--privacy);
+}
+
+.sync-indicator.sync-pending {
+  background: rgba(47, 116, 208, 0.1);
+  color: var(--info);
+}
+
+.sync-indicator.sync-failed {
+  background: rgba(217, 79, 79, 0.12);
+  color: var(--danger);
+}
+
+.sync-retry {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
 }
