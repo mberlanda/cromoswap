@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192" role="img" aria-labelledby="title desc">
+  <title id="title">Cromoswap mark</title>
+  <desc id="desc">A sticker card with scan corner and swap arrows.</desc>
+  <rect width="192" height="192" rx="36" fill="#17211f"/>
+  <path d="M62 34h68c9 0 16 7 16 16v92c0 9-7 16-16 16H62c-9 0-16-7-16-16V50c0-9 7-16 16-16Z" fill="#f7faf8"/>
+  <path d="M72 50h48c6 0 10 4 10 10v70c0 6-4 10-10 10H72c-6 0-10-4-10-10V60c0-6 4-10 10-10Z" fill="#ffffff" stroke="#d8e1dd" stroke-width="4"/>
+  <rect x="101" y="58" width="32" height="8" rx="4" fill="#f2b84b"/>
+  <rect x="125" y="58" width="8" height="30" rx="4" fill="#f2b84b"/>
+  <rect x="62" y="76" width="55" height="10" rx="5" fill="#1f8a5f"/>
+  <path d="M117 68 139 81 117 94Z" fill="#1f8a5f"/>
+  <rect x="75" y="107" width="55" height="10" rx="5" fill="#2f74d0"/>
+  <path d="M75 99 53 112 75 125Z" fill="#2f74d0"/>
+  <circle cx="96" cy="96" r="9" fill="#d94f4f"/>
+</svg>
