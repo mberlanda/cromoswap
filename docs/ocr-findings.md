@@ -34,11 +34,12 @@ The fixtures are full phone photos (a sticker on dark fabric), so the harness:
 ## Main blockers for higher accuracy (future work)
 
 1. **Precise pill localization.** The bbox auto-detect can run high (glare/stack edges),
-   so the ROI clips or includes fabric. A real `Localizer` (contour detect + rectify,
-   the ADR-0003 Level-2 seam) would isolate the pill far better than a static ROI.
-2. **Stylized bold digits.** `1`/`7`/`0` in the pill font misread. Options: a
-   Tesseract model fine-tuned on the pill font, or a small classifier trained on the
-   corpus (ADR-0003 Level-3).
+   so the ROI clips or includes fabric. A `BrightnessLocalizer` (ADR-0003 Level-2 bbox
+   seam) is now **shipped** and the pipeline takes the ROI relative to the detected
+   sticker; perspective-rectify (deskew) is the remaining step.
+2. **Stylized bold digits.** `1`/`7`/`0` in the pill font misread. Plan to fix via a
+   font-tuned Tesseract model (+ a cheap constrained post-corrector first):
+   see [`docs/plans/01-tesseract-fine-tuning.md`](plans/01-tesseract-fine-tuning.md).
 3. **Capture quality.** Live capture (sticker filling the frame, steady focus) should
    beat these incidental background photos; worth re-measuring with in-app captures.
 
