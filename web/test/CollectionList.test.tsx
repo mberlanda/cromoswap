@@ -76,4 +76,56 @@ describe('CollectionList', () => {
     );
     expect(screen.getByRole('img')).toHaveAttribute('src', 'data:image/png;base64,AAAA');
   });
+
+  it('shows stats: total scans, unique codes, duplicate count', () => {
+    render(
+      <CollectionList
+        scans={[scan('a', 'ARG01'), scan('b', 'ARG01'), scan('c', 'USA13')]}
+        thumbnails={{}}
+        onEdit={vi.fn()}
+        onDelete={vi.fn()}
+      />,
+    );
+    const stats = screen.getByRole('paragraph', { name: /collection stats/i });
+    expect(stats).toHaveTextContent('3 scans');
+    expect(stats).toHaveTextContent('2 unique');
+    expect(stats).toHaveTextContent('1 duplicates');
+  });
+
+  it('does not show stats when the list is empty', () => {
+    render(
+      <CollectionList
+        scans={[]}
+        thumbnails={{}}
+        onEdit={vi.fn()}
+        onDelete={vi.fn()}
+      />,
+    );
+    expect(screen.queryByRole('paragraph', { name: /collection stats/i })).not.toBeInTheDocument();
+  });
+
+  it('shows OCR badge for ocr-sourced scans', () => {
+    render(
+      <CollectionList
+        scans={[scan('a', 'ARG01')]}
+        thumbnails={{}}
+        onEdit={vi.fn()}
+        onDelete={vi.fn()}
+      />,
+    );
+    expect(screen.getByText('OCR')).toBeInTheDocument();
+  });
+
+  it('shows Manual badge for manually-entered scans', () => {
+    const manualScan: Scan = { ...scan('a', 'ARG01'), source: 'manual' };
+    render(
+      <CollectionList
+        scans={[manualScan]}
+        thumbnails={{}}
+        onEdit={vi.fn()}
+        onDelete={vi.fn()}
+      />,
+    );
+    expect(screen.getByText('Manual')).toBeInTheDocument();
+  });
 });
