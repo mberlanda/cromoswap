@@ -8,16 +8,20 @@ const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, '../../..');
 
 /**
- * Seed corpus encoding domain knowledge: codes sit near the top-right corner.
- * Replace/extend with real annotations as the corpus grows; regenerating is a
+ * Seed corpus annotated from the real Panini WC 2026 sticker backs: the code
+ * sits in a wide rounded pill at the top-right (e.g. "CRO 20", "GHA 1",
+ * "FWC 17"). Boxes are relative to the sticker; the pill is far wider than
+ * tall. Extend with more annotations as the corpus grows — regenerating is a
  * pure build step with no runtime change.
  */
 const SEED_CORPUS: CorpusAnnotation[] = [
-  { orientation: 'portrait', box: { x: 0.7, y: 0.03, w: 0.24, h: 0.1 } },
-  { orientation: 'portrait', box: { x: 0.72, y: 0.04, w: 0.22, h: 0.09 } },
-  { orientation: 'portrait', box: { x: 0.68, y: 0.05, w: 0.26, h: 0.1 } },
-  { orientation: 'landscape', box: { x: 0.76, y: 0.05, w: 0.2, h: 0.14 } },
-  { orientation: 'landscape', box: { x: 0.78, y: 0.06, w: 0.18, h: 0.13 } },
+  // Portrait (CRO 20, GHA 1, GHA 7): pill across the top-right.
+  { orientation: 'portrait', box: { x: 0.6, y: 0.035, w: 0.34, h: 0.06 } },
+  { orientation: 'portrait', box: { x: 0.58, y: 0.04, w: 0.36, h: 0.055 } },
+  { orientation: 'portrait', box: { x: 0.62, y: 0.03, w: 0.32, h: 0.065 } },
+  // Landscape (FWC 17): shorter sticker, so the pill is a touch taller relative.
+  { orientation: 'landscape', box: { x: 0.62, y: 0.05, w: 0.33, h: 0.1 } },
+  { orientation: 'landscape', box: { x: 0.6, y: 0.06, w: 0.35, h: 0.09 } },
 ];
 
 const PAD = 0.02;
