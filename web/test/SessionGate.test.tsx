@@ -1,0 +1,39 @@
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { SessionGate } from '../src/ui/SessionGate';
+import type { Session } from '../src/domain/types';
+
+const existing: Session = {
+  id: 'sess-1',
+  userName: 'Mauro',
+  createdAt: '2026-06-01T00:00:00.000Z',
+  updatedAt: '2026-06-01T00:00:00.000Z',
+};
+
+describe('SessionGate', () => {
+  it('creates a session with the entered name', async () => {
+    const onCreate = vi.fn();
+    render(<SessionGate sessions={[]} onCreate={onCreate} onResume={vi.fn()} />);
+
+    const button = screen.getByRole('button', { name: /start/i });
+    expect(button).toBeDisabled();
+
+    await userEvent.type(screen.getByLabelText(/name/i), 'Mauro');
+    expect(button).toBeEnabled();
+    await userEvent.click(button);
+    expect(onCreate).toHaveBeenCalledWith('Mauro');
+  });
+
+  it('lets the user resume an existing session', async () => {
+    const onResume = vi.fn();
+    render(<SessionGate sessions={[existing]} onCreate={vi.fn()} onResume={onResume} />);
+    await userEvent.click(screen.getByRole('button', { name: /resume.*mauro/i }));
+    expect(onResume).toHaveBeenCalledWith('sess-1');
+  });
+
+  it('does not show a resume section when there are no sessions', () => {
+    render(<SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} />);
+    expect(screen.queryByText(/resume/i)).not.toBeInTheDocument();
+  });
+});
