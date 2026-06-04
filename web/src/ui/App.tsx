@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RankedCode, Scan, Session } from '../domain/types';
 import type { Clock, ImageStore, ScanRepo, SessionRepo } from '../storage/types';
 import { toTextExport } from '../export/text-export';
@@ -27,6 +27,8 @@ export interface AppDeps {
   downloadJson: (filename: string, content: string) => void;
   /** Optional best-effort push of codes + metadata to the backend. */
   syncSession?: (session: Session, scans: Scan[]) => void;
+  /** Optional hook to bind the camera <video> element so capture can read it. */
+  attachVideo?: (element: HTMLVideoElement | null) => void;
 }
 
 export function App({ deps }: { deps: AppDeps }) {
@@ -37,10 +39,16 @@ export function App({ deps }: { deps: AppDeps }) {
   const [detection, setDetection] = useState<Detection | null>(null);
   const [noDetection, setNoDetection] = useState(false);
   const [orientation, setOrientation] = useState<Orientation>('portrait');
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     void deps.sessionRepo.list().then(setSessions);
   }, [deps]);
+
+  // Bind the camera <video> for the composition once the scanner is shown.
+  useEffect(() => {
+    if (active) deps.attachVideo?.(videoRef.current);
+  }, [active, deps]);
 
   const refreshScans = useCallback(
     async (session: Session) => {
@@ -149,6 +157,7 @@ export function App({ deps }: { deps: AppDeps }) {
       </header>
 
       <section aria-label="Scan" className="scan-area">
+        <video ref={videoRef} playsInline muted className="camera-preview" />
         <MaskOverlay orientation={orientation} />
         <fieldset aria-label="Orientation">
           <legend>Sticker orientation</legend>

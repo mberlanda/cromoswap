@@ -48,17 +48,28 @@ function captureFrame(video: HTMLVideoElement): { image: RgbaImage; dataUrl: str
   };
 }
 
-export async function createAppDeps(video: HTMLVideoElement): Promise<AppDeps> {
+export async function createAppDeps(): Promise<AppDeps> {
   const db = await openStickerDb();
   const ocr = new TesseractAdapter();
 
-  const camera = await requestCamera((c) => navigator.mediaDevices.getUserMedia(c));
-  if (camera.state === 'granted') {
-    video.srcObject = camera.stream;
-    await video.play();
-  }
+  // The App binds its <video> via attachVideo; we start the camera once it does.
+  let video: HTMLVideoElement | null = null;
+  let cameraStarted = false;
+
+  const attachVideo = (element: HTMLVideoElement | null): void => {
+    video = element;
+    if (!element || cameraStarted) return;
+    cameraStarted = true;
+    void requestCamera((c) => navigator.mediaDevices.getUserMedia(c)).then((camera) => {
+      if (camera.state === 'granted') {
+        element.srcObject = camera.stream;
+        void element.play();
+      }
+    });
+  };
 
   const scanOnce = async (orientation: 'portrait' | 'landscape'): Promise<Detection | null> => {
+    if (!video) return null;
     const captured = captureFrame(video);
     if (!captured) return null;
     const roi = maskConfig.orientations[orientation].roi;
@@ -72,6 +83,7 @@ export async function createAppDeps(video: HTMLVideoElement): Promise<AppDeps> {
     scanRepo: new IdbScanRepo(db, uuid, nowIso),
     imageStore: new IdbImageStore(db),
     scanOnce,
+    attachVideo,
     now: nowIso,
     downloadText: (name, content) => triggerDownload(name, content, 'text/plain'),
     downloadJson: (name, content) => triggerDownload(name, content, 'application/json'),

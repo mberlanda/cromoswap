@@ -56,6 +56,22 @@ describe('App', () => {
     expect(within(collection).getByText('ARG01')).toBeInTheDocument();
   });
 
+  it('renders the camera preview with the mask overlay over it', async () => {
+    render(<App deps={makeDeps()} />);
+    await startSession();
+    const scan = screen.getByRole('region', { name: /scan/i });
+    expect(scan.querySelector('video')).toBeInTheDocument();
+    expect(within(scan).getByTestId('roi-box')).toBeInTheDocument();
+  });
+
+  it('attaches the camera video element so the composition can wire it', async () => {
+    const attachVideo = vi.fn();
+    render(<App deps={makeDeps({ attachVideo })} />);
+    await startSession();
+    expect(attachVideo).toHaveBeenCalled();
+    expect(attachVideo.mock.calls.at(-1)?.[0]?.tagName).toBe('VIDEO');
+  });
+
   it('captures using the selected orientation', async () => {
     const scanOnce = vi.fn(async () => null);
     render(<App deps={makeDeps({ scanOnce })} />);
