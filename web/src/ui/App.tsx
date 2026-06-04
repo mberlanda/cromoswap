@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RankedCode, Scan, Session } from '../domain/types';
-import type { Clock, ImageStore, ScanRepo, SessionRepo } from '../storage/types';
+import type { Clock, ImageStore, ScanRepo, SessionRepo, AlbumRepo } from '../storage/types';
 import { toTextExport } from '../export/text-export';
 import { toJsonExport } from '../export/json-export';
 import { SessionGate } from './SessionGate';
-import { MaskOverlay } from './MaskOverlay';
-import { DetectionResult } from './DetectionResult';
-import { ManualEntry } from './ManualEntry';
-import { CollectionList } from './CollectionList';
+import { TabBar } from './TabBar';
+import { AlbumView } from './AlbumView';
+import { RepsView } from './RepsView';
 
 export type Orientation = 'portrait' | 'landscape';
 
@@ -20,6 +19,7 @@ export interface AppDeps {
   sessionRepo: SessionRepo;
   scanRepo: ScanRepo;
   imageStore: ImageStore;
+  albumRepo: AlbumRepo;
   /** Capture a frame and run the OCR pipeline; null when nothing valid found. */
   scanOnce: (orientation: Orientation) => Promise<Detection | null>;
   now: Clock;
@@ -44,6 +44,7 @@ export function App({ deps }: { deps: AppDeps }) {
   const [noDetection, setNoDetection] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [orientation, setOrientation] = useState<Orientation>('portrait');
+  const [tab, setTab] = useState<'album' | 'reps'>('reps');
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const SCAN_INTERVAL_MS = 300;
@@ -177,70 +178,37 @@ export function App({ deps }: { deps: AppDeps }) {
       <header>
         <h1>{active.userName}'s collection</h1>
       </header>
-
-      <section aria-label="Scan" className="scan-area">
-        <video ref={videoRef} playsInline muted className="camera-preview" />
-        <MaskOverlay orientation={orientation} />
-        <fieldset aria-label="Orientation">
-          <legend>Sticker orientation</legend>
-          <label>
-            <input
-              type="radio"
-              name="orientation"
-              checked={orientation === 'portrait'}
-              onChange={() => setOrientation('portrait')}
-            />
-            Portrait
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="orientation"
-              checked={orientation === 'landscape'}
-              onChange={() => setOrientation('landscape')}
-            />
-            Landscape
-          </label>
-        </fieldset>
-        <button type="button" className="primary full" onClick={handleCapture} disabled={scanning}>
-          {scanning ? 'Hold steady…' : 'Scan sticker'}
-        </button>
-        {scanning && <p role="status">Hold the sticker steady in the frame…</p>}
-        {noDetection && (
-          <p role="status">No code detected in 5s — try again or add manually.</p>
-        )}
-        {detection && (
-          <DetectionResult
-            candidate={detection.candidate}
-            imageDataUrl={detection.imageDataUrl}
-            onConfirm={handleConfirm}
-            onCorrect={handleCorrect}
-            onSkip={() => setDetection(null)}
-            onRescan={() => setDetection(null)}
-          />
-        )}
-      </section>
-
-      <section aria-label="Manual entry">
-        <h2>Add manually</h2>
-        <ManualEntry onAdd={handleManualAdd} />
-      </section>
-
-      <CollectionList
-        scans={scans}
-        thumbnails={thumbnails}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
-
-      <section aria-label="Export">
-        <button type="button" className="primary" onClick={handleExportText}>
-          Export text
-        </button>
-        <button type="button" className="secondary" onClick={handleExportJson}>
-          Export JSON (with images)
-        </button>
-      </section>
+      <TabBar active={tab} onChange={setTab} />
+      {tab === 'album' && (
+        <AlbumView
+          userName={active.userName}
+          albumRepo={deps.albumRepo}
+          downloadText={deps.downloadText}
+          now={deps.now}
+        />
+      )}
+      {tab === 'reps' && (
+        <RepsView
+          scans={scans}
+          thumbnails={thumbnails}
+          detection={detection}
+          noDetection={noDetection}
+          scanning={scanning}
+          orientation={orientation}
+          videoRef={videoRef}
+          onCapture={handleCapture}
+          onConfirm={handleConfirm}
+          onCorrect={handleCorrect}
+          onSkip={() => setDetection(null)}
+          onRescan={() => setDetection(null)}
+          onManualAdd={handleManualAdd}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onExportText={handleExportText}
+          onExportJson={handleExportJson}
+          onSetOrientation={setOrientation}
+        />
+      )}
     </main>
   );
 }

@@ -6,6 +6,7 @@ import {
   MemorySessionRepo,
   MemoryScanRepo,
   MemoryImageStore,
+  MemoryAlbumRepo,
 } from '../src/storage/memory-repos';
 import type { AppDeps } from '../src/ui/App';
 
@@ -18,6 +19,7 @@ function makeDeps(overrides: Partial<AppDeps> = {}): AppDeps {
     sessionRepo: new MemorySessionRepo(ids, clock),
     scanRepo: new MemoryScanRepo(ids, clock),
     imageStore: new MemoryImageStore(),
+    albumRepo: new MemoryAlbumRepo(ids, clock),
     scanOnce: vi.fn(async () => ({
       candidate: { code: { prefix: 'ARG', number: 1, canonical: 'ARG01' }, confidence: 0.9 },
       imageDataUrl: 'data:image/png;base64,AAAA',

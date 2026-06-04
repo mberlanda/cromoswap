@@ -1,5 +1,5 @@
-import type { Scan, Session } from '../domain/types';
-import type { Clock, IdGen, ImageStore, ScanInput, ScanRepo, SessionRepo } from './types';
+import type { Scan, Session, AlbumEntry } from '../domain/types';
+import type { Clock, IdGen, ImageStore, ScanInput, ScanRepo, SessionRepo, AlbumRepo } from './types';
 
 export class MemorySessionRepo implements SessionRepo {
   private readonly sessions = new Map<string, Session>();
@@ -82,5 +82,36 @@ export class MemoryImageStore implements ImageStore {
 
   async delete(scanId: string): Promise<void> {
     this.images.delete(scanId);
+  }
+}
+
+export class MemoryAlbumRepo implements AlbumRepo {
+  private readonly entries = new Map<string, AlbumEntry>();
+  private readonly ids: IdGen;
+  private readonly clock: Clock;
+
+  constructor(ids: IdGen, clock: Clock) {
+    this.ids = ids;
+    this.clock = clock;
+  }
+
+  async toggle(userName: string, normalizedCode: string): Promise<'added' | 'removed'> {
+    const key = `${userName}:${normalizedCode}`;
+    if (this.entries.has(key)) {
+      this.entries.delete(key);
+      return 'removed';
+    }
+    const entry: AlbumEntry = {
+      id: this.ids(),
+      userName,
+      normalizedCode,
+      ownedAt: this.clock(),
+    };
+    this.entries.set(key, entry);
+    return 'added';
+  }
+
+  async listByUser(userName: string): Promise<AlbumEntry[]> {
+    return [...this.entries.values()].filter((e) => e.userName === userName);
   }
 }

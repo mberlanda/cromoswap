@@ -33,3 +33,10 @@ export interface Session {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface AlbumEntry {
+  id: string;
+  userName: string;
+  normalizedCode: string;
+  ownedAt: string;
+}

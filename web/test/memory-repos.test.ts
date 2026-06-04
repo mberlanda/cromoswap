@@ -3,6 +3,7 @@ import {
   MemorySessionRepo,
   MemoryScanRepo,
   MemoryImageStore,
+  MemoryAlbumRepo,
 } from '../src/storage/memory-repos';
 
 let seq: number;
@@ -77,5 +78,35 @@ describe('MemoryImageStore', () => {
     expect(await store.get('scan-1')).toBe('data:image/png;base64,AAAA');
     await store.delete('scan-1');
     expect(await store.get('scan-1')).toBeUndefined();
+  });
+});
+
+describe('MemoryAlbumRepo', () => {
+  it('adds an entry on first toggle and removes on second', async () => {
+    const repo = new MemoryAlbumRepo(ids, clock);
+    expect(await repo.toggle('Mauro', 'ARG01')).toBe('added');
+    const owned = await repo.listByUser('Mauro');
+    expect(owned).toHaveLength(1);
+    expect(owned[0]).toMatchObject({ userName: 'Mauro', normalizedCode: 'ARG01' });
+
+    expect(await repo.toggle('Mauro', 'ARG01')).toBe('removed');
+    expect(await repo.listByUser('Mauro')).toHaveLength(0);
+  });
+
+  it('lists only entries for the given user', async () => {
+    const repo = new MemoryAlbumRepo(ids, clock);
+    await repo.toggle('Mauro', 'ARG01');
+    await repo.toggle('Luca', 'BRA05');
+    expect(await repo.listByUser('Mauro')).toHaveLength(1);
+    expect((await repo.listByUser('Mauro'))[0].normalizedCode).toBe('ARG01');
+    expect(await repo.listByUser('Luca')).toHaveLength(1);
+  });
+
+  it('different users can own the same code independently', async () => {
+    const repo = new MemoryAlbumRepo(ids, clock);
+    await repo.toggle('Mauro', 'ARG01');
+    await repo.toggle('Luca', 'ARG01');
+    expect(await repo.listByUser('Mauro')).toHaveLength(1);
+    expect(await repo.listByUser('Luca')).toHaveLength(1);
   });
 });

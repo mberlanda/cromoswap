@@ -50,12 +50,12 @@ export async function runPipeline(
  */
 export async function runPipelineMultiOrientation(
   frame: RgbaImage,
-  { ocr, roi, threshold, rotations = [0, 1, 2, 3] }: MultiOrientationOptions,
+  { ocr, roi, threshold, invert, localizer, rotations = [0, 1, 2, 3] }: MultiOrientationOptions,
 ): Promise<RankedCode[]> {
   const best = new Map<string, RankedCode>();
   for (const turns of rotations) {
     const rotated = rotate90(frame, turns);
-    const ranked = await runPipeline(rotated, { ocr, roi, threshold });
+    const ranked = await runPipeline(rotated, { ocr, roi, threshold, invert, localizer });
     for (const candidate of ranked) {
       const existing = best.get(candidate.code.canonical);
       if (!existing || candidate.confidence > existing.confidence) {

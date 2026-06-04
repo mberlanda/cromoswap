@@ -383,3 +383,99 @@ section[aria-label="Resume"] li button {
   font-weight: 700;
   line-height: 1.4;
 }
+
+/* ── Tab bar ─────────────────────────────────────── */
+.tab-bar {
+  display: flex;
+  border-bottom: 1px solid var(--subtle);
+  margin-bottom: var(--space-4);
+}
+
+.tab-bar button {
+  flex: 1;
+  min-height: 44px;
+  border: none;
+  border-radius: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.tab-bar button.tab-active {
+  border-bottom-color: var(--scan);
+  color: var(--scan-strong);
+}
+
+/* ── Team card ───────────────────────────────────── */
+.album-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.team-card {
+  border: 1px solid var(--subtle);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.team-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  background: var(--field);
+  border-bottom: 1px solid var(--subtle);
+  font-size: 13px;
+}
+
+.team-card-name {
+  color: var(--ink);
+}
+
+.team-card-count {
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.team-card-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+}
+
+/* ── Sticker chips ───────────────────────────────── */
+.chip {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0 var(--space-1);
+  border-radius: 6px;
+  background: var(--field);
+  border: 1px solid var(--subtle);
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--muted);
+}
+
+.chip-owned {
+  background: var(--scan);
+  border-color: var(--scan);
+  color: white;
+}
+
+/* ── Album export footer ─────────────────────────── */
+.album-footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3) 0 var(--space-5);
+  background: var(--paper);
+  border-top: 1px solid var(--subtle);
+  margin-top: var(--space-4);
+}

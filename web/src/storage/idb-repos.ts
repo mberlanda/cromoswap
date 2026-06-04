@@ -1,7 +1,7 @@
 import type { IDBPDatabase } from 'idb';
-import type { Scan, Session } from '../domain/types';
+import type { Scan, Session, AlbumEntry } from '../domain/types';
 import type { StickerDb } from './db';
-import type { Clock, IdGen, ImageStore, ScanInput, ScanRepo, SessionRepo } from './types';
+import type { Clock, IdGen, ImageStore, ScanInput, ScanRepo, SessionRepo, AlbumRepo } from './types';
 
 export class IdbSessionRepo implements SessionRepo {
   private readonly db: IDBPDatabase<StickerDb>;
@@ -91,5 +91,37 @@ export class IdbImageStore implements ImageStore {
 
   async delete(scanId: string): Promise<void> {
     await this.db.delete('images', scanId);
+  }
+}
+
+export class IdbAlbumRepo implements AlbumRepo {
+  private readonly db: IDBPDatabase<StickerDb>;
+  private readonly ids: IdGen;
+  private readonly clock: Clock;
+
+  constructor(db: IDBPDatabase<StickerDb>, ids: IdGen, clock: Clock) {
+    this.db = db;
+    this.ids = ids;
+    this.clock = clock;
+  }
+
+  async toggle(userName: string, normalizedCode: string): Promise<'added' | 'removed'> {
+    const existing = await this.db.getFromIndex('album', 'byUserAndCode', [userName, normalizedCode]);
+    if (existing) {
+      await this.db.delete('album', existing.id);
+      return 'removed';
+    }
+    const entry: AlbumEntry = {
+      id: this.ids(),
+      userName,
+      normalizedCode,
+      ownedAt: this.clock(),
+    };
+    await this.db.put('album', entry);
+    return 'added';
+  }
+
+  async listByUser(userName: string): Promise<AlbumEntry[]> {
+    return this.db.getAllFromIndex('album', 'byUser', userName);
   }
 }
