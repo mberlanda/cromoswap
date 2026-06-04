@@ -3,10 +3,12 @@ import type { RankedCode, Scan, Session } from '../domain/types';
 import type { Clock, ImageStore, ScanRepo, SessionRepo, AlbumRepo } from '../storage/types';
 import { toTextExport } from '../export/text-export';
 import { toJsonExport } from '../export/json-export';
+import type { CameraResult, CameraState } from './camera-permission';
 import { SessionGate } from './SessionGate';
 import { TabBar } from './TabBar';
 import { AlbumView } from './AlbumView';
 import { RepsView } from './RepsView';
+import { CameraPermissionPanel } from './CameraPermissionPanel';
 import { SyncIndicator } from './SyncIndicator';
 import type { SyncStatus } from './SyncIndicator';
 
@@ -35,6 +37,8 @@ export interface AppDeps {
   syncSession?: (session: Session, scans: Scan[]) => void | Promise<{ ok: boolean }>;
   /** Optional hook to bind the camera <video> element so capture can read it. */
   attachVideo?: (element: HTMLVideoElement | null) => void;
+  /** Optional: trigger the browser camera permission prompt and start the stream. */
+  startCamera?: () => Promise<CameraResult>;
 }
 
 export function App({ deps }: { deps: AppDeps }) {
@@ -49,6 +53,10 @@ export function App({ deps }: { deps: AppDeps }) {
   const [orientation, setOrientation] = useState<Orientation>('portrait');
   const [tab, setTab] = useState<'album' | 'reps'>('reps');
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('local');
+  // When startCamera is provided, camera starts only on user action; tests without it skip the panel.
+  const [cameraState, setCameraState] = useState<CameraState>(
+    deps.startCamera ? 'idle' : 'granted',
+  );
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const SCAN_INTERVAL_MS = 300;
@@ -185,6 +193,16 @@ export function App({ deps }: { deps: AppDeps }) {
     deps.downloadJson(`${active.userName}-${active.id}.json`, JSON.stringify(json, null, 2));
   }
 
+  async function handleRequestCamera() {
+    if (!deps.startCamera) return;
+    const result = await deps.startCamera();
+    setCameraState(result.state);
+  }
+
+  function handleSkipToManual() {
+    setCameraState('no-camera');
+  }
+
   if (!active) {
     return <SessionGate sessions={sessions} onCreate={handleCreate} onResume={handleResume} scanCounts={sessionScanCounts} />;
   }
@@ -209,7 +227,14 @@ export function App({ deps }: { deps: AppDeps }) {
           now={deps.now}
         />
       )}
-      {tab === 'reps' && (
+      {tab === 'reps' && cameraState !== 'granted' && (
+        <CameraPermissionPanel
+          state={cameraState}
+          onRequest={handleRequestCamera}
+          onSkip={handleSkipToManual}
+        />
+      )}
+      {tab === 'reps' && cameraState === 'granted' && (
         <RepsView
           scans={scans}
           thumbnails={thumbnails}

@@ -54,20 +54,20 @@ export async function createAppDeps(): Promise<AppDeps> {
   const ocr = new TesseractAdapter();
   const localizer = new BrightnessLocalizer();
 
-  // The App binds its <video> via attachVideo; we start the camera once it does.
+  // The App binds its <video> via attachVideo; the user then triggers startCamera.
   let video: HTMLVideoElement | null = null;
-  let cameraStarted = false;
 
   const attachVideo = (element: HTMLVideoElement | null): void => {
     video = element;
-    if (!element || cameraStarted) return;
-    cameraStarted = true;
-    void requestCamera((c) => navigator.mediaDevices.getUserMedia(c)).then((camera) => {
-      if (camera.state === 'granted') {
-        element.srcObject = camera.stream;
-        void element.play();
-      }
-    });
+  };
+
+  const startCamera = async () => {
+    const camera = await requestCamera((c) => navigator.mediaDevices.getUserMedia(c));
+    if (camera.state === 'granted' && video) {
+      video.srcObject = camera.stream;
+      void video.play();
+    }
+    return camera;
   };
 
   const scanOnce = async (orientation: 'portrait' | 'landscape'): Promise<Detection | null> => {
@@ -92,6 +92,7 @@ export async function createAppDeps(): Promise<AppDeps> {
     albumRepo: new IdbAlbumRepo(db, uuid, nowIso),
     scanOnce,
     attachVideo,
+    startCamera,
     now: nowIso,
     downloadText: (name, content) => triggerDownload(name, content, 'text/plain'),
     downloadJson: (name, content) => triggerDownload(name, content, 'application/json'),
