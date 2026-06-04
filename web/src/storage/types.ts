@@ -1,4 +1,4 @@
-import type { Scan, Session } from '../domain/types';
+import type { Scan, Session, AlbumEntry } from '../domain/types';
 
 export type IdGen = () => string;
 export type Clock = () => string;
@@ -30,4 +30,9 @@ export interface ImageStore {
   put(scanId: string, dataUrl: string): Promise<void>;
   get(scanId: string): Promise<string | undefined>;
   delete(scanId: string): Promise<void>;
+}
+
+export interface AlbumRepo {
+  toggle(userName: string, normalizedCode: string): Promise<'added' | 'removed'>;
+  listByUser(userName: string): Promise<AlbumEntry[]>;
 }
