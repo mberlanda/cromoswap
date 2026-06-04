@@ -3,12 +3,13 @@ import type { Session } from '../domain/types';
 
 interface SessionGateProps {
   sessions: Session[];
+  scanCounts?: Record<string, number>;
   onCreate: (userName: string) => void;
   onResume: (sessionId: string) => void;
 }
 
 /** Entry screen: ask for a name to start a session, or resume an existing one. */
-export function SessionGate({ sessions, onCreate, onResume }: SessionGateProps) {
+export function SessionGate({ sessions, scanCounts = {}, onCreate, onResume }: SessionGateProps) {
   const [name, setName] = useState('');
   const inputId = useId();
   const trimmed = name.trim();
@@ -26,13 +27,18 @@ export function SessionGate({ sessions, onCreate, onResume }: SessionGateProps) 
         <section aria-label="Resume">
           <h2>Resume a session</h2>
           <ul>
-            {sessions.map((session) => (
-              <li key={session.id}>
-                <button type="button" onClick={() => onResume(session.id)}>
-                  Resume {session.userName}
-                </button>
-              </li>
-            ))}
+            {sessions.map((session) => {
+              const count = scanCounts[session.id] ?? 0;
+              return (
+                <li key={session.id} className="session-card">
+                  <span className="session-name">{session.userName}</span>
+                  <span className="session-count">{count} scan{count !== 1 ? 's' : ''}</span>
+                  <button type="button" className="primary" onClick={() => onResume(session.id)}>
+                    Resume
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}

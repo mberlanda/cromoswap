@@ -28,12 +28,24 @@ describe('SessionGate', () => {
   it('lets the user resume an existing session', async () => {
     const onResume = vi.fn();
     render(<SessionGate sessions={[existing]} onCreate={vi.fn()} onResume={onResume} />);
-    await userEvent.click(screen.getByRole('button', { name: /resume.*mauro/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^resume$/i }));
     expect(onResume).toHaveBeenCalledWith('sess-1');
   });
 
   it('does not show a resume section when there are no sessions', () => {
     render(<SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} />);
     expect(screen.queryByText(/resume/i)).not.toBeInTheDocument();
+  });
+
+  it('shows scan count on each resume card', () => {
+    render(
+      <SessionGate
+        sessions={[existing]}
+        onCreate={vi.fn()}
+        onResume={vi.fn()}
+        scanCounts={{ 'sess-1': 12 }}
+      />,
+    );
+    expect(screen.getByText(/12 scans/i)).toBeInTheDocument();
   });
 });

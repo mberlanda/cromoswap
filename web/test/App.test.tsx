@@ -233,7 +233,7 @@ describe('App', () => {
     unmount();
 
     render(<App deps={deps} />);
-    await userEvent.click(await screen.findByRole('button', { name: /resume.*mauro/i }));
+    await userEvent.click(await screen.findByRole('button', { name: /^resume$/i }));
     const collection = screen.getByRole('list', { name: /collection/i });
     expect(within(collection).getByText('USA13')).toBeInTheDocument();
   });

@@ -37,6 +37,7 @@ export interface AppDeps {
 
 export function App({ deps }: { deps: AppDeps }) {
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [sessionScanCounts, setSessionScanCounts] = useState<Record<string, number>>({});
   const [active, setActive] = useState<Session | null>(null);
   const [scans, setScans] = useState<Scan[]>([]);
   const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
@@ -53,7 +54,15 @@ export function App({ deps }: { deps: AppDeps }) {
   const nowMs = deps.nowMs ?? (() => Date.now());
 
   useEffect(() => {
-    void deps.sessionRepo.list().then(setSessions);
+    void deps.sessionRepo.list().then(async (list) => {
+      setSessions(list);
+      const counts: Record<string, number> = {};
+      for (const s of list) {
+        const scans = await deps.scanRepo.listBySession(s.id);
+        counts[s.id] = scans.length;
+      }
+      setSessionScanCounts(counts);
+    });
   }, [deps]);
 
   // Bind the camera <video> for the composition once the scanner is shown.
@@ -170,7 +179,7 @@ export function App({ deps }: { deps: AppDeps }) {
   }
 
   if (!active) {
-    return <SessionGate sessions={sessions} onCreate={handleCreate} onResume={handleResume} />;
+    return <SessionGate sessions={sessions} onCreate={handleCreate} onResume={handleResume} scanCounts={sessionScanCounts} />;
   }
 
   return (
