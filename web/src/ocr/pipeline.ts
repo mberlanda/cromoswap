@@ -4,6 +4,7 @@ import type { RankedCode } from '../domain/types';
 import { cropRoi } from './roi-cropper';
 import { toGrayscaleThreshold } from './preprocessor';
 import { rotate90 } from './rotate';
+import { composeRect, type Localizer } from './localizer';
 import { parseCandidates } from '../domain/parser';
 import { rankCandidates } from '../domain/ranker';
 
@@ -13,6 +14,8 @@ export interface PipelineOptions {
   threshold: number;
   /** Invert preprocessing for light-on-dark code pills. Defaults to true. */
   invert?: boolean;
+  /** Optional sticker localizer; the ROI is taken relative to what it finds. */
+  localizer?: Localizer;
 }
 
 export interface MultiOrientationOptions extends PipelineOptions {
@@ -29,9 +32,11 @@ export interface MultiOrientationOptions extends PipelineOptions {
  */
 export async function runPipeline(
   frame: RgbaImage,
-  { ocr, roi, threshold, invert = true }: PipelineOptions,
+  { ocr, roi, threshold, invert = true, localizer }: PipelineOptions,
 ): Promise<RankedCode[]> {
-  const cropped = cropRoi(frame, roi);
+  const sticker = localizer?.locate(frame) ?? null;
+  const region = sticker ? composeRect(sticker, roi) : roi;
+  const cropped = cropRoi(frame, region);
   const preprocessed = toGrayscaleThreshold(cropped, threshold, invert);
   const { text, confidence } = await ocr.recognize(preprocessed);
   const candidates = parseCandidates(text).map((raw) => ({ raw, confidence }));

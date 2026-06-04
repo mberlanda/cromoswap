@@ -4,6 +4,7 @@ import { openStickerDb } from './storage/db';
 import { IdbSessionRepo, IdbScanRepo, IdbImageStore } from './storage/idb-repos';
 import { TesseractAdapter } from './ocr/tesseract-adapter';
 import { runPipelineMultiOrientation } from './ocr/pipeline';
+import { BrightnessLocalizer } from './ocr/localizer';
 import { requestCamera } from './ui/camera-permission';
 import { pushSession } from './storage/sync-client';
 import type { RgbaImage } from './ocr/image';
@@ -51,6 +52,7 @@ function captureFrame(video: HTMLVideoElement): { image: RgbaImage; dataUrl: str
 export async function createAppDeps(): Promise<AppDeps> {
   const db = await openStickerDb();
   const ocr = new TesseractAdapter();
+  const localizer = new BrightnessLocalizer();
 
   // The App binds its <video> via attachVideo; we start the camera once it does.
   let video: HTMLVideoElement | null = null;
@@ -73,7 +75,12 @@ export async function createAppDeps(): Promise<AppDeps> {
     const captured = captureFrame(video);
     if (!captured) return null;
     const roi = maskConfig.orientations[orientation].roi;
-    const ranked = await runPipelineMultiOrientation(captured.image, { ocr, roi, threshold: 128 });
+    const ranked = await runPipelineMultiOrientation(captured.image, {
+      ocr,
+      roi,
+      threshold: 128,
+      localizer,
+    });
     if (ranked.length === 0) return null;
     return { candidate: ranked[0], imageDataUrl: captured.dataUrl };
   };

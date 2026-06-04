@@ -20,6 +20,20 @@ describe('runPipeline', () => {
     expect(result).toEqual([]);
   });
 
+  it('takes the ROI relative to a located sticker when a localizer is given', async () => {
+    const ocr = new MockOcrAdapter({ text: 'ARG01', confidence: 0.6 });
+    const localizer = { locate: () => ({ x: 0, y: 0, w: 1, h: 1 }) };
+    const result = await runPipeline(frame, { ocr, roi, threshold: 128, localizer });
+    expect(result[0].code.canonical).toBe('ARG01');
+  });
+
+  it('falls back to the raw ROI when the localizer finds nothing', async () => {
+    const ocr = new MockOcrAdapter({ text: 'USA13', confidence: 0.6 });
+    const localizer = { locate: () => null };
+    const result = await runPipeline(frame, { ocr, roi, threshold: 128, localizer });
+    expect(result[0].code.canonical).toBe('USA13');
+  });
+
   it('crops to the ROI before running OCR', async () => {
     // A tiny ROI must still produce a non-empty image for the adapter.
     const ocr = new MockOcrAdapter({ text: 'ARG01', confidence: 0.6 });
