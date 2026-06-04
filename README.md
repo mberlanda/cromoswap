@@ -43,6 +43,10 @@ entry. Sync to the API is best-effort: in the bundled production build it posts 
 same origin automatically; in dev it is off unless you set `VITE_API_BASE_URL` (e.g.
 `VITE_API_BASE_URL=http://localhost:3000 npm run dev`).
 
+For a **split deployment** (web and API on different origins), the API must allow the
+web origin via CORS — see `CORS_ORIGINS` under the backend section. The same-origin
+Docker image needs no CORS.
+
 ## Backend (`api/`)
 
 ```bash
@@ -61,6 +65,17 @@ bundle exec rails server  # http://localhost:3000
 
 The database connection is configured from env (`DATABASE_HOST/PORT/USER/PASSWORD/NAME`)
 with defaults matching `docker-compose.yml`.
+
+**CORS:** for cross-origin sync, set `CORS_ORIGINS` to a comma-separated list of allowed
+web origins (defaults to `http://localhost:5173,http://localhost:4173` for Vite dev/preview).
+Then run the web app with a matching `VITE_API_BASE_URL`, e.g.:
+
+```bash
+# API
+CORS_ORIGINS=http://localhost:5173 bundle exec rails server
+# Web (separate terminal)
+VITE_API_BASE_URL=http://localhost:3000 npm run dev
+```
 
 ## Asset generation (`tools/asset-gen/`)
 
