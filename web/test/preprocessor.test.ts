@@ -27,4 +27,13 @@ describe('toGrayscaleThreshold', () => {
     const out = toGrayscaleThreshold(pixel(255, 255, 255), 128);
     expect(out.data[3]).toBe(255);
   });
+
+  it('inverts output for light-on-dark sources (e.g. the code pill)', () => {
+    // Bright pixel with invert => black (dark text on light for Tesseract).
+    const bright = toGrayscaleThreshold(pixel(255, 255, 255), 128, true);
+    expect([bright.data[0], bright.data[1], bright.data[2]]).toEqual([0, 0, 0]);
+    // Dark pixel with invert => white (background).
+    const dark = toGrayscaleThreshold(pixel(10, 10, 10), 128, true);
+    expect([dark.data[0], dark.data[1], dark.data[2]]).toEqual([255, 255, 255]);
+  });
 });

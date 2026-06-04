@@ -21,3 +21,6 @@ web/fixtures/stickers/*.jpg
 web/fixtures/stickers/*.jpeg
 web/fixtures/stickers/*.png
 web/fixtures/stickers/*.heic
+
+# Tesseract language model (downloaded at runtime)
+*.traineddata
