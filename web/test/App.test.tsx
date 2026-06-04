@@ -56,6 +56,21 @@ describe('App', () => {
     expect(within(collection).getByText('ARG01')).toBeInTheDocument();
   });
 
+  it('captures using the selected orientation', async () => {
+    const scanOnce = vi.fn(async () => null);
+    render(<App deps={makeDeps({ scanOnce })} />);
+    await startSession();
+
+    // Defaults to portrait.
+    await userEvent.click(screen.getByRole('button', { name: /capture/i }));
+    expect(scanOnce).toHaveBeenLastCalledWith('portrait');
+
+    // Switch to landscape and capture again.
+    await userEvent.click(screen.getByRole('radio', { name: /landscape/i }));
+    await userEvent.click(screen.getByRole('button', { name: /capture/i }));
+    expect(scanOnce).toHaveBeenLastCalledWith('landscape');
+  });
+
   it('shows a message when no code is detected', async () => {
     render(<App deps={makeDeps({ scanOnce: vi.fn(async () => null) })} />);
     await startSession();

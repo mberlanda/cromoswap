@@ -9,6 +9,8 @@ import { DetectionResult } from './DetectionResult';
 import { ManualEntry } from './ManualEntry';
 import { CollectionList } from './CollectionList';
 
+export type Orientation = 'portrait' | 'landscape';
+
 export interface Detection {
   candidate: RankedCode;
   imageDataUrl: string;
@@ -19,7 +21,7 @@ export interface AppDeps {
   scanRepo: ScanRepo;
   imageStore: ImageStore;
   /** Capture a frame and run the OCR pipeline; null when nothing valid found. */
-  scanOnce: () => Promise<Detection | null>;
+  scanOnce: (orientation: Orientation) => Promise<Detection | null>;
   now: Clock;
   downloadText: (filename: string, content: string) => void;
   downloadJson: (filename: string, content: string) => void;
@@ -34,6 +36,7 @@ export function App({ deps }: { deps: AppDeps }) {
   const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
   const [detection, setDetection] = useState<Detection | null>(null);
   const [noDetection, setNoDetection] = useState(false);
+  const [orientation, setOrientation] = useState<Orientation>('portrait');
 
   useEffect(() => {
     void deps.sessionRepo.list().then(setSessions);
@@ -89,7 +92,7 @@ export function App({ deps }: { deps: AppDeps }) {
   async function handleCapture() {
     setDetection(null);
     setNoDetection(false);
-    const result = await deps.scanOnce();
+    const result = await deps.scanOnce(orientation);
     if (!result) {
       setNoDetection(true);
       return;
@@ -146,7 +149,28 @@ export function App({ deps }: { deps: AppDeps }) {
       </header>
 
       <section aria-label="Scan" className="scan-area">
-        <MaskOverlay orientation="portrait" />
+        <MaskOverlay orientation={orientation} />
+        <fieldset aria-label="Orientation">
+          <legend>Sticker orientation</legend>
+          <label>
+            <input
+              type="radio"
+              name="orientation"
+              checked={orientation === 'portrait'}
+              onChange={() => setOrientation('portrait')}
+            />
+            Portrait
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="orientation"
+              checked={orientation === 'landscape'}
+              onChange={() => setOrientation('landscape')}
+            />
+            Landscape
+          </label>
+        </fieldset>
         <button type="button" onClick={handleCapture}>
           Capture
         </button>
