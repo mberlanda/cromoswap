@@ -51,7 +51,6 @@ function captureFrame(video: HTMLVideoElement): { image: RgbaImage; dataUrl: str
 export async function createAppDeps(video: HTMLVideoElement): Promise<AppDeps> {
   const db = await openStickerDb();
   const ocr = new TesseractAdapter();
-  const roi = maskConfig.orientations.portrait.roi;
 
   const camera = await requestCamera((c) => navigator.mediaDevices.getUserMedia(c));
   if (camera.state === 'granted') {
@@ -59,9 +58,10 @@ export async function createAppDeps(video: HTMLVideoElement): Promise<AppDeps> {
     await video.play();
   }
 
-  const scanOnce = async (): Promise<Detection | null> => {
+  const scanOnce = async (orientation: 'portrait' | 'landscape'): Promise<Detection | null> => {
     const captured = captureFrame(video);
     if (!captured) return null;
+    const roi = maskConfig.orientations[orientation].roi;
     const ranked = await runPipelineMultiOrientation(captured.image, { ocr, roi, threshold: 128 });
     if (ranked.length === 0) return null;
     return { candidate: ranked[0], imageDataUrl: captured.dataUrl };
