@@ -1,0 +1,9 @@
+{
+  "description": "Real sticker-back fixtures for OCR validation. Image files are gitignored (Panini artwork); place them here matching `file` and run the validation harness.",
+  "samples": [
+    { "file": "cro20.jpg", "expectedCode": "CRO20", "orientation": "portrait" },
+    { "file": "gha01.jpg", "expectedCode": "GHA01", "orientation": "portrait" },
+    { "file": "gha07.jpg", "expectedCode": "GHA07", "orientation": "portrait" },
+    { "file": "fwc17.jpg", "expectedCode": "FWC17", "orientation": "landscape" }
+  ]
+}
