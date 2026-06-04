@@ -3,7 +3,7 @@ import type { AppDeps, Detection } from './ui/App';
 import { openStickerDb } from './storage/db';
 import { IdbSessionRepo, IdbScanRepo, IdbImageStore } from './storage/idb-repos';
 import { TesseractAdapter } from './ocr/tesseract-adapter';
-import { runPipeline } from './ocr/pipeline';
+import { runPipelineMultiOrientation } from './ocr/pipeline';
 import { requestCamera } from './ui/camera-permission';
 import { pushSession } from './storage/sync-client';
 import type { RgbaImage } from './ocr/image';
@@ -62,7 +62,7 @@ export async function createAppDeps(video: HTMLVideoElement): Promise<AppDeps> {
   const scanOnce = async (): Promise<Detection | null> => {
     const captured = captureFrame(video);
     if (!captured) return null;
-    const ranked = await runPipeline(captured.image, { ocr, roi, threshold: 128 });
+    const ranked = await runPipelineMultiOrientation(captured.image, { ocr, roi, threshold: 128 });
     if (ranked.length === 0) return null;
     return { candidate: ranked[0], imageDataUrl: captured.dataUrl };
   };
