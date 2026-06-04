@@ -184,8 +184,9 @@ export function App({ deps }: { deps: AppDeps }) {
 
   return (
     <main aria-label="Scanner">
-      <header>
-        <h1>{active.userName}'s collection</h1>
+      <header className="app-header">
+        <h1 className="app-header-name">{active.userName}</h1>
+        <p className="app-header-meta">{scans.length} scan{scans.length !== 1 ? 's' : ''}</p>
       </header>
       <TabBar active={tab} onChange={setTab} />
       {tab === 'album' && (

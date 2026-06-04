@@ -81,6 +81,16 @@ describe('App', () => {
     expect(attachVideo.mock.calls.at(-1)?.[0]?.tagName).toBe('VIDEO');
   });
 
+  it('shows the session name and scan count in the header after creating a session', async () => {
+    const deps = makeDeps();
+    render(<App deps={deps} />);
+    await userEvent.type(screen.getByLabelText(/name/i), 'Mauro');
+    await userEvent.click(screen.getByRole('button', { name: /start/i }));
+    const header = screen.getByRole('heading', { name: /mauro/i }).closest('.app-header');
+    expect(header).toBeInTheDocument();
+    expect(within(header!).getByText(/0 scans/i)).toBeInTheDocument();
+  });
+
   it('captures using the selected orientation', async () => {
     const scanOnce = vi.fn(async () => ({
       candidate: { code: { prefix: 'ARG', number: 1, canonical: 'ARG01' }, confidence: 0.9 },

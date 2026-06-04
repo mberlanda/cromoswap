@@ -42,6 +42,10 @@ export function RepsView({
     .map(([code]) => code.slice(0, 3))
     .filter((p, i, arr) => arr.indexOf(p) === i); // deduplicate
 
+  const total = scans.length;
+  const unique = Object.keys(counts).length;
+  const duplicates = total - unique;
+
   return (
     <section aria-label="My Reps">
       <section aria-label="Scan" className="scan-area">
@@ -77,12 +81,16 @@ export function RepsView({
       />
 
       <section aria-label="Export">
+        <p className="export-summary" aria-label="Export summary">
+          {total} scan{total !== 1 ? 's' : ''} · {unique} unique · {duplicates} duplicates
+        </p>
         <button type="button" className="primary" onClick={onExportText}>
           Export text
         </button>
         <button type="button" className="secondary" onClick={onExportJson}>
           Export JSON (with images)
         </button>
+        <p className="privacy-note-inline">Images are included. File stays on this device — use as a personal backup.</p>
       </section>
     </section>
   );
