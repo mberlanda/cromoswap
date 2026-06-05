@@ -902,7 +902,7 @@ section[aria-label="Resume"] li button {
 
 .leaderboard-row {
   display: grid;
-  grid-template-columns: 2.5rem 1fr auto auto;
+  grid-template-columns: 2.5rem minmax(0, 1fr) auto auto;
   gap: var(--space-2);
   align-items: center;
   padding: var(--space-3) 0;
@@ -931,6 +931,12 @@ section[aria-label="Resume"] li button {
 .leaderboard-missing {
   font-size: 0.8125rem;
   color: var(--muted);
+  white-space: nowrap;
+}
+
+.leaderboard-open {
+  grid-column: 2 / -1;
+  justify-self: end;
   white-space: nowrap;
 }
 

@@ -47,4 +47,20 @@ describe('LeaderboardView', () => {
     render(<LeaderboardView entries={entries} loading={false} onRefresh={vi.fn()} />);
     expect(screen.getByRole('list', { name: 'Ranking' })).toBeDefined();
   });
+
+  it('opens a collector selection from a leaderboard row', async () => {
+    const onOpenSelection = vi.fn();
+    render(
+      <LeaderboardView
+        entries={entries}
+        loading={false}
+        onRefresh={vi.fn()}
+        onOpenSelection={onOpenSelection}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: /open mauro selection/i }));
+
+    expect(onOpenSelection).toHaveBeenCalledWith('Mauro');
+  });
 });
