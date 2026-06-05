@@ -15,10 +15,8 @@ export function toAlbumOwnedExport(
   ];
 
   for (const prefix of ALBUM_ORDER) {
-    const owned = stickerNumbers(prefix)
-      .map((n) => `${prefix}${n}`)
-      .filter((code) => ownedCodes.has(code));
-    if (owned.length > 0) lines.push(owned.join(' '));
+    const numbers = stickerNumbers(prefix).filter((n) => ownedCodes.has(`${prefix}${n}`));
+    if (numbers.length > 0) lines.push(`${prefix}: ${numbers.join(', ')}`);
   }
 
   return lines.join('\n');
@@ -42,10 +40,8 @@ export function toAlbumMissingExport(
   ];
 
   for (const prefix of ALBUM_ORDER) {
-    const missing = stickerNumbers(prefix)
-      .map((n) => `${prefix}${n}`)
-      .filter((code) => !ownedCodes.has(code));
-    if (missing.length > 0) lines.push(`${prefix}: ${missing.join(' ')}`);
+    const missing = stickerNumbers(prefix).filter((n) => !ownedCodes.has(`${prefix}${n}`));
+    if (missing.length > 0) lines.push(`${prefix}: ${missing.join(', ')}`);
   }
 
   return lines.join('\n');

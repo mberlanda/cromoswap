@@ -44,6 +44,9 @@ export interface AppDeps {
 export function App({ deps }: { deps: AppDeps }) {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [sessionScanCounts, setSessionScanCounts] = useState<Record<string, number>>({});
+  const [sessionAlbumCounts, setSessionAlbumCounts] = useState<
+    Record<string, { owned: number; missing: number }>
+  >({});
   const [active, setActive] = useState<Session | null>(null);
   const [scans, setScans] = useState<Scan[]>([]);
   const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
@@ -64,15 +67,22 @@ export function App({ deps }: { deps: AppDeps }) {
   const delay = deps.delay ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
   const nowMs = deps.nowMs ?? (() => Date.now());
 
+  const TOTAL_STICKERS = 980;
+
   useEffect(() => {
     void deps.sessionRepo.list().then(async (list) => {
       setSessions(list);
       const counts: Record<string, number> = {};
+      const albumCounts: Record<string, { owned: number; missing: number }> = {};
       for (const s of list) {
         const scans = await deps.scanRepo.listBySession(s.id);
         counts[s.id] = scans.length;
+        const entries = await deps.albumRepo.listByUser(s.userName);
+        const owned = entries.length;
+        albumCounts[s.id] = { owned, missing: TOTAL_STICKERS - owned };
       }
       setSessionScanCounts(counts);
+      setSessionAlbumCounts(albumCounts);
     });
   }, [deps]);
 
@@ -204,7 +214,15 @@ export function App({ deps }: { deps: AppDeps }) {
   }
 
   if (!active) {
-    return <SessionGate sessions={sessions} onCreate={handleCreate} onResume={handleResume} scanCounts={sessionScanCounts} />;
+    return (
+      <SessionGate
+        sessions={sessions}
+        onCreate={handleCreate}
+        onResume={handleResume}
+        scanCounts={sessionScanCounts}
+        albumCounts={sessionAlbumCounts}
+      />
+    );
   }
 
   function handleSyncRetry() {
