@@ -9,6 +9,8 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :sessions, only: %i[create show]
       resources :scans, only: %i[update destroy]
+      post 'album_stickers/sync', to: 'album_stickers#sync'
+      get 'leaderboard', to: 'leaderboard#index'
     end
   end
 

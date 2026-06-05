@@ -25,6 +25,12 @@ function toScanPayload(scan: Scan): ScanPayload {
   };
 }
 
+export interface LeaderboardEntry {
+  userName: string;
+  owned: number;
+  missing: number;
+}
+
 /**
  * Best-effort push of a session and its scans (codes + metadata only, no
  * images) to the backend. Never throws: resolves { ok: false } on any failure
@@ -50,5 +56,38 @@ export async function pushSession(
     return { ok: response.ok };
   } catch {
     return { ok: false };
+  }
+}
+
+/** Syncs the full set of album-owned codes for a user. Best-effort; never throws. */
+export async function syncAlbumStickers(
+  userName: string,
+  codes: string[],
+  baseUrl: string,
+  fetchImpl: FetchImpl,
+): Promise<SyncResult> {
+  try {
+    const response = await fetchImpl(`${baseUrl}/api/v1/album_stickers/sync`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userName, codes }),
+    });
+    return { ok: response.ok };
+  } catch {
+    return { ok: false };
+  }
+}
+
+/** Fetches the global leaderboard. Returns [] on any error. */
+export async function fetchLeaderboard(
+  baseUrl: string,
+  fetchImpl: FetchImpl,
+): Promise<LeaderboardEntry[]> {
+  try {
+    const response = await fetchImpl(`${baseUrl}/api/v1/leaderboard`);
+    if (!response.ok) return [];
+    return (await response.json()) as LeaderboardEntry[];
+  } catch {
+    return [];
   }
 }
