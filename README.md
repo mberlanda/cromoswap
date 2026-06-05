@@ -6,7 +6,9 @@ collection. Local-first (IndexedDB), with an optional Rails 8 + Postgres backend
 future sharing/matchmaking.
 
 See [`docs/specs/00-product-spec.md`](docs/specs/00-product-spec.md) and the ADRs in
-[`docs/adr/`](docs/adr/) for design and rationale.
+[`docs/adr/`](docs/adr/) for design and rationale. The live scanner's framing and OCR-crop
+geometry is documented in
+[`docs/ocr-scanning-geometry.md`](docs/ocr-scanning-geometry.md).
 
 ## Repository layout
 

@@ -2,7 +2,12 @@ import 'fake-indexeddb/auto';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { IDBFactory } from 'fake-indexeddb';
 import { openStickerDb } from '../src/storage/db';
-import { IdbSessionRepo, IdbScanRepo, IdbImageStore } from '../src/storage/idb-repos';
+import {
+  IdbSessionRepo,
+  IdbScanRepo,
+  IdbImageStore,
+  IdbAlbumRepo,
+} from '../src/storage/idb-repos';
 
 let seq: number;
 const ids = () => `id-${++seq}`;
@@ -77,5 +82,36 @@ describe('IndexedDB repos', () => {
     expect(await images.get('scan-1')).toBe('data:image/png;base64,AAAA');
     await images.delete('scan-1');
     expect(await images.get('scan-1')).toBeUndefined();
+  });
+
+  it('lists all sessions and renames one', async () => {
+    const db = await openStickerDb();
+    const sessions = new IdbSessionRepo(db, ids, clock);
+    await sessions.create('Mauro');
+    await sessions.create('Ana');
+
+    const all = await sessions.list();
+    expect(all.map((s) => s.userName).sort()).toEqual(['Ana', 'Mauro']);
+
+    const renamed = await sessions.update(all[0].id, { userName: 'Renamed' });
+    expect(renamed.userName).toBe('Renamed');
+    expect(await sessions.get(all[0].id)).toMatchObject({ userName: 'Renamed' });
+  });
+
+  it('toggles album stickers on and off and lists them per user', async () => {
+    const db = await openStickerDb();
+    const album = new IdbAlbumRepo(db, ids, clock);
+
+    expect(await album.toggle('Mauro', 'ARG01')).toBe('added');
+    expect(await album.toggle('Mauro', 'BRA07')).toBe('added');
+    expect(await album.listByUser('Mauro')).toHaveLength(2);
+
+    // Toggling an owned sticker removes it.
+    expect(await album.toggle('Mauro', 'ARG01')).toBe('removed');
+    const remaining = await album.listByUser('Mauro');
+    expect(remaining.map((e) => e.normalizedCode)).toEqual(['BRA07']);
+
+    // Scoped per user.
+    expect(await album.listByUser('Ana')).toEqual([]);
   });
 });

@@ -215,11 +215,45 @@ form {
   pointer-events: none;
 }
 
+/* Centered guide locked to the sticker aspect ratio; dims everything outside. */
+.sticker-frame {
+  border: 3px solid var(--review);
+  border-radius: var(--radius);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.42);
+  transition: border-color 120ms ease;
+}
+
+.sticker-frame.targeted {
+  border-color: #34c759;
+}
+
+/* Top-right OCR ROI, nested inside the guide. */
 .roi-box {
   border: 2px solid var(--review);
-  border-radius: var(--radius);
+  border-radius: 6px;
   background: rgba(242, 184, 75, 0.16);
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.32);
+}
+
+.sticker-frame.targeted .roi-box {
+  border-color: #34c759;
+}
+
+/* Frame-size tuning slider */
+.size-slider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.size-slider-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.size-slider input[type='range'] {
+  flex: 1;
 }
 
 fieldset {
