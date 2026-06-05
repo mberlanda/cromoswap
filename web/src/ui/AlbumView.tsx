@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { AlbumRepo } from '../storage/types';
 import type { Clock } from '../storage/types';
-import { ALBUM_ORDER, teamFullName, stickerNumbers } from '../domain/album-config';
+import { ALBUM_GROUPS, teamFullName, teamFlag, stickerNumbers } from '../domain/album-config';
 import { toAlbumOwnedExport, toAlbumMissingExport } from '../export/album-export';
 import { TeamCard } from './TeamCard';
 
@@ -51,15 +51,32 @@ export function AlbumView({ userName, albumRepo, downloadText, now }: AlbumViewP
   return (
     <section aria-label="My Album">
       <div className="album-list">
-        {ALBUM_ORDER.map((prefix) => (
+        <div className="album-group">
+          <h3 className="album-group-header">🏆 FIFA World Cup</h3>
           <TeamCard
-            key={prefix}
-            prefix={prefix}
-            fullName={teamFullName(prefix)}
-            numbers={stickerNumbers(prefix)}
+            prefix="FWC"
+            fullName="FIFA World Cup"
+            flag="🏆"
+            numbers={stickerNumbers('FWC')}
             ownedCodes={ownedCodes}
             onToggle={handleToggle}
           />
+        </div>
+        {ALBUM_GROUPS.map(({ letter, prefixes }) => (
+          <div key={letter} className="album-group">
+            <h3 className="album-group-header">Group {letter}</h3>
+            {prefixes.map((prefix) => (
+              <TeamCard
+                key={prefix}
+                prefix={prefix}
+                fullName={teamFullName(prefix)}
+                flag={teamFlag(prefix)}
+                numbers={stickerNumbers(prefix)}
+                ownedCodes={ownedCodes}
+                onToggle={handleToggle}
+              />
+            ))}
+          </div>
         ))}
       </div>
       <div className="album-footer">

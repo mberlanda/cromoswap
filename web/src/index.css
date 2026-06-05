@@ -489,6 +489,27 @@ section[aria-label="Resume"] li button {
   color: white;
 }
 
+/* ── Album group headers ─────────────────────────── */
+.album-group {
+  margin-bottom: var(--space-4);
+}
+
+.album-group-header {
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: var(--space-4) 0 var(--space-1);
+  padding: 0 var(--space-3);
+}
+
+.team-flag {
+  font-size: 16px;
+  line-height: 1;
+  margin-right: var(--space-1);
+}
+
 /* ── Album export footer ─────────────────────────── */
 .album-footer {
   position: sticky;

@@ -1,5 +1,5 @@
 import { useId, useState, type FormEvent } from 'react';
-import { ALBUM_ORDER, stickerNumbers } from '../domain/album-config';
+import { ALBUM_ORDER, stickerNumbers, teamFlag } from '../domain/album-config';
 import { validateCode } from '../domain/validator';
 
 interface ManualEntryProps {
@@ -49,7 +49,7 @@ export function ManualEntry({ onAdd, recentPrefixes = [] }: ManualEntryProps) {
               className="chip"
               onClick={() => handlePrefixChange(p)}
             >
-              {p}
+              {teamFlag(p) && <span aria-hidden="true">{teamFlag(p)} </span>}{p}
             </button>
           ))}
         </div>
