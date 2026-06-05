@@ -15,7 +15,7 @@ RSpec.describe "CORS", type: :request do
     process :options, "/api/v1/sessions",
       headers: {
         "Origin" => allowed_origin,
-        "Access-Control-Request-Method" => "POST",
+        "Access-Control-Request-Method" => "POST"
       }
     expect(response.headers["Access-Control-Allow-Origin"]).to eq(allowed_origin)
     expect(response.headers["Access-Control-Allow-Methods"]).to include("POST")

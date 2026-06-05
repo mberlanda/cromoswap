@@ -15,7 +15,7 @@ module Api
           {
             userName: row.user_name,
             owned: owned,
-            missing: TOTAL_STICKERS - owned,
+            missing: TOTAL_STICKERS - owned
           }
         end
 

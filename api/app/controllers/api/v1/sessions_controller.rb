@@ -53,7 +53,7 @@ module Api
           userName: session.user_name,
           createdAt: session.created_at,
           updatedAt: session.updated_at,
-          scanCount: session.scans.count,
+          scanCount: session.scans.count
         }
       end
     end

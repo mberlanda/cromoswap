@@ -14,7 +14,7 @@ RSpec.describe "API V1 Scans", type: :request do
           normalizedCode: "BRA07",
           source: "manual",
           confidence: 1.0,
-          capturedAt: Time.current.iso8601,
+          capturedAt: Time.current.iso8601
         }, as: :json
       }.to change(Scan, :count).by(1)
       expect(response).to have_http_status(:created)
@@ -26,7 +26,7 @@ RSpec.describe "API V1 Scans", type: :request do
         sessionId: "00000000-0000-4000-8000-000000000000",
         normalizedCode: "BRA07",
         source: "ocr",
-        capturedAt: Time.current.iso8601,
+        capturedAt: Time.current.iso8601
       }, as: :json
       expect(response).to have_http_status(:not_found)
     end
@@ -36,7 +36,7 @@ RSpec.describe "API V1 Scans", type: :request do
         sessionId: session.id,
         normalizedCode: "bad",
         source: "ocr",
-        capturedAt: Time.current.iso8601,
+        capturedAt: Time.current.iso8601
       }, as: :json
       expect(response).to have_http_status(:unprocessable_content)
     end

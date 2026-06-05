@@ -13,7 +13,7 @@ module Api
           userName: session.user_name,
           createdAt: session.created_at,
           updatedAt: session.updated_at,
-          scans: session.scans.map { |scan| scan_json(scan) },
+          scans: session.scans.map { |scan| scan_json(scan) }
         }
       end
 
@@ -26,7 +26,7 @@ module Api
           confidence: scan.confidence,
           capturedAt: scan.captured_at,
           createdAt: scan.created_at,
-          updatedAt: scan.updated_at,
+          updatedAt: scan.updated_at
         }
       end
 
@@ -35,7 +35,7 @@ module Api
           id: sticker.id,
           userName: sticker.user_name,
           normalizedCode: sticker.normalized_code,
-          ownedAt: sticker.owned_at,
+          ownedAt: sticker.owned_at
         }
       end
     end

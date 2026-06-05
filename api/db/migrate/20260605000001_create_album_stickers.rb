@@ -8,6 +8,6 @@ class CreateAlbumStickers < ActiveRecord::Migration[8.1]
     end
 
     add_index :album_stickers, :user_name
-    add_index :album_stickers, [:user_name, :normalized_code], unique: true
+    add_index :album_stickers, [ :user_name, :normalized_code ], unique: true
   end
 end

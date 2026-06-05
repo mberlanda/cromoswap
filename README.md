@@ -28,6 +28,20 @@ docker-compose.yml  db + app (web bundle + API on one origin)
 - Ruby 3.3.6 (`rbenv` — see `api/.ruby-version`)
 - Docker (for Postgres, and for full-stack serving)
 
+## Validate everything
+
+Run the full validation the same way CI does, before each change set:
+
+```bash
+docker compose up -d db        # Postgres for the API tests
+scripts/validate.sh            # web (lint/test/build) + api (rubocop/audit/brakeman/rspec)
+scripts/validate.sh web        # only the frontend checks
+scripts/validate.sh api        # only the backend checks
+```
+
+The script exits non-zero if any step fails and prints which. `DATABASE_*` env
+vars override the Postgres connection (defaults match `docker-compose.yml`).
+
 ## Frontend (`web/`)
 
 ```bash
