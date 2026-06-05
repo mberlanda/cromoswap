@@ -1,6 +1,44 @@
 require "rails_helper"
 
 RSpec.describe "API V1 Album Stickers", type: :request do
+  describe "GET /api/v1/album_stickers" do
+    it "returns owned stickers for the given user" do
+      AlbumSticker.create!(user_name: "Mauro", normalized_code: "ARG01", owned_at: Time.current)
+      AlbumSticker.create!(user_name: "Mauro", normalized_code: "BRA07", owned_at: Time.current)
+      AlbumSticker.create!(user_name: "Alice", normalized_code: "ARG01", owned_at: Time.current)
+
+      get "/api/v1/album_stickers?user_name=Mauro"
+      expect(response).to have_http_status(:ok)
+      body = response.parsed_body
+      expect(body.map { |s| s["normalizedCode"] }).to contain_exactly("ARG01", "BRA07")
+    end
+
+    it "returns an empty array for a user with no stickers" do
+      get "/api/v1/album_stickers?user_name=Nobody"
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body).to eq([])
+    end
+  end
+
+  describe "POST /api/v1/album_stickers/toggle" do
+    it "adds the sticker when absent and returns action:added" do
+      post "/api/v1/album_stickers/toggle",
+           params: { userName: "Mauro", normalizedCode: "ARG01" }, as: :json
+      expect(response).to have_http_status(:created)
+      expect(response.parsed_body["action"]).to eq("added")
+      expect(AlbumSticker.where(user_name: "Mauro", normalized_code: "ARG01").count).to eq(1)
+    end
+
+    it "removes the sticker when present and returns action:removed" do
+      AlbumSticker.create!(user_name: "Mauro", normalized_code: "ARG01", owned_at: Time.current)
+      post "/api/v1/album_stickers/toggle",
+           params: { userName: "Mauro", normalizedCode: "ARG01" }, as: :json
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["action"]).to eq("removed")
+      expect(AlbumSticker.where(user_name: "Mauro", normalized_code: "ARG01").count).to eq(0)
+    end
+  end
+
   describe "POST /api/v1/album_stickers/sync" do
     it "stores the full set of owned codes for a user" do
       post "/api/v1/album_stickers/sync",

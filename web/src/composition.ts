@@ -2,27 +2,41 @@ import maskConfig from './assets/mask-config.json';
 import type { AppDeps, Detection } from './ui/App';
 import { openStickerDb } from './storage/db';
 import { IdbSessionRepo, IdbScanRepo, IdbImageStore, IdbAlbumRepo } from './storage/idb-repos';
+import { ApiSessionRepo, ApiScanRepo, ApiAlbumRepo } from './storage/api-repos';
+import { fetchLeaderboard as fetchLeaderboardClient } from './storage/sync-client';
 import { TesseractAdapter } from './ocr/tesseract-adapter';
 import { runPipelineMultiOrientation } from './ocr/pipeline';
 import { BrightnessLocalizer } from './ocr/localizer';
-import { requestCamera } from './ui/camera-permission';
-import { pushSession, syncAlbumStickers, fetchLeaderboard as fetchLeaderboardClient } from './storage/sync-client';
+import { requestCamera, type CameraResult } from './ui/camera-permission';
 import type { RgbaImage } from './ocr/image';
 
-// Empty base URL means same-origin (relative `/api/...`), which is how the
-// production build is served by Rails. Sync is enabled when explicitly
-// configured, or implicitly for the bundled production build.
+// Empty string means same-origin (relative `/api/...`), which is how the
+// production build is served by Rails.
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
-const SYNC_ENABLED = API_BASE_URL !== '' || import.meta.env.PROD;
+const LEADERBOARD_ENABLED = API_BASE_URL !== '' || import.meta.env.PROD;
 
-/**
- * Composition root: wires real IndexedDB repos, the camera, and the Tesseract
- * pipeline into the dependency object the App consumes. Browser-only glue,
- * excluded from coverage; the units it composes are tested independently.
- */
+export type StorageMode = 'local' | 'cloud';
+const STORAGE_MODE_KEY = 'wc-storage-mode';
 
-const uuid = (): string => crypto.randomUUID();
+export function getStorageMode(): StorageMode {
+  try {
+    const v = localStorage.getItem(STORAGE_MODE_KEY);
+    return v === 'local' || v === 'cloud' ? v : 'cloud';
+  } catch {
+    return 'cloud';
+  }
+}
+
+export function setStorageMode(mode: StorageMode): void {
+  try {
+    localStorage.setItem(STORAGE_MODE_KEY, mode);
+  } catch {
+    // ignore
+  }
+}
+
 const nowIso = (): string => new Date().toISOString();
+const uuid = (): string => crypto.randomUUID();
 
 function triggerDownload(filename: string, content: string, mime: string): void {
   const blob = new Blob([content], { type: mime });
@@ -49,25 +63,46 @@ function captureFrame(video: HTMLVideoElement): { image: RgbaImage; dataUrl: str
   };
 }
 
-export async function createAppDeps(): Promise<AppDeps> {
+export function createCameraBinding(
+  request: () => Promise<CameraResult>,
+): Pick<AppDeps, 'attachVideo' | 'startCamera'> {
+  let video: HTMLVideoElement | null = null;
+  let cameraStream: MediaStream | null = null;
+
+  const attachStreamToVideo = (element: HTMLVideoElement, stream: MediaStream): void => {
+    if (element.srcObject !== stream) element.srcObject = stream;
+    void element.play().catch(() => undefined);
+  };
+
+  const attachVideo = (element: HTMLVideoElement | null): void => {
+    video = element;
+    if (video && cameraStream) attachStreamToVideo(video, cameraStream);
+  };
+
+  const startCamera = async () => {
+    const camera = await request();
+    if (camera.state === 'granted') {
+      cameraStream = camera.stream;
+      if (video) attachStreamToVideo(video, cameraStream);
+    }
+    return camera;
+  };
+
+  return { attachVideo, startCamera };
+}
+
+export async function createAppDeps(mode: StorageMode = getStorageMode()): Promise<AppDeps> {
   const db = await openStickerDb();
   const ocr = new TesseractAdapter();
   const localizer = new BrightnessLocalizer();
 
-  // The App binds its <video> via attachVideo; the user then triggers startCamera.
   let video: HTMLVideoElement | null = null;
-
+  const camera = createCameraBinding(() =>
+    requestCamera((c) => navigator.mediaDevices.getUserMedia(c)),
+  );
   const attachVideo = (element: HTMLVideoElement | null): void => {
     video = element;
-  };
-
-  const startCamera = async () => {
-    const camera = await requestCamera((c) => navigator.mediaDevices.getUserMedia(c));
-    if (camera.state === 'granted' && video) {
-      video.srcObject = camera.stream;
-      void video.play();
-    }
-    return camera;
+    camera.attachVideo?.(element);
   };
 
   const scanOnce = async (orientation: 'portrait' | 'landscape'): Promise<Detection | null> => {
@@ -85,27 +120,35 @@ export async function createAppDeps(): Promise<AppDeps> {
     return { candidate: ranked[0], imageDataUrl: captured.dataUrl };
   };
 
+  const sessionRepo =
+    mode === 'cloud'
+      ? new ApiSessionRepo(API_BASE_URL)
+      : new IdbSessionRepo(db, uuid, nowIso);
+
+  const scanRepo =
+    mode === 'cloud'
+      ? new ApiScanRepo(API_BASE_URL)
+      : new IdbScanRepo(db, uuid, nowIso);
+
+  const albumRepo =
+    mode === 'cloud'
+      ? new ApiAlbumRepo(API_BASE_URL)
+      : new IdbAlbumRepo(db, uuid, nowIso);
+
   return {
-    sessionRepo: new IdbSessionRepo(db, uuid, nowIso),
-    scanRepo: new IdbScanRepo(db, uuid, nowIso),
+    sessionRepo,
+    scanRepo,
     imageStore: new IdbImageStore(db),
-    albumRepo: new IdbAlbumRepo(db, uuid, nowIso),
+    albumRepo,
     scanOnce,
     attachVideo,
-    startCamera,
+    startCamera: camera.startCamera,
     now: nowIso,
     downloadText: (name, content) => triggerDownload(name, content, 'text/plain'),
     downloadJson: (name, content) => triggerDownload(name, content, 'application/json'),
-    syncSession: SYNC_ENABLED
-      ? (session, scans) => pushSession(session, scans, API_BASE_URL, (url, init) => fetch(url, init))
-      : undefined,
-    syncAlbum: SYNC_ENABLED
-      ? (userName, codes) => {
-          void syncAlbumStickers(userName, codes, API_BASE_URL, (url, init) => fetch(url, init));
-        }
-      : undefined,
-    fetchLeaderboard: SYNC_ENABLED
-      ? () => fetchLeaderboardClient(API_BASE_URL, (url, init) => fetch(url, init))
-      : undefined,
+    fetchLeaderboard:
+      mode === 'cloud' && LEADERBOARD_ENABLED
+        ? () => fetchLeaderboardClient(API_BASE_URL, (url, init) => fetch(url, init))
+        : undefined,
   };
 }

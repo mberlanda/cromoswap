@@ -7,10 +7,14 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      resources :sessions, only: %i[create show]
-      resources :scans, only: %i[update destroy]
-      post 'album_stickers/sync', to: 'album_stickers#sync'
-      get 'leaderboard', to: 'leaderboard#index'
+      resources :sessions, only: %i[index create show] do
+        resources :scans, only: %i[index], shallow: false
+      end
+      resources :scans, only: %i[create update destroy]
+      get  'album_stickers',        to: 'album_stickers#index'
+      post 'album_stickers/toggle', to: 'album_stickers#toggle'
+      post 'album_stickers/sync',   to: 'album_stickers#sync'
+      get  'leaderboard',           to: 'leaderboard#index'
     end
   end
 

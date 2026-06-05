@@ -25,6 +25,17 @@ module Api
           source: scan.source,
           confidence: scan.confidence,
           capturedAt: scan.captured_at,
+          createdAt: scan.created_at,
+          updatedAt: scan.updated_at,
+        }
+      end
+
+      def sticker_json(sticker)
+        {
+          id: sticker.id,
+          userName: sticker.user_name,
+          normalizedCode: sticker.normalized_code,
+          ownedAt: sticker.owned_at,
         }
       end
     end
