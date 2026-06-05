@@ -1,0 +1,27 @@
+<%= form_with model: [:admin, scan] do |f| %>
+  <% if scan.errors.any? %>
+    <div class="flash flash-alert"><%= pluralize(scan.errors.count, "error") %> prevented saving.</div>
+  <% end %>
+  <div class="field">
+    <%= f.label :session_id, "Collector session" %>
+    <%= f.collection_select :session_id, Session.order(:user_name), :id, :user_name, include_blank: false %>
+  </div>
+  <div class="field">
+    <%= f.label :normalized_code %>
+    <%= f.text_field :normalized_code, placeholder: "ARG01" %>
+  </div>
+  <div class="field">
+    <%= f.label :source %>
+    <%= f.select :source, Scan::SOURCES %>
+  </div>
+  <div class="field">
+    <%= f.label :confidence %>
+    <%= f.number_field :confidence, step: "any" %>
+  </div>
+  <div class="field">
+    <%= f.label :captured_at %>
+    <%= f.datetime_field :captured_at %>
+  </div>
+  <%= f.submit "Save", class: "btn btn-primary" %>
+  <%= link_to "Cancel", admin_scans_path, class: "btn" %>
+<% end %>

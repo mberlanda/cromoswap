@@ -1,0 +1,12 @@
+<h1>Scan — <%= @scan.normalized_code %></h1>
+<p>
+  <%= link_to "Edit", edit_admin_scan_path(@scan), class: "btn" %>
+  <%= link_to "Back", admin_scans_path, class: "btn" %>
+</p>
+<table>
+  <tr><th>Code</th><td><%= @scan.normalized_code %></td></tr>
+  <tr><th>Collector</th><td><%= @scan.session&.user_name %></td></tr>
+  <tr><th>Source</th><td><%= @scan.source %></td></tr>
+  <tr><th>Confidence</th><td><%= @scan.confidence %></td></tr>
+  <tr><th>Captured</th><td><%= @scan.captured_at %></td></tr>
+</table>

@@ -1,0 +1,21 @@
+<h1>Collectors</h1>
+<p class="label">Delete removes a collector's album, sessions and scans entirely.</p>
+<table>
+  <thead><tr><th>Collector</th><th>Owned</th><th>Sessions</th><th>Scans</th><th></th></tr></thead>
+  <tbody>
+    <% @collectors.each do |c| %>
+      <tr>
+        <td><%= c[:user_name] %></td>
+        <td><%= c[:owned] %></td>
+        <td><%= c[:sessions] %></td>
+        <td><%= c[:scans] %></td>
+        <td class="actions">
+          <%= button_to "Delete collector", admin_collector_path(c[:user_name]), method: :delete,
+                class: "btn btn-danger",
+                form: { data: { turbo_confirm: "Delete EVERYTHING for #{c[:user_name]}?" } } %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<% if @collectors.empty? %><p>No collectors yet.</p><% end %>

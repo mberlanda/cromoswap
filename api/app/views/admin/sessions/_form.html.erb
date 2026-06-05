@@ -1,0 +1,13 @@
+<%= form_with model: [:admin, session] do |f| %>
+  <% if session.errors.any? %>
+    <div class="flash flash-alert">
+      <%= pluralize(session.errors.count, "error") %> prevented saving.
+    </div>
+  <% end %>
+  <div class="field">
+    <%= f.label :user_name %>
+    <%= f.text_field :user_name %>
+  </div>
+  <%= f.submit "Save", class: "btn btn-primary" %>
+  <%= link_to "Cancel", admin_sessions_path, class: "btn" %>
+<% end %>

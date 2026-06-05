@@ -1,0 +1,22 @@
+<h1>Session — <%= @session.user_name %></h1>
+<p>
+  <%= link_to "Edit", edit_admin_session_path(@session), class: "btn" %>
+  <%= link_to "Back", admin_sessions_path, class: "btn" %>
+</p>
+<p><strong>ID:</strong> <%= @session.id %><br>
+   <strong>Created:</strong> <%= @session.created_at %></p>
+
+<h2>Scans (<%= @session.scans.size %>)</h2>
+<table>
+  <thead><tr><th>Code</th><th>Source</th><th>Confidence</th><th>Captured</th></tr></thead>
+  <tbody>
+    <% @session.scans.order(:captured_at).each do |scan| %>
+      <tr>
+        <td><%= scan.normalized_code %></td>
+        <td><%= scan.source %></td>
+        <td><%= scan.confidence %></td>
+        <td><%= scan.captured_at %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

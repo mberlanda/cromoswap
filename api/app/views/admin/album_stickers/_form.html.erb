@@ -1,0 +1,19 @@
+<%= form_with model: [:admin, album_sticker] do |f| %>
+  <% if album_sticker.errors.any? %>
+    <div class="flash flash-alert"><%= pluralize(album_sticker.errors.count, "error") %> prevented saving.</div>
+  <% end %>
+  <div class="field">
+    <%= f.label :user_name, "Collector" %>
+    <%= f.text_field :user_name %>
+  </div>
+  <div class="field">
+    <%= f.label :normalized_code %>
+    <%= f.text_field :normalized_code, placeholder: "ARG01" %>
+  </div>
+  <div class="field">
+    <%= f.label :owned_at %>
+    <%= f.datetime_field :owned_at %>
+  </div>
+  <%= f.submit "Save", class: "btn btn-primary" %>
+  <%= link_to "Cancel", admin_album_stickers_path, class: "btn" %>
+<% end %>

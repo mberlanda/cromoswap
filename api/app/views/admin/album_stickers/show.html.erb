@@ -1,0 +1,10 @@
+<h1>Album sticker — <%= @album_sticker.normalized_code %></h1>
+<p>
+  <%= link_to "Edit", edit_admin_album_sticker_path(@album_sticker), class: "btn" %>
+  <%= link_to "Back", admin_album_stickers_path, class: "btn" %>
+</p>
+<table>
+  <tr><th>Collector</th><td><%= @album_sticker.user_name %></td></tr>
+  <tr><th>Code</th><td><%= @album_sticker.normalized_code %></td></tr>
+  <tr><th>Owned at</th><td><%= @album_sticker.owned_at %></td></tr>
+</table>

@@ -11,17 +11,37 @@ Rails.application.routes.draw do
         resources :scans, only: %i[index], shallow: false
       end
       resources :scans, only: %i[create update destroy]
-      get  'album_stickers',        to: 'album_stickers#index'
-      post 'album_stickers/toggle', to: 'album_stickers#toggle'
-      post 'album_stickers/sync',   to: 'album_stickers#sync'
-      get  'leaderboard',           to: 'leaderboard#index'
+      get  "album_stickers",        to: "album_stickers#index"
+      post "album_stickers/toggle", to: "album_stickers#toggle"
+      post "album_stickers/sync",   to: "album_stickers#sync"
+      get  "leaderboard",           to: "leaderboard#index"
     end
+  end
+
+  # Server-rendered backoffice (HTTP Basic auth). Mounted before the SPA catch-all.
+  # config.api_only strips :new/:edit from resourceful routes, so add the form
+  # pages back explicitly (declared before the namespace so /new wins over /:id).
+  %w[sessions scans album_stickers].each do |res|
+    singular = res.singularize
+    get "/admin/#{res}/new",      to: "admin/#{res}#new",  as: :"new_admin_#{singular}"
+    get "/admin/#{res}/:id/edit", to: "admin/#{res}#edit", as: :"edit_admin_#{singular}"
+  end
+
+  namespace :admin do
+    root "dashboard#index"
+    resources :sessions
+    resources :scans
+    resources :album_stickers
+    resources :collectors, only: %i[index destroy], param: :user_name
+    # Literal .json/.sql segments (format: false) so each maps to its own action.
+    get "export.json", to: "exports#json", as: :export,     format: false
+    get "export.sql",  to: "exports#sql",  as: :export_sql, format: false
   end
 
   # Serve the bundled SPA for the root and any non-API GET path.
   root "spa#index"
   get "*path", to: "spa#index", constraints: lambda { |req|
-    !req.path.start_with?("/api/", "/up") && req.format.html?
+    !req.path.start_with?("/api/", "/admin", "/up") && req.format.html?
   }
 
   # Defines the root path route ("/")
