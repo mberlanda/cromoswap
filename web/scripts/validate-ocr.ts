@@ -76,10 +76,22 @@ async function detectStickerBbox(path: string): Promise<Rect> {
       if (x > maxx) maxx = x;
       if (y < miny) miny = y;
       if (y > maxy) maxy = y;
-      if (x > 0 && bright[p - 1] && !seen[p - 1]) (seen[p - 1] = 1), stack.push(p - 1);
-      if (x < w - 1 && bright[p + 1] && !seen[p + 1]) (seen[p + 1] = 1), stack.push(p + 1);
-      if (y > 0 && bright[p - w] && !seen[p - w]) (seen[p - w] = 1), stack.push(p - w);
-      if (y < h - 1 && bright[p + w] && !seen[p + w]) (seen[p + w] = 1), stack.push(p + w);
+      if (x > 0 && bright[p - 1] && !seen[p - 1]) {
+        seen[p - 1] = 1;
+        stack.push(p - 1);
+      }
+      if (x < w - 1 && bright[p + 1] && !seen[p + 1]) {
+        seen[p + 1] = 1;
+        stack.push(p + 1);
+      }
+      if (y > 0 && bright[p - w] && !seen[p - w]) {
+        seen[p - w] = 1;
+        stack.push(p - w);
+      }
+      if (y < h - 1 && bright[p + w] && !seen[p + w]) {
+        seen[p + w] = 1;
+        stack.push(p + w);
+      }
     }
     if (area > best.area) best = { area, minx, miny, maxx, maxy };
   }
