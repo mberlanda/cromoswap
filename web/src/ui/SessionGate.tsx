@@ -26,6 +26,7 @@ interface SessionGateProps {
   onChangeMode?: (mode: StorageMode) => void;
   onImportJson?: (data: JsonImport) => void;
   onImportText?: (data: TextImport) => void;
+  onOpenBoard?: () => void;
 }
 
 const KIND_LABELS: { kind: ImportKind; label: string }[] = [
@@ -45,6 +46,7 @@ export function SessionGate({
   onChangeMode,
   onImportJson,
   onImportText,
+  onOpenBoard,
 }: SessionGateProps) {
   const [name, setName] = useState('');
   const inputId = useId();
@@ -94,6 +96,11 @@ export function SessionGate({
           <StorageModeToggle mode={storageMode} onChange={onChangeMode} />
         )}
       </div>
+      {onOpenBoard && (
+        <button type="button" className="quiet gate-board-link" onClick={onOpenBoard}>
+          🏆 View board
+        </button>
+      )}
       {sessions.length > 0 && (
         <section aria-label="Resume">
           <h2>Resume a session</h2>

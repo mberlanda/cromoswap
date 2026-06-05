@@ -14,7 +14,7 @@ import type { RepsViewMode } from './RepsView';
 import type { RepsMode } from './RepsModeToggle';
 import { REPS_CAP } from './RepsGrid';
 import type { JsonImport, TextImport } from '../import/parse-import';
-import { LeaderboardView } from './LeaderboardView';
+import { BoardPanel } from './BoardPanel';
 import { CameraPermissionPanel } from './CameraPermissionPanel';
 import { StorageModeToggle } from './StorageModeToggle';
 import { SIZE_DEFAULT } from './SizeSlider';
@@ -86,6 +86,9 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [boardSelectionUserName, setBoardSelectionUserName] = useState<string | null>(null);
+  // Pre-session home can show the gate or the board (browse the leaderboard
+  // without starting a session).
+  const [homeView, setHomeView] = useState<'gate' | 'board'>('gate');
   // When startCamera is provided, camera starts only on user action; tests without it skip the panel.
   const [cameraState, setCameraState] = useState<CameraState>(
     deps.startCamera ? 'idle' : 'granted',
@@ -442,7 +445,41 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
     void refreshSessions();
   }
 
+  function handleOpenBoard() {
+    setHomeView('board');
+    setBoardSelectionUserName(null);
+    void handleRefreshLeaderboard();
+  }
+
   if (!active) {
+    if (homeView === 'board') {
+      return (
+        <main aria-label="Board">
+          <div className="app-header">
+            <button
+              type="button"
+              className="app-header-home"
+              aria-label="Home"
+              onClick={() => setHomeView('gate')}
+            >
+              ← Home
+            </button>
+            <h1 className="app-header-name">Board</h1>
+          </div>
+          <BoardPanel
+            entries={leaderboard}
+            loading={leaderboardLoading}
+            onRefresh={handleRefreshLeaderboard}
+            selectionUserName={boardSelectionUserName}
+            onOpenSelection={setBoardSelectionUserName}
+            onCloseSelection={() => setBoardSelectionUserName(null)}
+            albumRepo={deps.albumRepo}
+            downloadText={deps.downloadText}
+            now={deps.now}
+          />
+        </main>
+      );
+    }
     return (
       <SessionGate
         sessions={sessions}
@@ -454,6 +491,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
         onChangeMode={onChangeMode}
         onImportJson={handleImportJson}
         onImportText={handleImportText}
+        onOpenBoard={deps.fetchLeaderboard ? handleOpenBoard : undefined}
       />
     );
   }
@@ -509,34 +547,17 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
         />
       )}
       {tab === 'board' && (
-        boardSelectionUserName ? (
-          <section aria-label="Read-only selection">
-            <div className="leaderboard-header">
-              <h2 className="leaderboard-title">{boardSelectionUserName}'s selection</h2>
-              <button
-                type="button"
-                className="secondary"
-                onClick={() => setBoardSelectionUserName(null)}
-              >
-                Back to board
-              </button>
-            </div>
-            <AlbumView
-              userName={boardSelectionUserName}
-              albumRepo={deps.albumRepo}
-              downloadText={deps.downloadText}
-              now={deps.now}
-              readOnly
-            />
-          </section>
-        ) : (
-          <LeaderboardView
-            entries={leaderboard}
-            loading={leaderboardLoading}
-            onRefresh={handleRefreshLeaderboard}
-            onOpenSelection={setBoardSelectionUserName}
-          />
-        )
+        <BoardPanel
+          entries={leaderboard}
+          loading={leaderboardLoading}
+          onRefresh={handleRefreshLeaderboard}
+          selectionUserName={boardSelectionUserName}
+          onOpenSelection={setBoardSelectionUserName}
+          onCloseSelection={() => setBoardSelectionUserName(null)}
+          albumRepo={deps.albumRepo}
+          downloadText={deps.downloadText}
+          now={deps.now}
+        />
       )}
       {tab === 'reps' && cameraState !== 'granted' && (
         <CameraPermissionPanel

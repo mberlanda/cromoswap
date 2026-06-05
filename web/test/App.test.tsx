@@ -144,6 +144,21 @@ describe('App', () => {
     expect(await screen.findByText(/3 owned/i)).toBeInTheDocument();
   });
 
+  it('opens the board from the home gate without starting a session', async () => {
+    const fetchLeaderboard = vi.fn(async () => [{ userName: 'Ana', owned: 3, missing: 977 }]);
+    render(<App deps={makeDeps({ fetchLeaderboard })} />);
+
+    await userEvent.click(screen.getByRole('button', { name: /view board/i }));
+    expect(await screen.findByText('Ana')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /open ana selection/i }));
+    expect(await screen.findByText(/Ana's selection/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /admin backoffice/i })).toHaveAttribute('href', '/admin');
+
+    await userEvent.click(await findButtonByAriaLabel('Home'));
+    expect(await screen.findByLabelText(/name/i)).toBeInTheDocument();
+  });
+
   it('captures, confirms, and stores a scan that appears in the collection', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();

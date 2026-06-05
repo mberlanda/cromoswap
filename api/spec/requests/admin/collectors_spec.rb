@@ -32,4 +32,13 @@ RSpec.describe "Admin::Collectors", type: :request do
     expect(Session.where(user_name: "Luca").count).to eq(1)
     expect(AlbumSticker.where(user_name: "Luca").count).to eq(1)
   end
+
+  # The admin delete button submits POST + _method=delete; Rack::MethodOverride
+  # (re-added in application.rb since api_only strips it) must translate it.
+  it "honors a POST with _method=delete from the form button" do
+    expect {
+      post "/admin/collectors/Mauro", params: { _method: "delete" }, headers: admin_auth
+    }.to change(Session, :count).by(-1)
+    expect(response).to have_http_status(:found)
+  end
 end
