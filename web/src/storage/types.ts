@@ -34,5 +34,7 @@ export interface ImageStore {
 
 export interface AlbumRepo {
   toggle(userName: string, normalizedCode: string): Promise<'added' | 'removed'>;
+  /** Mark every listed code owned (owned=true) or not owned (owned=false) in one batch. */
+  setMany(userName: string, normalizedCodes: string[], owned: boolean): Promise<void>;
   listByUser(userName: string): Promise<AlbumEntry[]>;
 }

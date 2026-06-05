@@ -8,9 +8,19 @@ import { CollectionList } from './CollectionList';
 import { ScanStatus } from './ScanStatus';
 import { OrientationToggle } from './OrientationToggle';
 import { SizeSlider } from './SizeSlider';
+import { RepsGrid } from './RepsGrid';
+import { RepsModeToggle } from './RepsModeToggle';
+import type { RepsMode } from './RepsModeToggle';
 import { countByCode } from '../domain/counts';
 
+export type RepsViewMode = 'scan' | 'grid';
+
 export interface RepsViewProps {
+  view: RepsViewMode;
+  onSetView: (view: RepsViewMode) => void;
+  mode: RepsMode;
+  onSetMode: (mode: RepsMode) => void;
+  onGridTap: (code: string) => void;
   scans: Scan[];
   thumbnails: Record<string, string>;
   detection: Detection | null;
@@ -40,6 +50,7 @@ export interface RepsViewProps {
 }
 
 export function RepsView({
+  view, onSetView, mode, onSetMode, onGridTap,
   scans, thumbnails, detection, noDetection, scanning, cameraPaused, videoMode,
   orientation, size, targeted, videoRef, onCapture, onResumeCamera, onPauseCamera,
   onToggleVideoMode, onConfirm, onCorrect, onSkip, onRescan,
@@ -58,6 +69,34 @@ export function RepsView({
 
   return (
     <section aria-label="My Reps">
+      <div className="reps-view-switch" role="group" aria-label="Reps view">
+        <button
+          type="button"
+          className={`reps-view-btn${view === 'scan' ? ' reps-view-active' : ''}`}
+          aria-pressed={view === 'scan'}
+          onClick={() => onSetView('scan')}
+        >
+          📷 Scan
+        </button>
+        <button
+          type="button"
+          className={`reps-view-btn${view === 'grid' ? ' reps-view-active' : ''}`}
+          aria-pressed={view === 'grid'}
+          onClick={() => onSetView('grid')}
+        >
+          ▦ Grid
+        </button>
+      </div>
+
+      {view === 'grid' && (
+        <section aria-label="Reps grid view">
+          <RepsModeToggle value={mode} onChange={onSetMode} />
+          <RepsGrid counts={counts} onTap={onGridTap} />
+        </section>
+      )}
+
+      {view === 'scan' && (
+      <>
       <section aria-label="Scan" className="scan-area">
         <div className="camera-wrap">
           <video ref={videoRef} playsInline muted className="camera-preview" />
@@ -126,6 +165,8 @@ export function RepsView({
         onEdit={onEdit}
         onDelete={onDelete}
       />
+      </>
+      )}
 
       <section aria-label="Export">
         <p className="export-summary" aria-label="Export summary">

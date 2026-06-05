@@ -69,6 +69,38 @@ describe('AlbumView', () => {
     expect(downloadText.mock.calls[0][1]).toContain('missing: 980');
   });
 
+  it('Select all marks every sticker in the team owned, then flips to Clear all', async () => {
+    const repo = new MemoryAlbumRepo(ids, clock);
+    render(<AlbumView userName="Mauro" albumRepo={repo} downloadText={vi.fn()} now={now} />);
+    await findChip('FWC00 not owned, tap to add'); // wait for mount
+
+    const selectAll = document.querySelector<HTMLButtonElement>('button[aria-label="Select all FWC"]');
+    expect(selectAll).toBeInTheDocument();
+    await userEvent.click(selectAll!);
+
+    expect(await findChip('FWC00 owned, tap to remove')).toBeInTheDocument();
+    expect(await findChip('FWC19 owned, tap to remove')).toBeInTheDocument();
+    expect((await repo.listByUser('Mauro'))).toHaveLength(20);
+
+    const clearAll = await waitFor(() => {
+      const btn = document.querySelector<HTMLButtonElement>('button[aria-label="Clear all FWC"]');
+      expect(btn).toBeInTheDocument();
+      return btn!;
+    });
+    await userEvent.click(clearAll);
+    expect(await findChip('FWC00 not owned, tap to add')).toBeInTheDocument();
+    expect(await repo.listByUser('Mauro')).toHaveLength(0);
+  });
+
+  it('hides the Select all control in read-only mode', async () => {
+    const repo = new MemoryAlbumRepo(ids, clock);
+    render(
+      <AlbumView userName="Alice" albumRepo={repo} downloadText={vi.fn()} now={now} readOnly />,
+    );
+    await findChip('FWC00 not owned');
+    expect(document.querySelector('button[aria-label="Select all FWC"]')).not.toBeInTheDocument();
+  });
+
   it('disables sticker changes when shown in read-only mode', async () => {
     const repo = new MemoryAlbumRepo(ids, clock);
     const toggle = vi.spyOn(repo, 'toggle');

@@ -1,7 +1,15 @@
-import { useId, useState, type FormEvent } from 'react';
+import { useId, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { Session } from '../domain/types';
 import { StorageModeToggle } from './StorageModeToggle';
 import type { StorageMode } from '../composition';
+import {
+  detectTextKind,
+  buildTextImport,
+  parseJsonImport,
+  type ImportKind,
+  type JsonImport,
+  type TextImport,
+} from '../import/parse-import';
 
 interface AlbumCount {
   owned: number;
@@ -16,7 +24,15 @@ interface SessionGateProps {
   onResume: (sessionId: string) => void;
   storageMode?: StorageMode;
   onChangeMode?: (mode: StorageMode) => void;
+  onImportJson?: (data: JsonImport) => void;
+  onImportText?: (data: TextImport) => void;
 }
+
+const KIND_LABELS: { kind: ImportKind; label: string }[] = [
+  { kind: 'owned', label: 'Owned' },
+  { kind: 'missing', label: 'Missing' },
+  { kind: 'duplicate', label: 'Duplicate' },
+];
 
 /** Entry screen: ask for a name to start a session, or resume an existing one. */
 export function SessionGate({
@@ -27,15 +43,47 @@ export function SessionGate({
   onResume,
   storageMode,
   onChangeMode,
+  onImportJson,
+  onImportText,
 }: SessionGateProps) {
   const [name, setName] = useState('');
   const inputId = useId();
+  const importId = useId();
   const trimmed = name.trim();
+  // Holds a header-less text file until the user tells us how to read it.
+  const [pendingText, setPendingText] = useState<string | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
     if (trimmed === '') return;
     onCreate(trimmed);
+  }
+
+  async function handleImportFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = ''; // let the same file be re-selected later
+    if (!file) return;
+    setImportError(null);
+    setPendingText(null);
+    const content = await file.text();
+    const isJson = file.name.endsWith('.json') || content.trimStart().startsWith('{');
+    try {
+      if (isJson) {
+        onImportJson?.(parseJsonImport(content));
+        return;
+      }
+      const kind = detectTextKind(content);
+      if (kind) onImportText?.(buildTextImport(content, kind));
+      else setPendingText(content);
+    } catch (err) {
+      setImportError(err instanceof Error ? err.message : 'Could not read that file');
+    }
+  }
+
+  function handlePickKind(kind: ImportKind) {
+    if (pendingText !== null) onImportText?.(buildTextImport(pendingText, kind));
+    setPendingText(null);
   }
 
   return (
@@ -79,6 +127,30 @@ export function SessionGate({
           Start scanning
         </button>
       </form>
+      {(onImportJson || onImportText) && (
+        <section aria-label="Import" className="import-section">
+          <label htmlFor={importId} className="import-label">
+            Import a backup (.txt or .json)
+          </label>
+          <input
+            id={importId}
+            type="file"
+            accept=".txt,.json,application/json,text/plain"
+            onChange={handleImportFile}
+          />
+          {pendingText !== null && (
+            <div className="import-kind-picker" role="group" aria-label="Import kind">
+              <p>Can’t tell what this list is — what does it represent?</p>
+              {KIND_LABELS.map(({ kind, label }) => (
+                <button key={kind} type="button" className="secondary" onClick={() => handlePickKind(kind)}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+          {importError && <p className="import-error" role="alert">{importError}</p>}
+        </section>
+      )}
       <p className="privacy-note">
         {storageMode === 'local'
           ? 'Data stored locally on this device only.'

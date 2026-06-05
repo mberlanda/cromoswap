@@ -203,4 +203,41 @@ describe('ApiAlbumRepo', () => {
     fetchMock.mockResolvedValue(jsonResponse({}, 500));
     await expect(repo().toggle('Mauro', 'ARG01')).rejects.toThrow(/Failed to toggle sticker: 500/);
   });
+
+  it('setMany owned=true only toggles codes not already owned', async () => {
+    // First call: listByUser returns BRA01 already owned.
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse([{ id: 'a1', userName: 'Mauro', normalizedCode: 'BRA01', ownedAt: 'o' }]),
+    );
+    // Subsequent toggle calls succeed (fresh Response each time — bodies read once).
+    fetchMock.mockImplementation(() => Promise.resolve(jsonResponse({ action: 'added' })));
+
+    await repo().setMany('Mauro', ['BRA01', 'BRA02', 'BRA03'], true);
+
+    // One list + two toggles (BRA02, BRA03); BRA01 skipped.
+    const toggleCalls = fetchMock.mock.calls.filter(([url]) =>
+      String(url).endsWith('/album_stickers/toggle'),
+    );
+    expect(toggleCalls).toHaveLength(2);
+    const toggled = toggleCalls.map(([, init]) => JSON.parse(init.body).normalizedCode).sort();
+    expect(toggled).toEqual(['BRA02', 'BRA03']);
+  });
+
+  it('setMany owned=false only toggles codes currently owned', async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse([
+        { id: 'a1', userName: 'Mauro', normalizedCode: 'BRA01', ownedAt: 'o' },
+        { id: 'a2', userName: 'Mauro', normalizedCode: 'BRA02', ownedAt: 'o' },
+      ]),
+    );
+    fetchMock.mockImplementation(() => Promise.resolve(jsonResponse({ action: 'removed' })));
+
+    await repo().setMany('Mauro', ['BRA01', 'BRA99'], false);
+
+    const toggleCalls = fetchMock.mock.calls.filter(([url]) =>
+      String(url).endsWith('/album_stickers/toggle'),
+    );
+    expect(toggleCalls).toHaveLength(1);
+    expect(JSON.parse(toggleCalls[0][1].body).normalizedCode).toBe('BRA01');
+  });
 });

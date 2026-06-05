@@ -14,6 +14,11 @@ function makeScan(id: string, code: string, source: 'ocr' | 'manual' = 'ocr'): S
 }
 
 const baseProps: RepsViewProps = {
+  view: 'scan',
+  onSetView: vi.fn(),
+  mode: 'add',
+  onSetMode: vi.fn(),
+  onGridTap: vi.fn(),
   scans: [],
   thumbnails: {},
   detection: null,

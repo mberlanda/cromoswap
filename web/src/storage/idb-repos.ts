@@ -121,6 +121,24 @@ export class IdbAlbumRepo implements AlbumRepo {
     return 'added';
   }
 
+  async setMany(userName: string, normalizedCodes: string[], owned: boolean): Promise<void> {
+    for (const normalizedCode of normalizedCodes) {
+      const existing = await this.db.getFromIndex('album', 'byUserAndCode', [userName, normalizedCode]);
+      if (owned) {
+        if (!existing) {
+          await this.db.put('album', {
+            id: this.ids(),
+            userName,
+            normalizedCode,
+            ownedAt: this.clock(),
+          });
+        }
+      } else if (existing) {
+        await this.db.delete('album', existing.id);
+      }
+    }
+  }
+
   async listByUser(userName: string): Promise<AlbumEntry[]> {
     return this.db.getAllFromIndex('album', 'byUser', userName);
   }

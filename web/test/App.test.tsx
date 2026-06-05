@@ -63,6 +63,87 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: /scan sticker/i })).toBeInTheDocument();
   });
 
+  it('returns to the home screen via the header Home button without reload', async () => {
+    render(<App deps={makeDeps()} />);
+    await startSession();
+    expect(screen.getByRole('button', { name: /scan sticker/i })).toBeInTheDocument();
+
+    await userEvent.click(await findButtonByAriaLabel('Home'));
+
+    // Back on the session gate: the name field is shown again.
+    expect(await screen.findByLabelText(/name/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /scan sticker/i })).not.toBeInTheDocument();
+  });
+
+  it('reps grid adds, removes, and clears copies via the tap mode', async () => {
+    render(<App deps={makeDeps()} />);
+    await startSession();
+
+    await userEvent.click(screen.getByRole('button', { name: /grid/i }));
+    const tap = async (label: string) => userEvent.click(await findButtonByAriaLabel(label));
+
+    // Default mode is +1 (add).
+    await tap('CRO05, no copies');
+    expect(await findButtonByAriaLabel('CRO05, 1 copy')).toBeInTheDocument();
+    await tap('CRO05, 1 copy');
+    expect(await findButtonByAriaLabel('CRO05, 2 copies')).toBeInTheDocument();
+
+    // Give away → decrement.
+    await userEvent.click(screen.getByRole('button', { name: /give away/i }));
+    await tap('CRO05, 2 copies');
+    expect(await findButtonByAriaLabel('CRO05, 1 copy')).toBeInTheDocument();
+
+    // Clear → zero out.
+    await userEvent.click(screen.getByRole('button', { name: /clear/i }));
+    await tap('CRO05, 1 copy');
+    expect(await findButtonByAriaLabel('CRO05, no copies')).toBeInTheDocument();
+  });
+
+  it('reps grid caps a sticker at 7 copies', async () => {
+    render(<App deps={makeDeps()} />);
+    await startSession();
+    await userEvent.click(screen.getByRole('button', { name: /grid/i }));
+
+    for (let i = 0; i < 8; i++) {
+      const current =
+        document.querySelector<HTMLButtonElement>('button[aria-label^="CRO05,"]')!;
+      await userEvent.click(current);
+    }
+    expect(await findButtonByAriaLabel('CRO05, 7 copies')).toBeInTheDocument();
+  });
+
+  it('imports a JSON session export and shows it on the home screen', async () => {
+    render(<App deps={makeDeps()} />);
+    const json = JSON.stringify({
+      session: { id: 'old', userName: 'Imported Guy', createdAt: 'c', updatedAt: 'u' },
+      scans: [
+        { id: 's1', sessionId: 'old', normalizedCode: 'ARG01', source: 'manual', confidence: 1, capturedAt: 'cap', createdAt: 'c', updatedAt: 'u' },
+        { id: 's2', sessionId: 'old', normalizedCode: 'ARG01', source: 'manual', confidence: 1, capturedAt: 'cap', createdAt: 'c', updatedAt: 'u' },
+      ],
+      images: {},
+      albumOwnedCodes: ['BRA05', 'BRA06'],
+    });
+    const file = new File([json], 'backup.json', { type: 'application/json' });
+
+    await userEvent.upload(screen.getByLabelText(/import a backup/i), file);
+
+    expect(await screen.findByText('Imported Guy')).toBeInTheDocument();
+    expect(await screen.findByText(/2 scans/i)).toBeInTheDocument();
+    expect(await screen.findByText(/2 owned/i)).toBeInTheDocument();
+  });
+
+  it('imports a header-less text file after the user picks the kind', async () => {
+    render(<App deps={makeDeps()} />);
+    const file = new File(['BRA: 01, 02, 03'], 'list.txt', { type: 'text/plain' });
+
+    await userEvent.upload(screen.getByLabelText(/import a backup/i), file);
+    // No header → user is asked which kind it is.
+    await userEvent.click(await screen.findByRole('button', { name: /^owned$/i }));
+
+    // A session is created (named Imported) and shows 3 owned.
+    expect(await screen.findByText(/3 owned/i)).toBeInTheDocument();
+  });
+
   it('captures, confirms, and stores a scan that appears in the collection', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();

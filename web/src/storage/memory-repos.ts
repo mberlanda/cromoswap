@@ -111,6 +111,24 @@ export class MemoryAlbumRepo implements AlbumRepo {
     return 'added';
   }
 
+  async setMany(userName: string, normalizedCodes: string[], owned: boolean): Promise<void> {
+    for (const normalizedCode of normalizedCodes) {
+      const key = `${userName}:${normalizedCode}`;
+      if (owned) {
+        if (!this.entries.has(key)) {
+          this.entries.set(key, {
+            id: this.ids(),
+            userName,
+            normalizedCode,
+            ownedAt: this.clock(),
+          });
+        }
+      } else {
+        this.entries.delete(key);
+      }
+    }
+  }
+
   async listByUser(userName: string): Promise<AlbumEntry[]> {
     return [...this.entries.values()].filter((e) => e.userName === userName);
   }

@@ -10,6 +10,10 @@ import { TabBar } from './TabBar';
 import type { Tab } from './TabBar';
 import { AlbumView } from './AlbumView';
 import { RepsView } from './RepsView';
+import type { RepsViewMode } from './RepsView';
+import type { RepsMode } from './RepsModeToggle';
+import { REPS_CAP } from './RepsGrid';
+import type { JsonImport, TextImport } from '../import/parse-import';
 import { LeaderboardView } from './LeaderboardView';
 import { CameraPermissionPanel } from './CameraPermissionPanel';
 import { StorageModeToggle } from './StorageModeToggle';
@@ -77,6 +81,8 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
   const [cameraPaused, setCameraPaused] = useState(false);
   const [videoMode, setVideoMode] = useState(false);
   const [tab, setTab] = useState<Tab>('reps');
+  const [repsView, setRepsView] = useState<RepsViewMode>('scan');
+  const [repsMode, setRepsMode] = useState<RepsMode>('add');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [boardSelectionUserName, setBoardSelectionUserName] = useState<string | null>(null);
@@ -96,9 +102,10 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
 
   const TOTAL_STICKERS = 980;
 
-  useEffect(() => {
-    void deps.sessionRepo.list().then(async (list) => {
-      setSessions(list);
+  const refreshSessions = useCallback(() => {
+    // setState lives inside the .then callback (not synchronously in the
+    // caller's effect) so it stays clear of the set-state-in-effect rule.
+    return deps.sessionRepo.list().then(async (list) => {
       const counts: Record<string, number> = {};
       const albumCounts: Record<string, { owned: number; missing: number }> = {};
       for (const s of list) {
@@ -108,10 +115,15 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
         const owned = entries.length;
         albumCounts[s.id] = { owned, missing: TOTAL_STICKERS - owned };
       }
+      setSessions(list);
       setSessionScanCounts(counts);
       setSessionAlbumCounts(albumCounts);
     });
   }, [deps]);
+
+  useEffect(() => {
+    void refreshSessions();
+  }, [refreshSessions]);
 
   // Bind the camera <video> whenever the granted scanner preview is mounted.
   useEffect(() => {
@@ -318,6 +330,27 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
     await storeScan(code, 'manual', 1);
   }
 
+  // Apply a grid tap under the active mode: add one copy (capped), remove one,
+  // or clear all copies of a code. Each maps onto scan rows.
+  async function handleGridTap(code: string) {
+    if (!active) return;
+    if (repsMode === 'add') {
+      const current = scans.filter((s) => s.normalizedCode === code).length;
+      if (current >= REPS_CAP) return;
+      await storeScan(code, 'manual', 1);
+      return;
+    }
+    const targets =
+      repsMode === 'clear'
+        ? scans.filter((s) => s.normalizedCode === code)
+        : scans.filter((s) => s.normalizedCode === code).slice(0, 1);
+    for (const t of targets) {
+      await deps.scanRepo.delete(t.id);
+      await deps.imageStore.delete(t.id);
+    }
+    if (targets.length > 0) await refreshScans(active);
+  }
+
   async function handleEdit(id: string, code: string) {
     await deps.scanRepo.update(id, { normalizedCode: code });
     if (active) await refreshScans(active);
@@ -336,8 +369,55 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
 
   async function handleExportJson() {
     if (!active) return;
-    const json = await toJsonExport(active, scans, deps.imageStore, deps.now);
+    const albumOwnedCodes = (await deps.albumRepo.listByUser(active.userName)).map(
+      (e) => e.normalizedCode,
+    );
+    const json = await toJsonExport(active, scans, deps.imageStore, deps.now, albumOwnedCodes);
     deps.downloadJson(`${active.userName}-${active.id}.json`, JSON.stringify(json, null, 2));
+  }
+
+  // Restore a full JSON session export as a new local session (scans + images
+  // + album), then return to the home screen so it appears in the resume list.
+  async function handleImportJson(data: JsonImport) {
+    const session = await deps.sessionRepo.create(data.userName);
+    for (const scan of data.scans) {
+      const created = await deps.scanRepo.add({
+        sessionId: session.id,
+        normalizedCode: scan.normalizedCode,
+        source: scan.source,
+        confidence: scan.confidence,
+        capturedAt: scan.capturedAt,
+      });
+      const image = data.images[scan.id];
+      if (image !== undefined) await deps.imageStore.put(created.id, image);
+    }
+    if (data.albumOwnedCodes.length > 0) {
+      await deps.albumRepo.setMany(data.userName, data.albumOwnedCodes, true);
+    }
+    await refreshSessions();
+  }
+
+  // Merge a text import into a fresh session: duplicate counts become scan rows
+  // (capped), owned/missing become album ownership for the parsed user.
+  async function handleImportText(data: TextImport) {
+    const session = await deps.sessionRepo.create(data.userName);
+    if (data.kind === 'duplicate') {
+      for (const [code, count] of Object.entries(data.counts ?? {})) {
+        const copies = Math.min(count, REPS_CAP);
+        for (let i = 0; i < copies; i++) {
+          await deps.scanRepo.add({
+            sessionId: session.id,
+            normalizedCode: code,
+            source: 'manual',
+            confidence: 1,
+            capturedAt: deps.now(),
+          });
+        }
+      }
+    } else {
+      await deps.albumRepo.setMany(data.userName, data.ownedCodes ?? [], true);
+    }
+    await refreshSessions();
   }
 
   async function handleRequestCamera() {
@@ -351,6 +431,17 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
     setCameraState('no-camera');
   }
 
+  function handleHome() {
+    deps.stopCamera?.();
+    setActive(null);
+    setScans([]);
+    setThumbnails({});
+    setDetection(null);
+    setNoDetection(false);
+    setTab('reps');
+    void refreshSessions();
+  }
+
   if (!active) {
     return (
       <SessionGate
@@ -361,6 +452,8 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
         albumCounts={sessionAlbumCounts}
         storageMode={storageMode}
         onChangeMode={onChangeMode}
+        onImportJson={handleImportJson}
+        onImportText={handleImportText}
       />
     );
   }
@@ -392,6 +485,14 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
   return (
     <main aria-label="Scanner">
       <header className="app-header">
+        <button
+          type="button"
+          className="app-header-home"
+          aria-label="Home"
+          onClick={handleHome}
+        >
+          ← Home
+        </button>
         <h1 className="app-header-name">{active.userName}</h1>
         <p className="app-header-meta">{scans.length} scan{scans.length !== 1 ? 's' : ''}</p>
         {storageMode && onChangeMode && (
@@ -446,6 +547,11 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
       )}
       {tab === 'reps' && cameraState === 'granted' && (
         <RepsView
+          view={repsView}
+          onSetView={setRepsView}
+          mode={repsMode}
+          onSetMode={setRepsMode}
+          onGridTap={handleGridTap}
           scans={scans}
           thumbnails={thumbnails}
           detection={detection}

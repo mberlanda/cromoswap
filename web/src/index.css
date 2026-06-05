@@ -489,6 +489,8 @@ section[aria-label="Resume"] li button {
   width: 100%;
   background: var(--field);
   border-color: transparent;
+  /* Reset .primary's white text — it was invisible on the light field. */
+  color: var(--ink);
 }
 
 /* Privacy note */
@@ -501,6 +503,41 @@ section[aria-label="Resume"] li button {
   font-size: 12px;
   font-weight: 700;
   line-height: 1.4;
+}
+
+/* ── Import section ──────────────────────────────── */
+.import-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+}
+
+.import-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.import-kind-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.import-kind-picker p {
+  width: 100%;
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.import-error {
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0;
 }
 
 /* ── Tab bar ─────────────────────────────────────── */
@@ -577,10 +614,151 @@ section[aria-label="Resume"] li button {
   color: var(--ink);
 }
 
+.team-card-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 .team-card-count {
   color: var(--muted);
   font-weight: 700;
   font-size: 12px;
+}
+
+/* Compact per-team All / Clear toggle */
+.all-toggle {
+  min-height: 0;
+  padding: 2px var(--space-2);
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 999px;
+  border: 1px solid var(--subtle);
+  background: var(--surface);
+  color: var(--scan-strong);
+}
+
+.all-toggle-clear {
+  color: var(--muted);
+}
+
+/* ── Reps view switch (Scan | Grid) ──────────────── */
+.reps-view-switch {
+  display: flex;
+  border: 1px solid var(--subtle);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: var(--space-3);
+}
+
+.reps-view-btn {
+  flex: 1;
+  min-height: 40px;
+  border: 0;
+  border-radius: 0;
+  background: var(--field);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.reps-view-btn.reps-view-active {
+  background: var(--ink);
+  color: #fff;
+}
+
+/* ── Reps tap-mode toggle (-1 / +1 / Clear) ──────── */
+.reps-mode-toggle {
+  display: flex;
+  border: 1px solid var(--subtle);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: var(--space-4);
+}
+
+.reps-mode-btn {
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  min-height: 48px;
+  border: 0;
+  border-radius: 0;
+  border-right: 1px solid var(--subtle);
+  background: var(--field);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.reps-mode-btn:last-child {
+  border-right: 0;
+}
+
+.reps-mode-btn small {
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.reps-mode-btn.reps-mode-active.reps-mode-add {
+  background: var(--scan);
+  color: #fff;
+}
+
+.reps-mode-btn.reps-mode-active.reps-mode-remove {
+  background: var(--danger);
+  color: #fff;
+}
+
+.reps-mode-btn.reps-mode-active.reps-mode-clear {
+  background: var(--ink);
+  color: #fff;
+}
+
+/* ── Reps count chips ────────────────────────────── */
+.rchip {
+  position: relative;
+  min-width: 34px;
+  min-height: 34px;
+  padding: 0 var(--space-1);
+  border-radius: 6px;
+  background: var(--field);
+  border: 1px solid var(--subtle);
+  font-size: 11px;
+  font-weight: 900;
+  color: #b6c2bd;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rchip-have {
+  background: var(--scan);
+  border-color: var(--scan);
+  color: #fff;
+}
+
+.rchip-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--review);
+  color: #3a2c05;
+  font-size: 10px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--paper);
+}
+
+.rchip-cap {
+  box-shadow: 0 0 0 2px var(--review);
 }
 
 .team-card-chips {
@@ -795,6 +973,17 @@ section[aria-label="Resume"] li button {
   padding: var(--space-3) 0 var(--space-2);
   border-bottom: 1px solid var(--subtle);
   margin-bottom: var(--space-2);
+}
+
+.app-header-home {
+  align-self: center;
+  min-height: 0;
+  padding: var(--space-1) var(--space-2);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink);
+  background: var(--field);
+  border-color: transparent;
 }
 
 .app-header-name {

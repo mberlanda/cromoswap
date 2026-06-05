@@ -10,17 +10,20 @@ export interface JsonExport {
   scans: Scan[];
   /** Image data URLs keyed by scan id; only includes scans with stored images. */
   images: Record<string, string>;
+  /** The user's owned album codes, so one JSON round-trips reps + album. */
+  albumOwnedCodes: string[];
 }
 
 /**
- * Build a self-contained JSON export embedding metadata, scans, counts, and
- * image data URLs pulled from the image store. `now` is injected for tests.
+ * Build a self-contained JSON export embedding metadata, scans, counts, image
+ * data URLs, and the user's album. `now` is injected for tests.
  */
 export async function toJsonExport(
   session: Session,
   scans: Scan[],
   imageStore: ImageStore,
   now: Clock,
+  albumOwnedCodes: string[] = [],
 ): Promise<JsonExport> {
   const images: Record<string, string> = {};
   for (const scan of scans) {
@@ -37,5 +40,6 @@ export async function toJsonExport(
     countsByCode: countByCode(scans),
     scans,
     images,
+    albumOwnedCodes,
   };
 }

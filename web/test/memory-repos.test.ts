@@ -109,4 +109,28 @@ describe('MemoryAlbumRepo', () => {
     expect(await repo.listByUser('Mauro')).toHaveLength(1);
     expect(await repo.listByUser('Luca')).toHaveLength(1);
   });
+
+  it('setMany owned=true adds every code, idempotently', async () => {
+    const repo = new MemoryAlbumRepo(ids, clock);
+    await repo.toggle('Mauro', 'BRA01'); // pre-owned
+    await repo.setMany('Mauro', ['BRA01', 'BRA02', 'BRA03'], true);
+    const owned = (await repo.listByUser('Mauro')).map((e) => e.normalizedCode).sort();
+    expect(owned).toEqual(['BRA01', 'BRA02', 'BRA03']);
+  });
+
+  it('setMany owned=false removes every listed code, leaving others', async () => {
+    const repo = new MemoryAlbumRepo(ids, clock);
+    await repo.setMany('Mauro', ['BRA01', 'BRA02', 'BRA03'], true);
+    await repo.setMany('Mauro', ['BRA01', 'BRA03'], false);
+    const owned = (await repo.listByUser('Mauro')).map((e) => e.normalizedCode);
+    expect(owned).toEqual(['BRA02']);
+  });
+
+  it('setMany scopes to the given user', async () => {
+    const repo = new MemoryAlbumRepo(ids, clock);
+    await repo.setMany('Mauro', ['BRA01', 'BRA02'], true);
+    await repo.setMany('Luca', ['BRA01'], true);
+    expect(await repo.listByUser('Mauro')).toHaveLength(2);
+    expect(await repo.listByUser('Luca')).toHaveLength(1);
+  });
 });
