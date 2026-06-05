@@ -94,3 +94,71 @@ frame, runs `BrightnessLocalizer`, and calls `isWellTargeted(bbox, cropAspect)`:
 
 When both hold the guide border flips green, giving "you're aligned" feedback before the
 user taps **Scan**. The loop pauses during an explicit capture.
+
+## Fine-tuning the ROI (portrait and landscape)
+
+The ROI is the single biggest lever on OCR accuracy: too tight and it clips a digit, too
+loose and it feeds the pill plus surrounding artwork. Both orientations are tuned the same
+way — only the measured numbers differ.
+
+### 1. Re-measure from a real back
+
+Open a representative back (portrait or landscape) at full resolution and read off the pill
+corners **relative to the sticker** (not the whole photo):
+
+```
+x = (pixel distance from the sticker's left edge) / sticker width
+y = (pixel distance from the sticker's top edge)  / sticker height
+```
+
+Take a few samples per orientation — lighting, print drift, and hand angle move the pill a
+little. The ROI you want is the box that contains the pill in *all* of them.
+
+### 2. Add them to the corpus and regenerate
+
+Annotations live in [`tools/asset-gen/src/generate.ts`](../tools/asset-gen/src/generate.ts)
+as `{ orientation, box: { x, y, w, h } }`. The build derives one ROI per orientation:
+
+```
+deriveRoi = union(all boxes for that orientation) expanded by PAD on every side
+```
+
+So adding annotations only ever *grows* the ROI to keep covering new pill positions — it
+never shrinks below what you've seen. Workflow:
+
+```bash
+cd tools/asset-gen
+npm run test:run      # deriveRoi / buildMaskConfig stay green
+npm run generate      # rewrites assets/ and web/src/assets/ mask-config.json
+```
+
+No runtime code changes; the app imports the regenerated `mask-config.json`.
+
+### 3. Knobs, from coarse to fine
+
+| Knob | Where | Effect |
+| ---- | ----- | ------ |
+| Corpus annotations | `generate.ts` `SEED_CORPUS` | Primary control. More/tighter boxes reshape the ROI. |
+| `PAD` | `generate.ts` (currently `0.02`) | Uniform safety margin around the union. Raise if the pill is sometimes clipped; lower if fabric/artwork leaks in. |
+| `aspectRatio` | `build-assets.ts` `ASPECT_RATIO` | Nominal sticker shape per orientation (drives the guide via `STICKER_ASPECT`). |
+| Guide `size` | `SizeSlider` (40–95%) | Live, per-scan. Shrink to exclude background, grow to fit a sticker held further away. |
+| Targeting tolerance | `geometry.ts` `MIN_FILL_FRACTION`, `MIN/MAX_ASPECT_RATIO` | When the green cue triggers. Loosen if it rarely turns green, tighten if it greens on non-stickers. |
+
+### 4. Validate the change
+
+Drop annotated backs into `web/fixtures/stickers/` (gitignored) and run the regression
+harness — it applies the same ROI + preprocessing and OCRs the crop:
+
+```bash
+cd web && npm run validate:ocr
+```
+
+Compare read accuracy before/after. See [`ocr-findings.md`](ocr-findings.md) for how the
+fixtures are set up and the known failure modes (stylized digits, inversion).
+
+### Landscape note
+
+Landscape backs are the same physical sticker rotated 90°, so the pill is in the top-right
+of the *reading* orientation but proportionally taller relative to the shorter side. Its ROI
+is seeded from fewer samples than portrait and is the most likely to need another annotation
+pass — follow steps 1–4 with landscape backs specifically.
