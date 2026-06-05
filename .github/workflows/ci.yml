@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate (web + api)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: sticker
+          POSTGRES_PASSWORD: sticker
+          POSTGRES_DB: sticker_development
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sticker"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_HOST: localhost
+      DATABASE_PORT: 5432
+      DATABASE_USER: sticker
+      DATABASE_PASSWORD: sticker
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: web/.nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          working-directory: api
+          bundler-cache: true
+
+      - name: Run validation
+        run: ./scripts/validate.sh
+
+  docker:
+    name: Docker stack boots
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and start the stack
+        run: docker compose up -d --build
+
+      - name: Wait for the app to be healthy
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:3000/up > /dev/null; then
+              echo "app is up"; exit 0
+            fi
+            sleep 5
+          done
+          echo "app did not become healthy in time"
+          docker compose logs app
+          exit 1
+
+      - name: Smoke-check the admin auth gate (expect 401)
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/admin)
+          echo "GET /admin -> $code"
+          test "$code" = "401"
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
