@@ -79,6 +79,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
   const [tab, setTab] = useState<Tab>('reps');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+  const [boardSelectionUserName, setBoardSelectionUserName] = useState<string | null>(null);
   // When startCamera is provided, camera starts only on user action; tests without it skip the panel.
   const [cameraState, setCameraState] = useState<CameraState>(
     deps.startCamera ? 'idle' : 'granted',
@@ -374,6 +375,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
 
   function handleTabChange(next: Tab) {
     setTab(next);
+    setBoardSelectionUserName(null);
     if (next === 'board') void handleRefreshLeaderboard();
   }
 
@@ -406,11 +408,34 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
         />
       )}
       {tab === 'board' && (
-        <LeaderboardView
-          entries={leaderboard}
-          loading={leaderboardLoading}
-          onRefresh={handleRefreshLeaderboard}
-        />
+        boardSelectionUserName ? (
+          <section aria-label="Read-only selection">
+            <div className="leaderboard-header">
+              <h2 className="leaderboard-title">{boardSelectionUserName}'s selection</h2>
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => setBoardSelectionUserName(null)}
+              >
+                Back to board
+              </button>
+            </div>
+            <AlbumView
+              userName={boardSelectionUserName}
+              albumRepo={deps.albumRepo}
+              downloadText={deps.downloadText}
+              now={deps.now}
+              readOnly
+            />
+          </section>
+        ) : (
+          <LeaderboardView
+            entries={leaderboard}
+            loading={leaderboardLoading}
+            onRefresh={handleRefreshLeaderboard}
+            onOpenSelection={setBoardSelectionUserName}
+          />
+        )
       )}
       {tab === 'reps' && cameraState !== 'granted' && (
         <CameraPermissionPanel

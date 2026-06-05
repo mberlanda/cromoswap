@@ -4,10 +4,19 @@ interface TeamCardProps {
   flag: string;
   numbers: string[];
   ownedCodes: Set<string>;
-  onToggle: (code: string) => void;
+  onToggle?: (code: string) => void;
+  readOnly?: boolean;
 }
 
-export function TeamCard({ prefix, fullName, flag, numbers, ownedCodes, onToggle }: TeamCardProps) {
+export function TeamCard({
+  prefix,
+  fullName,
+  flag,
+  numbers,
+  ownedCodes,
+  onToggle,
+  readOnly = false,
+}: TeamCardProps) {
   const ownedCount = numbers.filter((n) => ownedCodes.has(`${prefix}${n}`)).length;
 
   return (
@@ -23,14 +32,20 @@ export function TeamCard({ prefix, fullName, flag, numbers, ownedCodes, onToggle
         {numbers.map((n) => {
           const code = `${prefix}${n}`;
           const owned = ownedCodes.has(code);
+          const label = readOnly
+            ? `${code} ${owned ? 'owned' : 'not owned'}`
+            : owned
+              ? `${code} owned, tap to remove`
+              : `${code} not owned, tap to add`;
           return (
             <button
               key={n}
               type="button"
               className={`chip${owned ? ' chip-owned' : ''}`}
-              aria-label={owned ? `${code} owned, tap to remove` : `${code} not owned, tap to add`}
+              aria-label={label}
               aria-pressed={owned}
-              onClick={() => onToggle(code)}
+              disabled={readOnly}
+              onClick={() => onToggle?.(code)}
             >
               {n}
             </button>

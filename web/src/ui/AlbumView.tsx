@@ -10,9 +10,16 @@ interface AlbumViewProps {
   albumRepo: AlbumRepo;
   downloadText: (filename: string, content: string) => void;
   now: Clock;
+  readOnly?: boolean;
 }
 
-export function AlbumView({ userName, albumRepo, downloadText, now }: AlbumViewProps) {
+export function AlbumView({
+  userName,
+  albumRepo,
+  downloadText,
+  now,
+  readOnly = false,
+}: AlbumViewProps) {
   const [ownedCodes, setOwnedCodes] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -23,6 +30,7 @@ export function AlbumView({ userName, albumRepo, downloadText, now }: AlbumViewP
 
   const handleToggle = useCallback(
     async (code: string) => {
+      if (readOnly) return;
       const result = await albumRepo.toggle(userName, code);
       setOwnedCodes((prev) => {
         const next = new Set(prev);
@@ -31,7 +39,7 @@ export function AlbumView({ userName, albumRepo, downloadText, now }: AlbumViewP
         return next;
       });
     },
-    [albumRepo, userName],
+    [albumRepo, readOnly, userName],
   );
 
   function handleExportOwned() {
@@ -60,6 +68,7 @@ export function AlbumView({ userName, albumRepo, downloadText, now }: AlbumViewP
             numbers={stickerNumbers('FWC')}
             ownedCodes={ownedCodes}
             onToggle={handleToggle}
+            readOnly={readOnly}
           />
         </div>
         {ALBUM_GROUPS.map(({ letter, prefixes }) => (
@@ -74,6 +83,7 @@ export function AlbumView({ userName, albumRepo, downloadText, now }: AlbumViewP
                 numbers={stickerNumbers(prefix)}
                 ownedCodes={ownedCodes}
                 onToggle={handleToggle}
+                readOnly={readOnly}
               />
             ))}
           </div>

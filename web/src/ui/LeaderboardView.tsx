@@ -4,9 +4,15 @@ interface LeaderboardViewProps {
   entries: LeaderboardEntry[];
   loading: boolean;
   onRefresh: () => void;
+  onOpenSelection?: (userName: string) => void;
 }
 
-export function LeaderboardView({ entries, loading, onRefresh }: LeaderboardViewProps) {
+export function LeaderboardView({
+  entries,
+  loading,
+  onRefresh,
+  onOpenSelection,
+}: LeaderboardViewProps) {
   return (
     <section aria-label="Leaderboard">
       <div className="leaderboard-header">
@@ -27,6 +33,15 @@ export function LeaderboardView({ entries, loading, onRefresh }: LeaderboardView
             <span className="leaderboard-name">{entry.userName}</span>
             <span className="leaderboard-owned">{entry.owned} owned</span>
             <span className="leaderboard-missing">{entry.missing} missing</span>
+            {onOpenSelection && (
+              <button
+                type="button"
+                className="quiet leaderboard-open"
+                onClick={() => onOpenSelection(entry.userName)}
+              >
+                Open {entry.userName} selection
+              </button>
+            )}
           </li>
         ))}
       </ol>
