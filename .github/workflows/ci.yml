@@ -51,11 +51,24 @@ jobs:
       - name: Run validation
         run: ./scripts/validate.sh
 
-  docker:
-    name: Docker stack boots
+  docker-e2e:
+    name: Docker stack + e2e
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: web/.nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install web deps + Playwright browser
+        working-directory: web
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
 
       - name: Build and start the stack
         run: docker compose up -d --build
@@ -77,6 +90,12 @@ jobs:
           code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/admin)
           echo "GET /admin -> $code"
           test "$code" = "401"
+
+      - name: Run end-to-end tests against the stack
+        working-directory: web
+        env:
+          E2E_BASE_URL: http://localhost:3000
+        run: npm run e2e:docker
 
       - name: Tear down
         if: always()
