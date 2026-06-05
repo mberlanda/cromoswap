@@ -1,5 +1,7 @@
 import { useId, useState, type FormEvent } from 'react';
 import type { Session } from '../domain/types';
+import { StorageModeToggle } from './StorageModeToggle';
+import type { StorageMode } from '../composition';
 
 interface AlbumCount {
   owned: number;
@@ -12,6 +14,8 @@ interface SessionGateProps {
   albumCounts?: Record<string, AlbumCount>;
   onCreate: (userName: string) => void;
   onResume: (sessionId: string) => void;
+  storageMode?: StorageMode;
+  onChangeMode?: (mode: StorageMode) => void;
 }
 
 /** Entry screen: ask for a name to start a session, or resume an existing one. */
@@ -21,6 +25,8 @@ export function SessionGate({
   albumCounts = {},
   onCreate,
   onResume,
+  storageMode,
+  onChangeMode,
 }: SessionGateProps) {
   const [name, setName] = useState('');
   const inputId = useId();
@@ -34,7 +40,12 @@ export function SessionGate({
 
   return (
     <main aria-label="Session">
-      <h1>Cromoswap</h1>
+      <div className="session-gate-header">
+        <h1>Cromoswap</h1>
+        {storageMode && onChangeMode && (
+          <StorageModeToggle mode={storageMode} onChange={onChangeMode} />
+        )}
+      </div>
       {sessions.length > 0 && (
         <section aria-label="Resume">
           <h2>Resume a session</h2>
@@ -68,7 +79,11 @@ export function SessionGate({
           Start scanning
         </button>
       </form>
-      <p className="privacy-note">Images stay on this device. No account needed.</p>
+      <p className="privacy-note">
+        {storageMode === 'local'
+          ? 'Data stored locally on this device only.'
+          : 'Data synced to the server. Appears on the leaderboard.'}
+      </p>
     </main>
   );
 }

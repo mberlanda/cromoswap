@@ -81,6 +81,19 @@ describe('App', () => {
     expect(attachVideo.mock.calls.at(-1)?.[0]?.tagName).toBe('VIDEO');
   });
 
+  it('attaches the camera video element after permission is granted', async () => {
+    const attachVideo = vi.fn();
+    const startCamera = vi.fn(async () => ({ state: 'granted' as const, stream: {} as MediaStream }));
+    render(<App deps={makeDeps({ attachVideo, startCamera })} />);
+
+    await startSession();
+    expect(screen.queryByRole('button', { name: /scan sticker/i })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /allow camera/i }));
+
+    expect(await screen.findByRole('button', { name: /scan sticker/i })).toBeInTheDocument();
+    expect(attachVideo.mock.calls.at(-1)?.[0]?.tagName).toBe('VIDEO');
+  });
+
   it('shows the session name and scan count in the header after creating a session', async () => {
     const deps = makeDeps();
     render(<App deps={deps} />);
@@ -223,20 +236,6 @@ describe('App', () => {
     expect(content).toContain('USA13');
   });
 
-  it('best-effort syncs the session and scans after a change', async () => {
-    const syncSession = vi.fn();
-    render(<App deps={makeDeps({ syncSession })} />);
-    await startSession('Mauro');
-    await userEvent.type(screen.getByLabelText(/^prefix$/i), 'USA');
-    await userEvent.selectOptions(screen.getByLabelText(/^number$/i), '13');
-    await userEvent.click(screen.getByRole('button', { name: /^add$/i }));
-
-    const lastCall = syncSession.mock.calls.at(-1);
-    expect(lastCall?.[0]).toMatchObject({ userName: 'Mauro' });
-    expect(lastCall?.[1].map((s: { normalizedCode: string }) => s.normalizedCode)).toContain(
-      'USA13',
-    );
-  });
 
   it('resumes an existing session and shows its scans', async () => {
     const deps = makeDeps();

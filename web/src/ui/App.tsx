@@ -12,8 +12,8 @@ import { AlbumView } from './AlbumView';
 import { RepsView } from './RepsView';
 import { LeaderboardView } from './LeaderboardView';
 import { CameraPermissionPanel } from './CameraPermissionPanel';
-import { SyncIndicator } from './SyncIndicator';
-import type { SyncStatus } from './SyncIndicator';
+import { StorageModeToggle } from './StorageModeToggle';
+import type { StorageMode } from '../composition';
 
 export type Orientation = 'portrait' | 'landscape';
 
@@ -36,19 +36,21 @@ export interface AppDeps {
   scanTimeoutMs?: number;
   delay?: (ms: number) => Promise<void>;
   nowMs?: () => number;
-  /** Optional best-effort push of codes + metadata to the backend. Returns sync result when async. */
-  syncSession?: (session: Session, scans: Scan[]) => void | Promise<{ ok: boolean }>;
   /** Optional hook to bind the camera <video> element so capture can read it. */
   attachVideo?: (element: HTMLVideoElement | null) => void;
   /** Optional: trigger the browser camera permission prompt and start the stream. */
   startCamera?: () => Promise<CameraResult>;
-  /** Optional: sync album owned codes to the backend for a user. */
-  syncAlbum?: (userName: string, codes: string[]) => void;
   /** Optional: fetch the global leaderboard from the backend. */
   fetchLeaderboard?: () => Promise<LeaderboardEntry[]>;
 }
 
-export function App({ deps }: { deps: AppDeps }) {
+interface AppProps {
+  deps: AppDeps;
+  storageMode?: StorageMode;
+  onChangeMode?: (mode: StorageMode) => void;
+}
+
+export function App({ deps, storageMode, onChangeMode }: AppProps) {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [sessionScanCounts, setSessionScanCounts] = useState<Record<string, number>>({});
   const [sessionAlbumCounts, setSessionAlbumCounts] = useState<
@@ -62,7 +64,6 @@ export function App({ deps }: { deps: AppDeps }) {
   const [scanning, setScanning] = useState(false);
   const [orientation, setOrientation] = useState<Orientation>('portrait');
   const [tab, setTab] = useState<Tab>('reps');
-  const [syncStatus, setSyncStatus] = useState<SyncStatus>('local');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   // When startCamera is provided, camera starts only on user action; tests without it skip the panel.
@@ -84,8 +85,8 @@ export function App({ deps }: { deps: AppDeps }) {
       const counts: Record<string, number> = {};
       const albumCounts: Record<string, { owned: number; missing: number }> = {};
       for (const s of list) {
-        const scans = await deps.scanRepo.listBySession(s.id);
-        counts[s.id] = scans.length;
+        const sessionScans = await deps.scanRepo.listBySession(s.id);
+        counts[s.id] = sessionScans.length;
         const entries = await deps.albumRepo.listByUser(s.userName);
         const owned = entries.length;
         albumCounts[s.id] = { owned, missing: TOTAL_STICKERS - owned };
@@ -95,10 +96,14 @@ export function App({ deps }: { deps: AppDeps }) {
     });
   }, [deps]);
 
-  // Bind the camera <video> for the composition once the scanner is shown.
+  // Bind the camera <video> whenever the granted scanner preview is mounted.
   useEffect(() => {
-    if (active) deps.attachVideo?.(videoRef.current);
-  }, [active, deps]);
+    if (active && tab === 'reps' && cameraState === 'granted') {
+      deps.attachVideo?.(videoRef.current);
+      return () => deps.attachVideo?.(null);
+    }
+    deps.attachVideo?.(null);
+  }, [active, cameraState, tab, deps]);
 
   const refreshScans = useCallback(
     async (session: Session) => {
@@ -110,11 +115,6 @@ export function App({ deps }: { deps: AppDeps }) {
         if (dataUrl !== undefined) thumbs[scan.id] = dataUrl;
       }
       setThumbnails(thumbs);
-      if (deps.syncSession) {
-        setSyncStatus('pending');
-        const result = deps.syncSession(session, list);
-        if (result) void result.then((r) => setSyncStatus(r.ok ? 'synced' : 'failed'));
-      }
     },
     [deps],
   );
@@ -180,8 +180,6 @@ export function App({ deps }: { deps: AppDeps }) {
   }
 
   async function handleCorrect(code: string) {
-    // Keep the captured image but mark it manually corrected; the user can
-    // refine the code inline in the collection list afterwards.
     if (detection) await storeScan(code, 'manual', detection.candidate.confidence, detection.imageDataUrl);
     setDetection(null);
   }
@@ -230,16 +228,10 @@ export function App({ deps }: { deps: AppDeps }) {
         onResume={handleResume}
         scanCounts={sessionScanCounts}
         albumCounts={sessionAlbumCounts}
+        storageMode={storageMode}
+        onChangeMode={onChangeMode}
       />
     );
-  }
-
-  function handleSyncRetry() {
-    if (active) void refreshScans(active);
-  }
-
-  function handleAlbumSync(codes: string[]) {
-    if (active && deps.syncAlbum) deps.syncAlbum(active.userName, codes);
   }
 
   async function handleRefreshLeaderboard() {
@@ -260,7 +252,9 @@ export function App({ deps }: { deps: AppDeps }) {
       <header className="app-header">
         <h1 className="app-header-name">{active.userName}</h1>
         <p className="app-header-meta">{scans.length} scan{scans.length !== 1 ? 's' : ''}</p>
-        <SyncIndicator status={syncStatus} onRetry={handleSyncRetry} />
+        {storageMode && onChangeMode && (
+          <StorageModeToggle mode={storageMode} onChange={onChangeMode} />
+        )}
       </header>
       <TabBar active={tab} onChange={handleTabChange} showBoard={!!deps.fetchLeaderboard} />
       {tab === 'album' && (
@@ -269,7 +263,6 @@ export function App({ deps }: { deps: AppDeps }) {
           albumRepo={deps.albumRepo}
           downloadText={deps.downloadText}
           now={deps.now}
-          onSync={deps.syncAlbum ? handleAlbumSync : undefined}
         />
       )}
       {tab === 'board' && (

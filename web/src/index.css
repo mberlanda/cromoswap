@@ -828,3 +828,43 @@ section[aria-label="Resume"] li button {
   text-align: center;
   margin: 0;
 }
+
+/* Storage mode toggle */
+
+.session-gate-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-4) 0;
+}
+
+.session-gate-header h1 {
+  margin: 0;
+}
+
+.storage-toggle {
+  display: flex;
+  border: 1px solid var(--subtle);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.storage-toggle-btn {
+  background: none;
+  border: none;
+  padding: var(--space-1) var(--space-3);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--muted);
+  transition: background 0.15s, color 0.15s;
+}
+
+.storage-toggle-btn.active {
+  background: var(--scan);
+  color: #fff;
+}
+
+.app-header .storage-toggle {
+  margin-left: auto;
+}
