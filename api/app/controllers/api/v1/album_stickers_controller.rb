@@ -19,14 +19,14 @@ module Api
         sticker = AlbumSticker.find_by(user_name: user_name, normalized_code: normalized_code)
         if sticker
           sticker.destroy!
-          render json: { action: 'removed', normalizedCode: normalized_code }
+          render json: { action: "removed", normalizedCode: normalized_code }
         else
           sticker = AlbumSticker.create!(
             user_name: user_name,
             normalized_code: normalized_code,
             owned_at: Time.current,
           )
-          render json: { action: 'added' }.merge(sticker_json(sticker)), status: :created
+          render json: { action: "added" }.merge(sticker_json(sticker)), status: :created
         end
       end
 

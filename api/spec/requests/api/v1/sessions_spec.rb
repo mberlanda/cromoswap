@@ -13,9 +13,9 @@ RSpec.describe "API V1 Sessions", type: :request do
           normalizedCode: "ARG01",
           source: "ocr",
           confidence: 0.9,
-          capturedAt: "2026-06-04T00:00:00Z",
-        }.merge(extra_scan),
-      ],
+          capturedAt: "2026-06-04T00:00:00Z"
+        }.merge(extra_scan)
+      ]
     }
   end
 

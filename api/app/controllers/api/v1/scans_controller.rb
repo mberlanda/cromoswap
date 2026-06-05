@@ -12,7 +12,7 @@ module Api
         session = Session.find(params[:sessionId])
         scan = session.scans.create!(
           normalized_code: params[:normalizedCode],
-          source: params.fetch(:source, 'ocr'),
+          source: params.fetch(:source, "ocr"),
           confidence: params[:confidence],
           captured_at: params[:capturedAt],
         )
