@@ -73,4 +73,23 @@ describe('composition camera binding', () => {
     });
     expect(HTMLMediaElement.prototype.play).toHaveBeenCalled();
   });
+
+  it('stops tracks and detaches the stream when camera is stopped', async () => {
+    const stop = vi.fn();
+    const stream = { getTracks: () => [{ stop }] } as unknown as MediaStream;
+    vi.mocked(navigator.mediaDevices.getUserMedia).mockResolvedValue(stream);
+    const cam = createCameraBinding(() =>
+      requestCamera((c) => navigator.mediaDevices.getUserMedia(c)),
+    );
+    const video = document.createElement('video');
+
+    cam.attachVideo(video);
+    await cam.startCamera();
+    expect(video.srcObject).toBe(stream);
+
+    cam.stopCamera();
+
+    expect(stop).toHaveBeenCalledOnce();
+    expect(video.srcObject).toBeNull();
+  });
 });

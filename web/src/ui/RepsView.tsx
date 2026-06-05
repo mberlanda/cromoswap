@@ -16,11 +16,16 @@ export interface RepsViewProps {
   detection: Detection | null;
   noDetection: boolean;
   scanning: boolean;
+  cameraPaused: boolean;
+  videoMode: boolean;
   orientation: Orientation;
   size: number;
   targeted: boolean;
   videoRef: RefObject<HTMLVideoElement | null>;
   onCapture: () => void;
+  onResumeCamera: () => void;
+  onPauseCamera: () => void;
+  onToggleVideoMode: (enabled: boolean) => void;
   onConfirm: (code: string) => void;
   onCorrect: (code: string) => void;
   onSkip: () => void;
@@ -35,8 +40,9 @@ export interface RepsViewProps {
 }
 
 export function RepsView({
-  scans, thumbnails, detection, noDetection, scanning, orientation, size, targeted,
-  videoRef, onCapture, onConfirm, onCorrect, onSkip, onRescan,
+  scans, thumbnails, detection, noDetection, scanning, cameraPaused, videoMode,
+  orientation, size, targeted, videoRef, onCapture, onResumeCamera, onPauseCamera,
+  onToggleVideoMode, onConfirm, onCorrect, onSkip, onRescan,
   onManualAdd, onEdit, onDelete, onExportText, onExportJson, onSetOrientation, onSetSize,
 }: RepsViewProps) {
   const counts = countByCode(scans);
@@ -56,6 +62,15 @@ export function RepsView({
         <div className="camera-wrap">
           <video ref={videoRef} playsInline muted className="camera-preview" />
           <MaskOverlay orientation={orientation} size={size} targeted={targeted} />
+          {videoMode && !cameraPaused && <div className="camera-pill">Auto collect</div>}
+          {cameraPaused && (
+            <div className="camera-state-overlay" role="status">
+              <p>Camera paused</p>
+              <button type="button" className="primary" onClick={onResumeCamera}>
+                Resume camera
+              </button>
+            </div>
+          )}
         </div>
         <ScanStatus state={scanning ? 'scanning' : noDetection ? 'no-detection' : 'idle'} />
         {detection && (
@@ -69,10 +84,33 @@ export function RepsView({
           />
         )}
         <div className="scan-bottom">
+          <div className="scan-mode-row">
+            <label className="toggle-control">
+              <input
+                type="checkbox"
+                checked={videoMode}
+                onChange={(event) => onToggleVideoMode(event.currentTarget.checked)}
+              />
+              <span>Auto collect</span>
+            </label>
+            <button
+              type="button"
+              className="secondary"
+              onClick={onPauseCamera}
+              disabled={cameraPaused}
+            >
+              Pause camera
+            </button>
+          </div>
           <OrientationToggle value={orientation} onChange={onSetOrientation} />
           <SizeSlider value={size} onChange={onSetSize} />
-          <button type="button" className="primary full" onClick={onCapture} disabled={scanning}>
-            {scanning ? 'Hold steady…' : 'Scan sticker'}
+          <button
+            type="button"
+            className="primary full"
+            onClick={onCapture}
+            disabled={scanning || cameraPaused || videoMode}
+          >
+            {scanning ? 'Hold steady…' : videoMode ? 'Auto collect enabled' : 'Scan sticker'}
           </button>
         </div>
       </section>

@@ -14,6 +14,8 @@ export interface PipelineOptions {
   threshold: number;
   /** Invert preprocessing for light-on-dark code pills. Defaults to true. */
   invert?: boolean;
+  /** Upscale the tiny code-pill crop before OCR. Defaults to 4x. */
+  preprocessScale?: number;
   /** Optional sticker localizer; the ROI is taken relative to what it finds. */
   localizer?: Localizer;
 }
@@ -32,12 +34,12 @@ export interface MultiOrientationOptions extends PipelineOptions {
  */
 export async function runPipeline(
   frame: RgbaImage,
-  { ocr, roi, threshold, invert = true, localizer }: PipelineOptions,
+  { ocr, roi, threshold, invert = true, preprocessScale = 4, localizer }: PipelineOptions,
 ): Promise<RankedCode[]> {
   const sticker = localizer?.locate(frame) ?? null;
   const region = sticker ? composeRect(sticker, roi) : roi;
   const cropped = cropRoi(frame, region);
-  const preprocessed = toGrayscaleThreshold(cropped, threshold, invert);
+  const preprocessed = toGrayscaleThreshold(cropped, threshold, invert, preprocessScale);
   const { text, confidence } = await ocr.recognize(preprocessed);
   const candidates = parseCandidates(text).map((raw) => ({ raw, confidence }));
   return rankCandidates(candidates);
@@ -50,12 +52,27 @@ export async function runPipeline(
  */
 export async function runPipelineMultiOrientation(
   frame: RgbaImage,
-  { ocr, roi, threshold, invert, localizer, rotations = [0, 1, 2, 3] }: MultiOrientationOptions,
+  {
+    ocr,
+    roi,
+    threshold,
+    invert,
+    preprocessScale,
+    localizer,
+    rotations = [0, 1, 2, 3],
+  }: MultiOrientationOptions,
 ): Promise<RankedCode[]> {
   const best = new Map<string, RankedCode>();
   for (const turns of rotations) {
     const rotated = rotate90(frame, turns);
-    const ranked = await runPipeline(rotated, { ocr, roi, threshold, invert, localizer });
+    const ranked = await runPipeline(rotated, {
+      ocr,
+      roi,
+      threshold,
+      invert,
+      preprocessScale,
+      localizer,
+    });
     for (const candidate of ranked) {
       const existing = best.get(candidate.code.canonical);
       if (!existing || candidate.confidence > existing.confidence) {

@@ -194,6 +194,42 @@ form {
   position: relative;
 }
 
+.camera-state-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius);
+  background: rgba(23, 33, 31, 0.74);
+  color: white;
+  text-align: center;
+}
+
+.camera-state-overlay p {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.camera-pill {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  min-height: 28px;
+  padding: 0 var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: rgba(18, 97, 63, 0.9);
+  color: white;
+  font-size: 12px;
+  font-weight: 900;
+}
+
 .scan-bottom {
   position: sticky;
   bottom: 0;
@@ -207,6 +243,34 @@ form {
 
 .scan-bottom button.primary {
   min-height: 52px;
+}
+
+.scan-mode-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.toggle-control {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--subtle);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.toggle-control input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--scan);
 }
 
 .mask-overlay {
@@ -440,18 +504,28 @@ section[aria-label="Resume"] li button {
 }
 
 /* ── Tab bar ─────────────────────────────────────── */
+.section-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: var(--space-2) 0;
+  background: var(--paper);
+  margin-bottom: var(--space-4);
+}
+
 .tab-bar {
   display: flex;
-  border-bottom: 1px solid var(--subtle);
-  margin-bottom: var(--space-4);
+  padding: var(--space-1);
+  border: 1px solid var(--subtle);
+  border-radius: var(--radius);
+  background: var(--surface);
 }
 
 .tab-bar button {
   flex: 1;
   min-height: 44px;
   border: none;
-  border-radius: 0;
-  border-bottom: 3px solid transparent;
+  border-radius: 6px;
   background: transparent;
   color: var(--muted);
   font-size: 14px;
@@ -459,8 +533,20 @@ section[aria-label="Resume"] li button {
 }
 
 .tab-bar button.tab-active {
-  border-bottom-color: var(--scan);
+  background: var(--field);
   color: var(--scan-strong);
+}
+
+.section-stepper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.section-stepper button {
+  min-height: 36px;
+  font-size: 12px;
 }
 
 /* ── Team card ───────────────────────────────────── */

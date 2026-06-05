@@ -70,6 +70,7 @@ describe('runPipelineMultiOrientation', () => {
       ocr,
       roi,
       threshold: 128,
+      preprocessScale: 1,
       localizer: { locate: () => ({ x: 0, y: 0, w: 0.5, h: 0.5 }) },
       rotations: [0],
     });

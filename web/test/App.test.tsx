@@ -65,6 +65,35 @@ describe('App', () => {
     expect(within(collection).getByText('ARG01')).toBeInTheDocument();
   });
 
+  it('pauses the camera after a successful scan and can resume it', async () => {
+    const stopCamera = vi.fn();
+    render(<App deps={makeDeps({ stopCamera })} />);
+    await startSession();
+
+    await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
+
+    expect(await screen.findByText(/camera paused/i)).toBeInTheDocument();
+    expect(stopCamera).toHaveBeenCalledOnce();
+
+    await userEvent.click(screen.getByRole('button', { name: /resume camera/i }));
+    expect(screen.queryByText(/camera paused/i)).not.toBeInTheDocument();
+  });
+
+  it('auto-collects detected stickers in video mode without confirmation', async () => {
+    const scanOnce = vi.fn(async () => ({
+      candidate: { code: { prefix: 'USA', number: 13, canonical: 'USA13' }, confidence: 0.8 },
+      imageDataUrl: 'data:image/png;base64,BBBB',
+    }));
+    render(<App deps={makeDeps({ scanOnce, videoScanIntervalMs: 50 })} />);
+    await startSession();
+
+    await userEvent.click(screen.getByRole('checkbox', { name: /auto collect/i }));
+
+    const collection = screen.getByRole('list', { name: /collection/i });
+    expect(await within(collection).findByText('USA13')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^save$/i })).not.toBeInTheDocument();
+  });
+
   it('renders the camera preview with the mask overlay over it', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();
@@ -118,6 +147,7 @@ describe('App', () => {
     expect(scanOnce).toHaveBeenLastCalledWith('portrait', 0.8);
 
     // Switch to landscape and capture again.
+    await userEvent.click(screen.getByRole('button', { name: /resume camera/i }));
     await userEvent.click(screen.getByRole('button', { name: /landscape/i }));
     await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
     await screen.findByText('ARG01');

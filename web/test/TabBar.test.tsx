@@ -32,4 +32,15 @@ describe('TabBar', () => {
     await userEvent.click(screen.getByRole('tab', { name: /board/i }));
     expect(onChange).toHaveBeenCalledWith('board');
   });
+
+  it('provides previous and next section controls', async () => {
+    const onChange = vi.fn();
+    render(<TabBar active="reps" onChange={onChange} showBoard />);
+
+    await userEvent.click(screen.getByRole('button', { name: /previous section/i }));
+    expect(onChange).toHaveBeenCalledWith('album');
+
+    await userEvent.click(screen.getByRole('button', { name: /next section/i }));
+    expect(onChange).toHaveBeenCalledWith('board');
+  });
 });

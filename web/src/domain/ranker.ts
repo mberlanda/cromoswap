@@ -1,5 +1,5 @@
 import type { Candidate, RankedCode } from './types';
-import { normalizeCode } from './normalizer';
+import { normalizeOcrCode } from './normalizer';
 import { validateCode } from './validator';
 
 /**
@@ -9,7 +9,7 @@ import { validateCode } from './validator';
 export function rankCandidates(candidates: Candidate[]): RankedCode[] {
   return candidates
     .map((candidate): RankedCode | null => {
-      const canonical = normalizeCode(candidate.raw);
+      const canonical = normalizeOcrCode(candidate.raw);
       if (!canonical) return null;
       const code = validateCode(canonical);
       if (!code) return null;
