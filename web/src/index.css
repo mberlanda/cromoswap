@@ -489,6 +489,8 @@ section[aria-label="Resume"] li button {
   width: 100%;
   background: var(--field);
   border-color: transparent;
+  /* Reset .primary's white text — it was invisible on the light field. */
+  color: var(--ink);
 }
 
 /* Privacy note */
@@ -817,6 +819,17 @@ section[aria-label="Resume"] li button {
   padding: var(--space-3) 0 var(--space-2);
   border-bottom: 1px solid var(--subtle);
   margin-bottom: var(--space-2);
+}
+
+.app-header-home {
+  align-self: center;
+  min-height: 0;
+  padding: var(--space-1) var(--space-2);
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink);
+  background: var(--field);
+  border-color: transparent;
 }
 
 .app-header-name {

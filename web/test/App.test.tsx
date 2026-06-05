@@ -63,6 +63,18 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: /scan sticker/i })).toBeInTheDocument();
   });
 
+  it('returns to the home screen via the header Home button without reload', async () => {
+    render(<App deps={makeDeps()} />);
+    await startSession();
+    expect(screen.getByRole('button', { name: /scan sticker/i })).toBeInTheDocument();
+
+    await userEvent.click(await findButtonByAriaLabel('Home'));
+
+    // Back on the session gate: the name field is shown again.
+    expect(await screen.findByLabelText(/name/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /scan sticker/i })).not.toBeInTheDocument();
+  });
+
   it('captures, confirms, and stores a scan that appears in the collection', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();

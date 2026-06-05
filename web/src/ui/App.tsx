@@ -96,22 +96,25 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
 
   const TOTAL_STICKERS = 980;
 
-  useEffect(() => {
-    void deps.sessionRepo.list().then(async (list) => {
-      setSessions(list);
-      const counts: Record<string, number> = {};
-      const albumCounts: Record<string, { owned: number; missing: number }> = {};
-      for (const s of list) {
-        const sessionScans = await deps.scanRepo.listBySession(s.id);
-        counts[s.id] = sessionScans.length;
-        const entries = await deps.albumRepo.listByUser(s.userName);
-        const owned = entries.length;
-        albumCounts[s.id] = { owned, missing: TOTAL_STICKERS - owned };
-      }
-      setSessionScanCounts(counts);
-      setSessionAlbumCounts(albumCounts);
-    });
+  const refreshSessions = useCallback(async () => {
+    const list = await deps.sessionRepo.list();
+    setSessions(list);
+    const counts: Record<string, number> = {};
+    const albumCounts: Record<string, { owned: number; missing: number }> = {};
+    for (const s of list) {
+      const sessionScans = await deps.scanRepo.listBySession(s.id);
+      counts[s.id] = sessionScans.length;
+      const entries = await deps.albumRepo.listByUser(s.userName);
+      const owned = entries.length;
+      albumCounts[s.id] = { owned, missing: TOTAL_STICKERS - owned };
+    }
+    setSessionScanCounts(counts);
+    setSessionAlbumCounts(albumCounts);
   }, [deps]);
+
+  useEffect(() => {
+    void refreshSessions();
+  }, [refreshSessions]);
 
   // Bind the camera <video> whenever the granted scanner preview is mounted.
   useEffect(() => {
@@ -351,6 +354,17 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
     setCameraState('no-camera');
   }
 
+  function handleHome() {
+    deps.stopCamera?.();
+    setActive(null);
+    setScans([]);
+    setThumbnails({});
+    setDetection(null);
+    setNoDetection(false);
+    setTab('reps');
+    void refreshSessions();
+  }
+
   if (!active) {
     return (
       <SessionGate
@@ -392,6 +406,14 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
   return (
     <main aria-label="Scanner">
       <header className="app-header">
+        <button
+          type="button"
+          className="app-header-home"
+          aria-label="Home"
+          onClick={handleHome}
+        >
+          ← Home
+        </button>
         <h1 className="app-header-name">{active.userName}</h1>
         <p className="app-header-meta">{scans.length} scan{scans.length !== 1 ? 's' : ''}</p>
         {storageMode && onChangeMode && (
