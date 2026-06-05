@@ -13,6 +13,7 @@ import { RepsView } from './RepsView';
 import type { RepsViewMode } from './RepsView';
 import type { RepsMode } from './RepsModeToggle';
 import { REPS_CAP } from './RepsGrid';
+import type { JsonImport, TextImport } from '../import/parse-import';
 import { LeaderboardView } from './LeaderboardView';
 import { CameraPermissionPanel } from './CameraPermissionPanel';
 import { StorageModeToggle } from './StorageModeToggle';
@@ -368,8 +369,55 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
 
   async function handleExportJson() {
     if (!active) return;
-    const json = await toJsonExport(active, scans, deps.imageStore, deps.now);
+    const albumOwnedCodes = (await deps.albumRepo.listByUser(active.userName)).map(
+      (e) => e.normalizedCode,
+    );
+    const json = await toJsonExport(active, scans, deps.imageStore, deps.now, albumOwnedCodes);
     deps.downloadJson(`${active.userName}-${active.id}.json`, JSON.stringify(json, null, 2));
+  }
+
+  // Restore a full JSON session export as a new local session (scans + images
+  // + album), then return to the home screen so it appears in the resume list.
+  async function handleImportJson(data: JsonImport) {
+    const session = await deps.sessionRepo.create(data.userName);
+    for (const scan of data.scans) {
+      const created = await deps.scanRepo.add({
+        sessionId: session.id,
+        normalizedCode: scan.normalizedCode,
+        source: scan.source,
+        confidence: scan.confidence,
+        capturedAt: scan.capturedAt,
+      });
+      const image = data.images[scan.id];
+      if (image !== undefined) await deps.imageStore.put(created.id, image);
+    }
+    if (data.albumOwnedCodes.length > 0) {
+      await deps.albumRepo.setMany(data.userName, data.albumOwnedCodes, true);
+    }
+    await refreshSessions();
+  }
+
+  // Merge a text import into a fresh session: duplicate counts become scan rows
+  // (capped), owned/missing become album ownership for the parsed user.
+  async function handleImportText(data: TextImport) {
+    const session = await deps.sessionRepo.create(data.userName);
+    if (data.kind === 'duplicate') {
+      for (const [code, count] of Object.entries(data.counts ?? {})) {
+        const copies = Math.min(count, REPS_CAP);
+        for (let i = 0; i < copies; i++) {
+          await deps.scanRepo.add({
+            sessionId: session.id,
+            normalizedCode: code,
+            source: 'manual',
+            confidence: 1,
+            capturedAt: deps.now(),
+          });
+        }
+      }
+    } else {
+      await deps.albumRepo.setMany(data.userName, data.ownedCodes ?? [], true);
+    }
+    await refreshSessions();
   }
 
   async function handleRequestCamera() {
@@ -404,6 +452,8 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
         albumCounts={sessionAlbumCounts}
         storageMode={storageMode}
         onChangeMode={onChangeMode}
+        onImportJson={handleImportJson}
+        onImportText={handleImportText}
       />
     );
   }

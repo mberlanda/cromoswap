@@ -505,6 +505,41 @@ section[aria-label="Resume"] li button {
   line-height: 1.4;
 }
 
+/* ── Import section ──────────────────────────────── */
+.import-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+}
+
+.import-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.import-kind-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.import-kind-picker p {
+  width: 100%;
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.import-error {
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0;
+}
+
 /* ── Tab bar ─────────────────────────────────────── */
 .section-nav {
   position: sticky;
