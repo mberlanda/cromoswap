@@ -40,5 +40,13 @@ module Api
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+
+    # The server-rendered /admin backoffice needs cookies/session/flash, CSRF,
+    # and Rack::MethodOverride (so form button_to method: :delete/:patch works —
+    # api_only strips it). The JSON API ignores these, so they are inert there.
+    config.middleware.use Rack::MethodOverride
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use ActionDispatch::Session::CookieStore, key: "_cromoswap_admin"
+    config.middleware.use ActionDispatch::Flash
   end
 end

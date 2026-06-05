@@ -11,8 +11,9 @@ RUN npm run build
 
 # 2. Rails app that serves the bundle from public/ and exposes the API.
 FROM ruby:3.3.6-slim AS app
+# postgresql-client provides pg_dump for the admin backoffice SQL export.
 RUN apt-get update -qq \
-  && apt-get install -y --no-install-recommends build-essential libpq-dev git \
+  && apt-get install -y --no-install-recommends build-essential libpq-dev postgresql-client git \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

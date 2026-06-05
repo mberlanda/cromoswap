@@ -1,0 +1,19 @@
+<h1>Album stickers</h1>
+<p><%= link_to "New album sticker", new_admin_album_sticker_path, class: "btn btn-primary" %></p>
+<p class="label">Showing up to 1000, by collector.</p>
+<table>
+  <thead><tr><th>Collector</th><th>Code</th><th>Owned at</th><th></th></tr></thead>
+  <tbody>
+    <% @album_stickers.each do |sticker| %>
+      <tr>
+        <td><%= sticker.user_name %></td>
+        <td><%= sticker.normalized_code %></td>
+        <td><%= sticker.owned_at&.strftime("%Y-%m-%d %H:%M") %></td>
+        <td class="actions">
+          <%= link_to "Edit", edit_admin_album_sticker_path(sticker), class: "btn" %>
+          <%= button_to "Delete", admin_album_sticker_path(sticker), method: :delete, class: "btn btn-danger" %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

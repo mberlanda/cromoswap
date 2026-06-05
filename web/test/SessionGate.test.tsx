@@ -25,6 +25,20 @@ describe('SessionGate', () => {
     expect(onCreate).toHaveBeenCalledWith('Mauro');
   });
 
+  it('shows a View board button only when onOpenBoard is provided', async () => {
+    const onOpenBoard = vi.fn();
+    const { rerender } = render(
+      <SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} />,
+    );
+    expect(screen.queryByRole('button', { name: /view board/i })).not.toBeInTheDocument();
+
+    rerender(
+      <SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} onOpenBoard={onOpenBoard} />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: /view board/i }));
+    expect(onOpenBoard).toHaveBeenCalled();
+  });
+
   it('lets the user resume an existing session', async () => {
     const onResume = vi.fn();
     render(<SessionGate sessions={[existing]} onCreate={vi.fn()} onResume={onResume} />);
