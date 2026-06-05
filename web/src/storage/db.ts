@@ -31,5 +31,10 @@ export function openStickerDb(): Promise<IDBPDatabase<StickerDb>> {
         album.createIndex('byUserAndCode', ['userName', 'normalizedCode'], { unique: true });
       }
     },
+    // When a newer DB version is requested (e.g. another tab upgraded), close
+    // this connection so the upgrade isn't blocked indefinitely.
+    blocking(_cv, _nv, event) {
+      (event.target as IDBOpenDBRequest)?.result?.close();
+    },
   });
 }
