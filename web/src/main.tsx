@@ -7,12 +7,19 @@ import { createAppDeps } from './composition';
 /** Browser bootstrap: build deps (IndexedDB, camera, OCR), then mount the App. */
 function Root() {
   const [deps, setDeps] = useState<AppDeps | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    void createAppDeps().then(setDeps);
+    createAppDeps().then(setDeps).catch((err: unknown) => {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(msg);
+      console.error('createAppDeps failed:', err);
+    });
   }, []);
 
-  return deps ? <App deps={deps} /> : <p>Starting…</p>;
+  if (error) return <p style={{ padding: '1rem', color: 'red' }}>Failed to start: {error}</p>;
+  if (!deps) return <p style={{ padding: '1rem' }}>Starting…</p>;
+  return <App deps={deps} />;
 }
 
 createRoot(document.getElementById('root')!).render(
