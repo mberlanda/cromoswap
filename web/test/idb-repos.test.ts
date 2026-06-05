@@ -114,4 +114,17 @@ describe('IndexedDB repos', () => {
     // Scoped per user.
     expect(await album.listByUser('Ana')).toEqual([]);
   });
+
+  it('setMany adds and removes batches of codes idempotently', async () => {
+    const db = await openStickerDb();
+    const album = new IdbAlbumRepo(db, ids, clock);
+
+    await album.toggle('Mauro', 'BRA01'); // pre-owned
+    await album.setMany('Mauro', ['BRA01', 'BRA02', 'BRA03'], true);
+    expect((await album.listByUser('Mauro')).map((e) => e.normalizedCode).sort())
+      .toEqual(['BRA01', 'BRA02', 'BRA03']);
+
+    await album.setMany('Mauro', ['BRA01', 'BRA03'], false);
+    expect((await album.listByUser('Mauro')).map((e) => e.normalizedCode)).toEqual(['BRA02']);
+  });
 });

@@ -42,6 +42,23 @@ export function AlbumView({
     [albumRepo, readOnly, userName],
   );
 
+  const handleSetAll = useCallback(
+    async (prefix: string, owned: boolean) => {
+      if (readOnly) return;
+      const codes = stickerNumbers(prefix).map((n) => `${prefix}${n}`);
+      await albumRepo.setMany(userName, codes, owned);
+      setOwnedCodes((prev) => {
+        const next = new Set(prev);
+        for (const code of codes) {
+          if (owned) next.add(code);
+          else next.delete(code);
+        }
+        return next;
+      });
+    },
+    [albumRepo, readOnly, userName],
+  );
+
   function handleExportOwned() {
     downloadText(
       `${userName}-album-owned.txt`,
@@ -68,6 +85,7 @@ export function AlbumView({
             numbers={stickerNumbers('FWC')}
             ownedCodes={ownedCodes}
             onToggle={handleToggle}
+            onSetAll={handleSetAll}
             readOnly={readOnly}
           />
         </div>
@@ -83,6 +101,7 @@ export function AlbumView({
                 numbers={stickerNumbers(prefix)}
                 ownedCodes={ownedCodes}
                 onToggle={handleToggle}
+                onSetAll={handleSetAll}
                 readOnly={readOnly}
               />
             ))}

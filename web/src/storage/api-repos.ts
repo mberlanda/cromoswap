@@ -159,4 +159,15 @@ export class ApiAlbumRepo implements AlbumRepo {
     const data = await res.json() as { action: 'added' | 'removed' };
     return data.action;
   }
+
+  // The backend only exposes a per-sticker toggle, so a batch set reads the
+  // current owned set once and toggles only the codes whose state must change.
+  async setMany(userName: string, normalizedCodes: string[], owned: boolean): Promise<void> {
+    const current = new Set((await this.listByUser(userName)).map((e) => e.normalizedCode));
+    for (const normalizedCode of normalizedCodes) {
+      if (current.has(normalizedCode) !== owned) {
+        await this.toggle(userName, normalizedCode);
+      }
+    }
+  }
 }

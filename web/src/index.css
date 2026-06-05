@@ -577,10 +577,32 @@ section[aria-label="Resume"] li button {
   color: var(--ink);
 }
 
+.team-card-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 .team-card-count {
   color: var(--muted);
   font-weight: 700;
   font-size: 12px;
+}
+
+/* Compact per-team All / Clear toggle */
+.all-toggle {
+  min-height: 0;
+  padding: 2px var(--space-2);
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 999px;
+  border: 1px solid var(--subtle);
+  background: var(--surface);
+  color: var(--scan-strong);
+}
+
+.all-toggle-clear {
+  color: var(--muted);
 }
 
 .team-card-chips {
