@@ -10,9 +10,10 @@ interface AlbumViewProps {
   albumRepo: AlbumRepo;
   downloadText: (filename: string, content: string) => void;
   now: Clock;
+  onSync?: (codes: string[]) => void;
 }
 
-export function AlbumView({ userName, albumRepo, downloadText, now }: AlbumViewProps) {
+export function AlbumView({ userName, albumRepo, downloadText, now, onSync }: AlbumViewProps) {
   const [ownedCodes, setOwnedCodes] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -28,6 +29,7 @@ export function AlbumView({ userName, albumRepo, downloadText, now }: AlbumViewP
         const next = new Set(prev);
         if (result === 'added') next.add(code);
         else next.delete(code);
+        onSync?.([...next]);
         return next;
       });
     },

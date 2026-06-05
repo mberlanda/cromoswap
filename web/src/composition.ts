@@ -6,7 +6,7 @@ import { TesseractAdapter } from './ocr/tesseract-adapter';
 import { runPipelineMultiOrientation } from './ocr/pipeline';
 import { BrightnessLocalizer } from './ocr/localizer';
 import { requestCamera } from './ui/camera-permission';
-import { pushSession } from './storage/sync-client';
+import { pushSession, syncAlbumStickers, fetchLeaderboard as fetchLeaderboardClient } from './storage/sync-client';
 import type { RgbaImage } from './ocr/image';
 
 // Empty base URL means same-origin (relative `/api/...`), which is how the
@@ -98,6 +98,14 @@ export async function createAppDeps(): Promise<AppDeps> {
     downloadJson: (name, content) => triggerDownload(name, content, 'application/json'),
     syncSession: SYNC_ENABLED
       ? (session, scans) => pushSession(session, scans, API_BASE_URL, (url, init) => fetch(url, init))
+      : undefined,
+    syncAlbum: SYNC_ENABLED
+      ? (userName, codes) => {
+          void syncAlbumStickers(userName, codes, API_BASE_URL, (url, init) => fetch(url, init));
+        }
+      : undefined,
+    fetchLeaderboard: SYNC_ENABLED
+      ? () => fetchLeaderboardClient(API_BASE_URL, (url, init) => fetch(url, init))
       : undefined,
   };
 }

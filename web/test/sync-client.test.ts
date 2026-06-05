@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { pushSession } from '../src/storage/sync-client';
+import { pushSession, syncAlbumStickers, fetchLeaderboard } from '../src/storage/sync-client';
 import type { Scan, Session } from '../src/domain/types';
 
 const session: Session = {
@@ -55,5 +55,46 @@ describe('pushSession', () => {
     const fetchImpl = vi.fn(async () => new Response(null, { status: 500 }));
     const result = await pushSession(session, [scan], 'http://api.test', fetchImpl);
     expect(result.ok).toBe(false);
+  });
+});
+
+describe('syncAlbumStickers', () => {
+  it('POSTs userName and codes to the album sync endpoint', async () => {
+    const fetchImpl = vi.fn(async () => new Response(JSON.stringify({ ok: true, owned: 2 }), { status: 200 }));
+    const result = await syncAlbumStickers('Mauro', ['ARG01', 'BRA07'], 'http://api.test', fetchImpl);
+
+    expect(result.ok).toBe(true);
+    const [url, init] = fetchImpl.mock.calls[0];
+    expect(url).toBe('http://api.test/api/v1/album_stickers/sync');
+    const body = JSON.parse(init!.body as string);
+    expect(body.userName).toBe('Mauro');
+    expect(body.codes).toEqual(['ARG01', 'BRA07']);
+  });
+
+  it('resolves ok:false on network failure', async () => {
+    const fetchImpl = vi.fn(async () => { throw new Error('down'); });
+    const result = await syncAlbumStickers('Mauro', [], 'http://api.test', fetchImpl);
+    expect(result.ok).toBe(false);
+  });
+});
+
+describe('fetchLeaderboard', () => {
+  it('returns parsed leaderboard entries on success', async () => {
+    const entries = [{ userName: 'Mauro', owned: 45, missing: 935 }];
+    const fetchImpl = vi.fn(async () => new Response(JSON.stringify(entries), { status: 200 }));
+    const result = await fetchLeaderboard('http://api.test', fetchImpl);
+    expect(result).toEqual(entries);
+  });
+
+  it('returns empty array on error', async () => {
+    const fetchImpl = vi.fn(async () => { throw new Error('down'); });
+    const result = await fetchLeaderboard('http://api.test', fetchImpl);
+    expect(result).toEqual([]);
+  });
+
+  it('returns empty array on non-2xx response', async () => {
+    const fetchImpl = vi.fn(async () => new Response(null, { status: 500 }));
+    const result = await fetchLeaderboard('http://api.test', fetchImpl);
+    expect(result).toEqual([]);
   });
 });

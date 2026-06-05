@@ -10,10 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_03_230127) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_05_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
+
+  create_table "album_stickers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "normalized_code", null: false
+    t.datetime "owned_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "user_name", null: false
+    t.index ["user_name", "normalized_code"], name: "index_album_stickers_on_user_name_and_normalized_code", unique: true
+    t.index ["user_name"], name: "index_album_stickers_on_user_name"
+  end
 
   create_table "scans", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "captured_at", null: false

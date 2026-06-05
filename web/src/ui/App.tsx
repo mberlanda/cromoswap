@@ -4,10 +4,13 @@ import type { Clock, ImageStore, ScanRepo, SessionRepo, AlbumRepo } from '../sto
 import { toTextExport } from '../export/text-export';
 import { toJsonExport } from '../export/json-export';
 import type { CameraResult, CameraState } from './camera-permission';
+import type { LeaderboardEntry } from '../storage/sync-client';
 import { SessionGate } from './SessionGate';
 import { TabBar } from './TabBar';
+import type { Tab } from './TabBar';
 import { AlbumView } from './AlbumView';
 import { RepsView } from './RepsView';
+import { LeaderboardView } from './LeaderboardView';
 import { CameraPermissionPanel } from './CameraPermissionPanel';
 import { SyncIndicator } from './SyncIndicator';
 import type { SyncStatus } from './SyncIndicator';
@@ -39,6 +42,10 @@ export interface AppDeps {
   attachVideo?: (element: HTMLVideoElement | null) => void;
   /** Optional: trigger the browser camera permission prompt and start the stream. */
   startCamera?: () => Promise<CameraResult>;
+  /** Optional: sync album owned codes to the backend for a user. */
+  syncAlbum?: (userName: string, codes: string[]) => void;
+  /** Optional: fetch the global leaderboard from the backend. */
+  fetchLeaderboard?: () => Promise<LeaderboardEntry[]>;
 }
 
 export function App({ deps }: { deps: AppDeps }) {
@@ -54,8 +61,10 @@ export function App({ deps }: { deps: AppDeps }) {
   const [noDetection, setNoDetection] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [orientation, setOrientation] = useState<Orientation>('portrait');
-  const [tab, setTab] = useState<'album' | 'reps'>('reps');
+  const [tab, setTab] = useState<Tab>('reps');
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('local');
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   // When startCamera is provided, camera starts only on user action; tests without it skip the panel.
   const [cameraState, setCameraState] = useState<CameraState>(
     deps.startCamera ? 'idle' : 'granted',
@@ -229,6 +238,23 @@ export function App({ deps }: { deps: AppDeps }) {
     if (active) void refreshScans(active);
   }
 
+  function handleAlbumSync(codes: string[]) {
+    if (active && deps.syncAlbum) deps.syncAlbum(active.userName, codes);
+  }
+
+  async function handleRefreshLeaderboard() {
+    if (!deps.fetchLeaderboard) return;
+    setLeaderboardLoading(true);
+    const entries = await deps.fetchLeaderboard();
+    setLeaderboard(entries);
+    setLeaderboardLoading(false);
+  }
+
+  function handleTabChange(next: Tab) {
+    setTab(next);
+    if (next === 'board') void handleRefreshLeaderboard();
+  }
+
   return (
     <main aria-label="Scanner">
       <header className="app-header">
@@ -236,13 +262,21 @@ export function App({ deps }: { deps: AppDeps }) {
         <p className="app-header-meta">{scans.length} scan{scans.length !== 1 ? 's' : ''}</p>
         <SyncIndicator status={syncStatus} onRetry={handleSyncRetry} />
       </header>
-      <TabBar active={tab} onChange={setTab} />
+      <TabBar active={tab} onChange={handleTabChange} showBoard={!!deps.fetchLeaderboard} />
       {tab === 'album' && (
         <AlbumView
           userName={active.userName}
           albumRepo={deps.albumRepo}
           downloadText={deps.downloadText}
           now={deps.now}
+          onSync={deps.syncAlbum ? handleAlbumSync : undefined}
+        />
+      )}
+      {tab === 'board' && (
+        <LeaderboardView
+          entries={leaderboard}
+          loading={leaderboardLoading}
+          onRefresh={handleRefreshLeaderboard}
         />
       )}
       {tab === 'reps' && cameraState !== 'granted' && (

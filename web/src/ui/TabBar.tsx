@@ -1,9 +1,12 @@
+export type Tab = 'album' | 'reps' | 'board';
+
 interface TabBarProps {
-  active: 'album' | 'reps';
-  onChange: (tab: 'album' | 'reps') => void;
+  active: Tab;
+  onChange: (tab: Tab) => void;
+  showBoard?: boolean;
 }
 
-export function TabBar({ active, onChange }: TabBarProps) {
+export function TabBar({ active, onChange, showBoard = false }: TabBarProps) {
   return (
     <div role="tablist" className="tab-bar">
       <button
@@ -24,6 +27,17 @@ export function TabBar({ active, onChange }: TabBarProps) {
       >
         My Reps
       </button>
+      {showBoard && (
+        <button
+          type="button"
+          role="tab"
+          aria-selected={active === 'board'}
+          className={active === 'board' ? 'tab-active' : ''}
+          onClick={() => onChange('board')}
+        >
+          Board
+        </button>
+      )}
     </div>
   );
 }
