@@ -45,6 +45,10 @@ export interface AppDeps {
   attachVideo?: (element: HTMLVideoElement | null) => void;
   /** Optional: trigger the browser camera permission prompt and start the stream. */
   startCamera?: () => Promise<CameraResult>;
+  /** Optional: stop camera tracks and detach the current preview stream. */
+  stopCamera?: () => void;
+  /** Auto-collect scan interval (injectable for tests). */
+  videoScanIntervalMs?: number;
   /** Optional: fetch the global leaderboard from the backend. */
   fetchLeaderboard?: () => Promise<LeaderboardEntry[]>;
 }
@@ -70,6 +74,8 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
   const [orientation, setOrientation] = useState<Orientation>('portrait');
   const [size, setSize] = useState<number>(SIZE_DEFAULT);
   const [targeted, setTargeted] = useState(false);
+  const [cameraPaused, setCameraPaused] = useState(false);
+  const [videoMode, setVideoMode] = useState(false);
   const [tab, setTab] = useState<Tab>('reps');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
@@ -78,9 +84,12 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
     deps.startCamera ? 'idle' : 'granted',
   );
   const videoRef = useRef<HTMLVideoElement>(null);
+  const videoScanBusyRef = useRef(false);
+  const lastAutoCodeRef = useRef<string | null>(null);
 
   const SCAN_INTERVAL_MS = 300;
   const scanTimeoutMs = deps.scanTimeoutMs ?? 5000;
+  const videoScanIntervalMs = deps.videoScanIntervalMs ?? 850;
   const delay = deps.delay ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
   const nowMs = deps.nowMs ?? (() => Date.now());
 
@@ -105,19 +114,24 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
 
   // Bind the camera <video> whenever the granted scanner preview is mounted.
   useEffect(() => {
-    if (active && tab === 'reps' && cameraState === 'granted') {
+    if (active && tab === 'reps' && cameraState === 'granted' && !cameraPaused) {
       deps.attachVideo?.(videoRef.current);
       return () => deps.attachVideo?.(null);
     }
     deps.attachVideo?.(null);
-  }, [active, cameraState, tab, deps]);
+  }, [active, cameraPaused, cameraState, tab, deps]);
 
   // Live targeting: poll the framed region so the guide turns green when a
   // sticker is well aligned. Paused while an explicit capture is running.
   const targetIntervalMs = deps.targetIntervalMs ?? 350;
   const detectTargeted = deps.detectTargeted;
   const liveTargeting =
-    !!detectTargeted && !!active && tab === 'reps' && cameraState === 'granted' && !scanning;
+    !!detectTargeted &&
+    !!active &&
+    tab === 'reps' &&
+    cameraState === 'granted' &&
+    !cameraPaused &&
+    !scanning;
   useEffect(() => {
     if (!liveTargeting || !detectTargeted) return;
     let cancelled = false;
@@ -162,28 +176,113 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
     await refreshScans(session);
   }
 
-  async function storeScan(
-    code: string,
-    source: Scan['source'],
-    confidence: number,
-    imageDataUrl?: string,
-  ) {
-    if (!active) return;
-    const scan = await deps.scanRepo.add({
-      sessionId: active.id,
-      normalizedCode: code,
-      source,
-      confidence,
-      capturedAt: deps.now(),
-    });
-    if (imageDataUrl !== undefined) await deps.imageStore.put(scan.id, imageDataUrl);
-    await refreshScans(active);
-  }
+  const storeScan = useCallback(
+    async (
+      code: string,
+      source: Scan['source'],
+      confidence: number,
+      imageDataUrl?: string,
+    ) => {
+      if (!active) return;
+      const scan = await deps.scanRepo.add({
+        sessionId: active.id,
+        normalizedCode: code,
+        source,
+        confidence,
+        capturedAt: deps.now(),
+      });
+      if (imageDataUrl !== undefined) await deps.imageStore.put(scan.id, imageDataUrl);
+      await refreshScans(active);
+    },
+    [active, deps, refreshScans],
+  );
+
+  const storeDetection = useCallback(
+    async (result: Detection) => {
+      await storeScan(
+        result.candidate.code.canonical,
+        'ocr',
+        result.candidate.confidence,
+        result.imageDataUrl,
+      );
+    },
+    [storeScan],
+  );
+
+  const pauseCamera = useCallback(() => {
+    deps.stopCamera?.();
+    setCameraPaused(true);
+    setTargeted(false);
+  }, [deps]);
+
+  const resumeCamera = useCallback(async () => {
+    setNoDetection(false);
+    if (deps.startCamera) {
+      const result = await deps.startCamera();
+      setCameraState(result.state);
+      setCameraPaused(result.state !== 'granted');
+      return;
+    }
+    setCameraPaused(false);
+  }, [deps]);
+
+  const autoCollectActive =
+    !!active &&
+    tab === 'reps' &&
+    cameraState === 'granted' &&
+    videoMode &&
+    !cameraPaused &&
+    !detection &&
+    !scanning;
+
+  useEffect(() => {
+    if (!autoCollectActive) {
+      videoScanBusyRef.current = false;
+      lastAutoCodeRef.current = null;
+      return;
+    }
+
+    let cancelled = false;
+    const tick = async () => {
+      if (videoScanBusyRef.current) return;
+      videoScanBusyRef.current = true;
+      try {
+        const result = await deps.scanOnce(orientation, size);
+        if (cancelled) return;
+        if (!result) {
+          lastAutoCodeRef.current = null;
+          return;
+        }
+
+        const code = result.candidate.code.canonical;
+        if (code === lastAutoCodeRef.current) return;
+        lastAutoCodeRef.current = code;
+        setNoDetection(false);
+        await storeDetection(result);
+      } finally {
+        videoScanBusyRef.current = false;
+      }
+    };
+
+    void tick();
+    const id = setInterval(() => void tick(), videoScanIntervalMs);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [
+    autoCollectActive,
+    deps,
+    orientation,
+    size,
+    storeDetection,
+    videoScanIntervalMs,
+  ]);
 
   // Hold-while-focused: keep scanning the framed region until a valid code is
   // recognized or the timeout elapses, then prompt to confirm/correct or fail.
   async function handleCapture() {
-    if (scanning) return;
+    if (scanning || cameraPaused) return;
     setDetection(null);
     setNoDetection(false);
     setScanning(true);
@@ -193,6 +292,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
         const result = await deps.scanOnce(orientation, size);
         if (result) {
           setDetection(result);
+          pauseCamera();
           return;
         }
         await delay(SCAN_INTERVAL_MS);
@@ -243,6 +343,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
     if (!deps.startCamera) return;
     const result = await deps.startCamera();
     setCameraState(result.state);
+    setCameraPaused(result.state !== 'granted');
   }
 
   function handleSkipToManual() {
@@ -274,6 +375,16 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
   function handleTabChange(next: Tab) {
     setTab(next);
     if (next === 'board') void handleRefreshLeaderboard();
+  }
+
+  function handleToggleVideoMode(enabled: boolean) {
+    setVideoMode(enabled);
+    if (enabled && cameraPaused) void resumeCamera();
+  }
+
+  function handleResumeScan() {
+    setDetection(null);
+    void resumeCamera();
   }
 
   return (
@@ -315,15 +426,20 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
           detection={detection}
           noDetection={noDetection}
           scanning={scanning}
+          cameraPaused={cameraPaused}
+          videoMode={videoMode}
           orientation={orientation}
           size={size}
           targeted={targeted}
           videoRef={videoRef}
           onCapture={handleCapture}
+          onResumeCamera={() => void resumeCamera()}
+          onPauseCamera={pauseCamera}
+          onToggleVideoMode={handleToggleVideoMode}
           onConfirm={handleConfirm}
           onCorrect={handleCorrect}
-          onSkip={() => setDetection(null)}
-          onRescan={() => setDetection(null)}
+          onSkip={handleResumeScan}
+          onRescan={handleResumeScan}
           onManualAdd={handleManualAdd}
           onEdit={handleEdit}
           onDelete={handleDelete}

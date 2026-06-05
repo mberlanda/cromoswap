@@ -19,11 +19,16 @@ const baseProps: RepsViewProps = {
   detection: null,
   noDetection: false,
   scanning: false,
+  cameraPaused: false,
+  videoMode: false,
   orientation: 'portrait',
   size: 0.8,
   targeted: false,
   videoRef: createRef(),
   onCapture: vi.fn(),
+  onResumeCamera: vi.fn(),
+  onPauseCamera: vi.fn(),
+  onToggleVideoMode: vi.fn(),
   onConfirm: vi.fn(),
   onCorrect: vi.fn(),
   onSkip: vi.fn(),
@@ -54,5 +59,12 @@ describe('RepsView export section', () => {
   it('shows privacy note near the JSON export button', () => {
     render(<RepsView {...baseProps} />);
     expect(screen.getByText(/personal backup/i)).toBeInTheDocument();
+  });
+
+  it('shows camera pause controls and auto collect toggle', () => {
+    render(<RepsView {...baseProps} cameraPaused />);
+    expect(screen.getByText(/camera paused/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /resume camera/i })).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: /auto collect/i })).toBeInTheDocument();
   });
 });

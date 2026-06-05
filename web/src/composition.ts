@@ -78,7 +78,7 @@ function drawFrame(
 
 export function createCameraBinding(
   request: () => Promise<CameraResult>,
-): Pick<AppDeps, 'attachVideo' | 'startCamera'> {
+): Pick<AppDeps, 'attachVideo' | 'startCamera' | 'stopCamera'> {
   let video: HTMLVideoElement | null = null;
   let cameraStream: MediaStream | null = null;
 
@@ -101,7 +101,13 @@ export function createCameraBinding(
     return camera;
   };
 
-  return { attachVideo, startCamera };
+  const stopCamera = (): void => {
+    cameraStream?.getTracks().forEach((track) => track.stop());
+    cameraStream = null;
+    if (video) video.srcObject = null;
+  };
+
+  return { attachVideo, startCamera, stopCamera };
 }
 
 export async function createAppDeps(mode: StorageMode = getStorageMode()): Promise<AppDeps> {
@@ -176,6 +182,7 @@ export async function createAppDeps(mode: StorageMode = getStorageMode()): Promi
     detectTargeted,
     attachVideo,
     startCamera: camera.startCamera,
+    stopCamera: camera.stopCamera,
     now: nowIso,
     downloadText: (name, content) => triggerDownload(name, content, 'text/plain'),
     downloadJson: (name, content) => triggerDownload(name, content, 'application/json'),

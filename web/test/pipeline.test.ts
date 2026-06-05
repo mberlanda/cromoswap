@@ -41,4 +41,19 @@ describe('runPipeline', () => {
     expect(result[0].code.canonical).toBe('ARG01');
     expect(ocr.calls).toBe(1);
   });
+
+  it('upscales the preprocessed ROI before OCR', async () => {
+    let recognized: RgbaImage | null = null;
+    const ocr = {
+      async recognize(image: RgbaImage) {
+        recognized = image;
+        return { text: 'ARG01', confidence: 0.6 };
+      },
+    };
+
+    await runPipeline(frame, { ocr, roi, threshold: 128, preprocessScale: 4 });
+
+    expect(recognized?.width).toBe(8);
+    expect(recognized?.height).toBe(8);
+  });
 });

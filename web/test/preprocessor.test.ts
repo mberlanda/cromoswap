@@ -36,4 +36,23 @@ describe('toGrayscaleThreshold', () => {
     const dark = toGrayscaleThreshold(pixel(10, 10, 10), 128, true);
     expect([dark.data[0], dark.data[1], dark.data[2]]).toEqual([255, 255, 255]);
   });
+
+  it('can upscale tiny OCR crops while thresholding', () => {
+    const image: RgbaImage = {
+      width: 2,
+      height: 1,
+      data: new Uint8ClampedArray([
+        10, 10, 10, 255,
+        255, 255, 255, 255,
+      ]),
+    };
+
+    const out = toGrayscaleThreshold(image, 128, true, 3);
+
+    expect(out.width).toBe(6);
+    expect(out.height).toBe(3);
+    expect([out.data[0], out.data[1], out.data[2]]).toEqual([255, 255, 255]);
+    const firstBrightPixel = (0 * out.width + 3) * 4;
+    expect([out.data[firstBrightPixel], out.data[firstBrightPixel + 1], out.data[firstBrightPixel + 2]]).toEqual([0, 0, 0]);
+  });
 });

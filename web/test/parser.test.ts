@@ -10,6 +10,15 @@ describe('parseCandidates', () => {
     expect(parseCandidates('arg-01 noise')).toEqual(['arg-01']);
   });
 
+  it('keeps OCR-confused code tokens for preset correction', () => {
+    expect(parseCandidates('noise CR0 2O\nFWC I7\nJ0R8\nGHA I')).toEqual([
+      'CR0 2O',
+      'FWC I7',
+      'J0R8',
+      'GHA I',
+    ]);
+  });
+
   it('returns [] when nothing matches', () => {
     expect(parseCandidates('no codes here')).toEqual([]);
   });
