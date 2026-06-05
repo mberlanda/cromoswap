@@ -24,3 +24,6 @@ web/fixtures/stickers/*.heic
 
 # Tesseract language model (downloaded at runtime)
 *.traineddata
+
+# Visual brainstorming companion artifacts
+.superpowers/
