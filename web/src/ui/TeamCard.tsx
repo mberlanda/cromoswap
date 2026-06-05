@@ -1,18 +1,20 @@
 interface TeamCardProps {
   prefix: string;
   fullName: string;
+  flag: string;
   numbers: string[];
   ownedCodes: Set<string>;
   onToggle: (code: string) => void;
 }
 
-export function TeamCard({ prefix, fullName, numbers, ownedCodes, onToggle }: TeamCardProps) {
+export function TeamCard({ prefix, fullName, flag, numbers, ownedCodes, onToggle }: TeamCardProps) {
   const ownedCount = numbers.filter((n) => ownedCodes.has(`${prefix}${n}`)).length;
 
   return (
     <div className="team-card">
       <div className="team-card-header">
         <span className="team-card-name">
+          {flag && <span className="team-flag" aria-hidden="true">{flag}</span>}
           <strong>{prefix}</strong> · {fullName}
         </span>
         <span className="team-card-count">{ownedCount} / {numbers.length}</span>
