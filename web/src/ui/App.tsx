@@ -10,6 +10,9 @@ import { TabBar } from './TabBar';
 import type { Tab } from './TabBar';
 import { AlbumView } from './AlbumView';
 import { RepsView } from './RepsView';
+import type { RepsViewMode } from './RepsView';
+import type { RepsMode } from './RepsModeToggle';
+import { REPS_CAP } from './RepsGrid';
 import { LeaderboardView } from './LeaderboardView';
 import { CameraPermissionPanel } from './CameraPermissionPanel';
 import { StorageModeToggle } from './StorageModeToggle';
@@ -77,6 +80,8 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
   const [cameraPaused, setCameraPaused] = useState(false);
   const [videoMode, setVideoMode] = useState(false);
   const [tab, setTab] = useState<Tab>('reps');
+  const [repsView, setRepsView] = useState<RepsViewMode>('scan');
+  const [repsMode, setRepsMode] = useState<RepsMode>('add');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [boardSelectionUserName, setBoardSelectionUserName] = useState<string | null>(null);
@@ -96,20 +101,23 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
 
   const TOTAL_STICKERS = 980;
 
-  const refreshSessions = useCallback(async () => {
-    const list = await deps.sessionRepo.list();
-    setSessions(list);
-    const counts: Record<string, number> = {};
-    const albumCounts: Record<string, { owned: number; missing: number }> = {};
-    for (const s of list) {
-      const sessionScans = await deps.scanRepo.listBySession(s.id);
-      counts[s.id] = sessionScans.length;
-      const entries = await deps.albumRepo.listByUser(s.userName);
-      const owned = entries.length;
-      albumCounts[s.id] = { owned, missing: TOTAL_STICKERS - owned };
-    }
-    setSessionScanCounts(counts);
-    setSessionAlbumCounts(albumCounts);
+  const refreshSessions = useCallback(() => {
+    // setState lives inside the .then callback (not synchronously in the
+    // caller's effect) so it stays clear of the set-state-in-effect rule.
+    return deps.sessionRepo.list().then(async (list) => {
+      const counts: Record<string, number> = {};
+      const albumCounts: Record<string, { owned: number; missing: number }> = {};
+      for (const s of list) {
+        const sessionScans = await deps.scanRepo.listBySession(s.id);
+        counts[s.id] = sessionScans.length;
+        const entries = await deps.albumRepo.listByUser(s.userName);
+        const owned = entries.length;
+        albumCounts[s.id] = { owned, missing: TOTAL_STICKERS - owned };
+      }
+      setSessions(list);
+      setSessionScanCounts(counts);
+      setSessionAlbumCounts(albumCounts);
+    });
   }, [deps]);
 
   useEffect(() => {
@@ -321,6 +329,27 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
     await storeScan(code, 'manual', 1);
   }
 
+  // Apply a grid tap under the active mode: add one copy (capped), remove one,
+  // or clear all copies of a code. Each maps onto scan rows.
+  async function handleGridTap(code: string) {
+    if (!active) return;
+    if (repsMode === 'add') {
+      const current = scans.filter((s) => s.normalizedCode === code).length;
+      if (current >= REPS_CAP) return;
+      await storeScan(code, 'manual', 1);
+      return;
+    }
+    const targets =
+      repsMode === 'clear'
+        ? scans.filter((s) => s.normalizedCode === code)
+        : scans.filter((s) => s.normalizedCode === code).slice(0, 1);
+    for (const t of targets) {
+      await deps.scanRepo.delete(t.id);
+      await deps.imageStore.delete(t.id);
+    }
+    if (targets.length > 0) await refreshScans(active);
+  }
+
   async function handleEdit(id: string, code: string) {
     await deps.scanRepo.update(id, { normalizedCode: code });
     if (active) await refreshScans(active);
@@ -468,6 +497,11 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
       )}
       {tab === 'reps' && cameraState === 'granted' && (
         <RepsView
+          view={repsView}
+          onSetView={setRepsView}
+          mode={repsMode}
+          onSetMode={setRepsMode}
+          onGridTap={handleGridTap}
           scans={scans}
           thumbnails={thumbnails}
           detection={detection}

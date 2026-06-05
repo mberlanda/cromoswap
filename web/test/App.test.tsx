@@ -75,6 +75,43 @@ describe('App', () => {
     expect(screen.queryByRole('button', { name: /scan sticker/i })).not.toBeInTheDocument();
   });
 
+  it('reps grid adds, removes, and clears copies via the tap mode', async () => {
+    render(<App deps={makeDeps()} />);
+    await startSession();
+
+    await userEvent.click(screen.getByRole('button', { name: /grid/i }));
+    const tap = async (label: string) => userEvent.click(await findButtonByAriaLabel(label));
+
+    // Default mode is +1 (add).
+    await tap('CRO05, no copies');
+    expect(await findButtonByAriaLabel('CRO05, 1 copy')).toBeInTheDocument();
+    await tap('CRO05, 1 copy');
+    expect(await findButtonByAriaLabel('CRO05, 2 copies')).toBeInTheDocument();
+
+    // Give away → decrement.
+    await userEvent.click(screen.getByRole('button', { name: /give away/i }));
+    await tap('CRO05, 2 copies');
+    expect(await findButtonByAriaLabel('CRO05, 1 copy')).toBeInTheDocument();
+
+    // Clear → zero out.
+    await userEvent.click(screen.getByRole('button', { name: /clear/i }));
+    await tap('CRO05, 1 copy');
+    expect(await findButtonByAriaLabel('CRO05, no copies')).toBeInTheDocument();
+  });
+
+  it('reps grid caps a sticker at 7 copies', async () => {
+    render(<App deps={makeDeps()} />);
+    await startSession();
+    await userEvent.click(screen.getByRole('button', { name: /grid/i }));
+
+    for (let i = 0; i < 8; i++) {
+      const current =
+        document.querySelector<HTMLButtonElement>('button[aria-label^="CRO05,"]')!;
+      await userEvent.click(current);
+    }
+    expect(await findButtonByAriaLabel('CRO05, 7 copies')).toBeInTheDocument();
+  });
+
   it('captures, confirms, and stores a scan that appears in the collection', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();
