@@ -7,6 +7,7 @@ import { ManualEntry } from './ManualEntry';
 import { CollectionList } from './CollectionList';
 import { ScanStatus } from './ScanStatus';
 import { OrientationToggle } from './OrientationToggle';
+import { SizeSlider } from './SizeSlider';
 import { countByCode } from '../domain/counts';
 
 export interface RepsViewProps {
@@ -16,6 +17,8 @@ export interface RepsViewProps {
   noDetection: boolean;
   scanning: boolean;
   orientation: Orientation;
+  size: number;
+  targeted: boolean;
   videoRef: RefObject<HTMLVideoElement | null>;
   onCapture: () => void;
   onConfirm: (code: string) => void;
@@ -28,12 +31,13 @@ export interface RepsViewProps {
   onExportText: () => void;
   onExportJson: () => void;
   onSetOrientation: (o: Orientation) => void;
+  onSetSize: (size: number) => void;
 }
 
 export function RepsView({
-  scans, thumbnails, detection, noDetection, scanning, orientation,
+  scans, thumbnails, detection, noDetection, scanning, orientation, size, targeted,
   videoRef, onCapture, onConfirm, onCorrect, onSkip, onRescan,
-  onManualAdd, onEdit, onDelete, onExportText, onExportJson, onSetOrientation,
+  onManualAdd, onEdit, onDelete, onExportText, onExportJson, onSetOrientation, onSetSize,
 }: RepsViewProps) {
   const counts = countByCode(scans);
   const recentPrefixes = Object.entries(counts)
@@ -51,7 +55,7 @@ export function RepsView({
       <section aria-label="Scan" className="scan-area">
         <div className="camera-wrap">
           <video ref={videoRef} playsInline muted className="camera-preview" />
-          <MaskOverlay orientation={orientation} />
+          <MaskOverlay orientation={orientation} size={size} targeted={targeted} />
         </div>
         <ScanStatus state={scanning ? 'scanning' : noDetection ? 'no-detection' : 'idle'} />
         {detection && (
@@ -66,6 +70,7 @@ export function RepsView({
         )}
         <div className="scan-bottom">
           <OrientationToggle value={orientation} onChange={onSetOrientation} />
+          <SizeSlider value={size} onChange={onSetSize} />
           <button type="button" className="primary full" onClick={onCapture} disabled={scanning}>
             {scanning ? 'Hold steady…' : 'Scan sticker'}
           </button>

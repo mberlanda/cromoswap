@@ -7,6 +7,14 @@ import { fetchLeaderboard as fetchLeaderboardClient } from './storage/sync-clien
 import { TesseractAdapter } from './ocr/tesseract-adapter';
 import { runPipelineMultiOrientation } from './ocr/pipeline';
 import { BrightnessLocalizer } from './ocr/localizer';
+import { cropRoi } from './ocr/roi-cropper';
+import {
+  centeredRect,
+  coverMapRect,
+  isWellTargeted,
+  PREVIEW_BOX_ASPECT,
+  type Orientation,
+} from './ocr/geometry';
 import { requestCamera, type CameraResult } from './ui/camera-permission';
 import type { RgbaImage } from './ocr/image';
 
@@ -48,7 +56,12 @@ function triggerDownload(filename: string, content: string, mime: string): void 
   URL.revokeObjectURL(url);
 }
 
-function captureFrame(video: HTMLVideoElement): { image: RgbaImage; dataUrl: string } | null {
+// Draw the current video frame to a canvas; returns the canvas (and its pixels)
+// so callers can optionally encode a dataURL — the live targeting loop skips the
+// expensive PNG encode and only reads pixels.
+function drawFrame(
+  video: HTMLVideoElement,
+): { image: RgbaImage; canvas: HTMLCanvasElement } | null {
   const canvas = document.createElement('canvas');
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
@@ -59,7 +72,7 @@ function captureFrame(video: HTMLVideoElement): { image: RgbaImage; dataUrl: str
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   return {
     image: { width: imageData.width, height: imageData.height, data: imageData.data },
-    dataUrl: canvas.toDataURL('image/png'),
+    canvas,
   };
 }
 
@@ -105,19 +118,38 @@ export async function createAppDeps(mode: StorageMode = getStorageMode()): Promi
     camera.attachVideo?.(element);
   };
 
-  const scanOnce = async (orientation: 'portrait' | 'landscape'): Promise<Detection | null> => {
+  // The frame region (in captured-frame coords) the user has aligned the
+  // sticker into: the centered guide, mapped through the cover-crop.
+  const framedRegion = (image: RgbaImage, orientation: Orientation, size: number) => {
+    const guide = centeredRect(orientation, size, PREVIEW_BOX_ASPECT);
+    return coverMapRect(guide, image.width, image.height, PREVIEW_BOX_ASPECT);
+  };
+
+  const scanOnce = async (orientation: Orientation, size: number): Promise<Detection | null> => {
     if (!video) return null;
-    const captured = captureFrame(video);
+    const captured = drawFrame(video);
     if (!captured) return null;
+    const cropped = cropRoi(captured.image, framedRegion(captured.image, orientation, size));
     const roi = maskConfig.orientations[orientation].roi;
-    const ranked = await runPipelineMultiOrientation(captured.image, {
+    const ranked = await runPipelineMultiOrientation(cropped, {
       ocr,
       roi,
       threshold: 128,
       localizer,
     });
     if (ranked.length === 0) return null;
-    return { candidate: ranked[0], imageDataUrl: captured.dataUrl };
+    return { candidate: ranked[0], imageDataUrl: captured.canvas.toDataURL('image/png') };
+  };
+
+  const detectTargeted = async (orientation: Orientation, size: number): Promise<boolean> => {
+    if (!video) return false;
+    const captured = drawFrame(video);
+    if (!captured) return false;
+    const crop = cropRoi(captured.image, framedRegion(captured.image, orientation, size));
+    if (crop.width === 0 || crop.height === 0) return false;
+    const bbox = localizer.locate(crop);
+    if (!bbox) return false;
+    return isWellTargeted(bbox, crop.width / crop.height);
   };
 
   const sessionRepo =
@@ -141,6 +173,7 @@ export async function createAppDeps(mode: StorageMode = getStorageMode()): Promi
     imageStore: new IdbImageStore(db),
     albumRepo,
     scanOnce,
+    detectTargeted,
     attachVideo,
     startCamera: camera.startCamera,
     now: nowIso,

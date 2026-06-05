@@ -23,9 +23,11 @@ export const OCR_PROFILE: OcrProfile = {
   psm: 7,
 };
 
+// Panini WC 2026 backs measure ~3:4 (width:height). See
+// docs/ocr-scanning-geometry.md.
 const ASPECT_RATIO: Record<Orientation, number> = {
-  portrait: 0.72,
-  landscape: 1.39,
+  portrait: 3 / 4, // 0.75
+  landscape: 4 / 3, // 1.333
 };
 
 /**

@@ -15,10 +15,10 @@ const repoRoot = resolve(here, '../../..');
  * pure build step with no runtime change.
  */
 const SEED_CORPUS: CorpusAnnotation[] = [
-  // Portrait (CRO 20, GHA 1, GHA 7): pill across the top-right.
-  { orientation: 'portrait', box: { x: 0.6, y: 0.035, w: 0.34, h: 0.06 } },
-  { orientation: 'portrait', box: { x: 0.58, y: 0.04, w: 0.36, h: 0.055 } },
-  { orientation: 'portrait', box: { x: 0.62, y: 0.03, w: 0.32, h: 0.065 } },
+  // Portrait (CRO 20, GHA 1, GHA 7): pill in the top-right. Re-measured tighter
+  // from the GHA 1 sample -> ROI ~ {0.64, 0.02, 0.32, 0.11} after PAD.
+  { orientation: 'portrait', box: { x: 0.66, y: 0.04, w: 0.26, h: 0.06 } },
+  { orientation: 'portrait', box: { x: 0.68, y: 0.05, w: 0.26, h: 0.06 } },
   // Landscape (FWC 17): shorter sticker, so the pill is a touch taller relative.
   { orientation: 'landscape', box: { x: 0.62, y: 0.05, w: 0.33, h: 0.1 } },
   { orientation: 'landscape', box: { x: 0.6, y: 0.06, w: 0.35, h: 0.09 } },

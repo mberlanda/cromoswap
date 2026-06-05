@@ -20,6 +20,8 @@ const baseProps: RepsViewProps = {
   noDetection: false,
   scanning: false,
   orientation: 'portrait',
+  size: 0.8,
+  targeted: false,
   videoRef: createRef(),
   onCapture: vi.fn(),
   onConfirm: vi.fn(),
@@ -32,6 +34,7 @@ const baseProps: RepsViewProps = {
   onExportText: vi.fn(),
   onExportJson: vi.fn(),
   onSetOrientation: vi.fn(),
+  onSetSize: vi.fn(),
 };
 
 describe('RepsView export section', () => {

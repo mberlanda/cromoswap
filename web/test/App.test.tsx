@@ -112,16 +112,26 @@ describe('App', () => {
     render(<App deps={makeDeps({ scanOnce })} />);
     await startSession();
 
-    // Defaults to portrait.
+    // Defaults to portrait, with the current frame size.
     await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
     expect(await screen.findByText('ARG01')).toBeInTheDocument();
-    expect(scanOnce).toHaveBeenLastCalledWith('portrait');
+    expect(scanOnce).toHaveBeenLastCalledWith('portrait', 0.8);
 
     // Switch to landscape and capture again.
     await userEvent.click(screen.getByRole('button', { name: /landscape/i }));
     await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
     await screen.findByText('ARG01');
-    expect(scanOnce).toHaveBeenLastCalledWith('landscape');
+    expect(scanOnce).toHaveBeenLastCalledWith('landscape', 0.8);
+  });
+
+  it('flips the scan frame to targeted when live detection succeeds', async () => {
+    const detectTargeted = vi.fn(async () => true);
+    render(<App deps={makeDeps({ detectTargeted, targetIntervalMs: 10 })} />);
+    await startSession();
+
+    const frame = await screen.findByTestId('sticker-frame');
+    await vi.waitFor(() => expect(frame.className).toContain('targeted'));
+    expect(detectTargeted).toHaveBeenCalledWith('portrait', 0.8);
   });
 
   it('keeps scanning until a code is recognized', async () => {

@@ -1,5 +1,9 @@
 # OCR findings from real sticker backs
 
+> Framing and crop geometry (centered guide, aspect ratios, ROI, live targeting) is
+> documented in [`ocr-scanning-geometry.md`](ocr-scanning-geometry.md).
+
+
 Date: 2026-06-04. Source: four real Panini WC 2026 backs (`CRO 20`, `GHA 1`, `GHA 7`,
 `FWC 17`) under `web/fixtures/stickers/` (gitignored). Measured with
 `npm run validate:ocr`.

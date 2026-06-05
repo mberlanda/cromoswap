@@ -13,6 +13,7 @@ import { RepsView } from './RepsView';
 import { LeaderboardView } from './LeaderboardView';
 import { CameraPermissionPanel } from './CameraPermissionPanel';
 import { StorageModeToggle } from './StorageModeToggle';
+import { SIZE_DEFAULT } from './SizeSlider';
 import type { StorageMode } from '../composition';
 
 export type Orientation = 'portrait' | 'landscape';
@@ -28,7 +29,11 @@ export interface AppDeps {
   imageStore: ImageStore;
   albumRepo: AlbumRepo;
   /** Capture a frame and run the OCR pipeline; null when nothing valid found. */
-  scanOnce: (orientation: Orientation) => Promise<Detection | null>;
+  scanOnce: (orientation: Orientation, size: number) => Promise<Detection | null>;
+  /** Live check whether a sticker is well framed (drives the green guide). */
+  detectTargeted?: (orientation: Orientation, size: number) => Promise<boolean>;
+  /** Live-targeting poll interval (injectable for tests). */
+  targetIntervalMs?: number;
   now: Clock;
   downloadText: (filename: string, content: string) => void;
   downloadJson: (filename: string, content: string) => void;
@@ -63,6 +68,8 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
   const [noDetection, setNoDetection] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [orientation, setOrientation] = useState<Orientation>('portrait');
+  const [size, setSize] = useState<number>(SIZE_DEFAULT);
+  const [targeted, setTargeted] = useState(false);
   const [tab, setTab] = useState<Tab>('reps');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
@@ -104,6 +111,28 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
     }
     deps.attachVideo?.(null);
   }, [active, cameraState, tab, deps]);
+
+  // Live targeting: poll the framed region so the guide turns green when a
+  // sticker is well aligned. Paused while an explicit capture is running.
+  const targetIntervalMs = deps.targetIntervalMs ?? 350;
+  const detectTargeted = deps.detectTargeted;
+  const liveTargeting =
+    !!detectTargeted && !!active && tab === 'reps' && cameraState === 'granted' && !scanning;
+  useEffect(() => {
+    if (!liveTargeting || !detectTargeted) return;
+    let cancelled = false;
+    const tick = async () => {
+      const hit = await detectTargeted(orientation, size);
+      if (!cancelled) setTargeted(hit);
+    };
+    void tick();
+    const id = setInterval(() => void tick(), targetIntervalMs);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+      setTargeted(false);
+    };
+  }, [liveTargeting, detectTargeted, orientation, size, targetIntervalMs]);
 
   const refreshScans = useCallback(
     async (session: Session) => {
@@ -161,7 +190,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
     const deadline = nowMs() + scanTimeoutMs;
     try {
       while (nowMs() < deadline) {
-        const result = await deps.scanOnce(orientation);
+        const result = await deps.scanOnce(orientation, size);
         if (result) {
           setDetection(result);
           return;
@@ -287,6 +316,8 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
           noDetection={noDetection}
           scanning={scanning}
           orientation={orientation}
+          size={size}
+          targeted={targeted}
           videoRef={videoRef}
           onCapture={handleCapture}
           onConfirm={handleConfirm}
@@ -299,6 +330,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
           onExportText={handleExportText}
           onExportJson={handleExportJson}
           onSetOrientation={setOrientation}
+          onSetSize={setSize}
         />
       )}
     </main>
