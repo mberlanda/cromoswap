@@ -572,6 +572,21 @@ section[aria-label="Resume"] li button {
   font-weight: 700;
 }
 
+.session-album-counts {
+  display: flex;
+  gap: var(--space-2);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.session-owned {
+  color: var(--scan);
+}
+
+.session-missing {
+  color: var(--muted);
+}
+
 /* ── Confidence meter ────────────────────────────── */
 .confidence-meter {
   height: 6px;

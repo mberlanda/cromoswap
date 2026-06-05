@@ -48,4 +48,23 @@ describe('SessionGate', () => {
     );
     expect(screen.getByText(/12 scans/i)).toBeInTheDocument();
   });
+
+  it('shows owned and missing sticker counts when albumCounts provided', () => {
+    render(
+      <SessionGate
+        sessions={[existing]}
+        onCreate={vi.fn()}
+        onResume={vi.fn()}
+        albumCounts={{ 'sess-1': { owned: 45, missing: 935 } }}
+      />,
+    );
+    expect(screen.getByText(/45 owned/i)).toBeInTheDocument();
+    expect(screen.getByText(/935 missing/i)).toBeInTheDocument();
+  });
+
+  it('omits owned/missing when albumCounts not provided', () => {
+    render(<SessionGate sessions={[existing]} onCreate={vi.fn()} onResume={vi.fn()} />);
+    expect(screen.queryByText(/owned/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/missing/i)).not.toBeInTheDocument();
+  });
 });

@@ -23,7 +23,7 @@ function scan(code: string): Scan {
 }
 
 describe('toTextExport', () => {
-  it('includes a metadata header and sorted codes', () => {
+  it('includes a metadata header with counts', () => {
     const text = toTextExport(session, [scan('USA13'), scan('ARG01'), scan('ARG01')], () =>
       '2026-06-04T12:00:00.000Z',
     );
@@ -33,9 +33,25 @@ describe('toTextExport', () => {
     expect(text).toContain('total scans: 3');
     expect(text).toContain('ARG01: 2');
     expect(text).toContain('USA13: 1');
-    // codes listed one per line, sorted, after the header
-    const lines = text.trimEnd().split('\n');
-    expect(lines.slice(-3)).toEqual(['ARG01', 'ARG01', 'USA13']);
+  });
+
+  it('groups codes by prefix with number-only format', () => {
+    const text = toTextExport(session, [scan('USA13'), scan('ARG01'), scan('ARG01')], () =>
+      '2026-06-04T12:00:00.000Z',
+    );
+    // Codes section: grouped, sorted by prefix then number
+    expect(text).toContain('ARG: 01, 01');
+    expect(text).toContain('USA: 13');
+  });
+
+  it('groups multiple codes within the same prefix', () => {
+    const text = toTextExport(
+      session,
+      [scan('FWC03'), scan('FWC04'), scan('FWC05'), scan('FWC07'), scan('MEX02')],
+      () => '2026-06-04T12:00:00.000Z',
+    );
+    expect(text).toContain('FWC: 03, 04, 05, 07');
+    expect(text).toContain('MEX: 02');
   });
 
   it('handles an empty session', () => {

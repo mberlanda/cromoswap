@@ -4,20 +4,20 @@ import { toAlbumOwnedExport, toAlbumMissingExport } from '../src/export/album-ex
 const now = () => '2026-06-04T12:00:00.000Z';
 
 describe('toAlbumOwnedExport', () => {
-  it('includes a header and groups owned codes by team', () => {
+  it('includes a header and groups owned codes by team with number-only format', () => {
     const owned = new Set(['FWC00', 'FWC01', 'ARG07']);
     const text = toAlbumOwnedExport('Mauro', owned, now);
     expect(text).toContain('user: Mauro');
     expect(text).toContain('total: 3');
-    expect(text).toContain('FWC00 FWC01');
-    expect(text).toContain('ARG07');
+    expect(text).toContain('FWC: 00, 01');
+    expect(text).toContain('ARG: 07');
   });
 
   it('omits teams with no owned stickers', () => {
     const owned = new Set(['ARG01']);
     const text = toAlbumOwnedExport('Mauro', owned, now);
-    expect(text).not.toMatch(/^BRA/m);
-    expect(text).not.toMatch(/^FWC/m);
+    expect(text).not.toMatch(/^BRA:/m);
+    expect(text).not.toMatch(/^FWC:/m);
   });
 
   it('handles an empty owned set', () => {
@@ -27,11 +27,11 @@ describe('toAlbumOwnedExport', () => {
 });
 
 describe('toAlbumMissingExport', () => {
-  it('includes a header and groups missing codes by team', () => {
+  it('includes a header and groups missing codes by team with number-only format', () => {
     const owned = new Set(['FWC00', 'FWC01']);
     const text = toAlbumMissingExport('Mauro', owned, now);
     expect(text).toContain('user: Mauro');
-    expect(text).toContain('FWC: FWC02');
+    expect(text).toContain('FWC: 02,');
     expect(text).not.toContain('FWC00');
     expect(text).not.toContain('FWC01');
   });
