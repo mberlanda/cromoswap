@@ -16,7 +16,7 @@ export function LeaderboardView({
   return (
     <section aria-label="Leaderboard">
       <div className="leaderboard-header">
-        <h2 className="leaderboard-title">Leaderboard</h2>
+        <h2 className="leaderboard-title" data-test-id="leaderboard-title">Leaderboard</h2>
         <button type="button" className="secondary" onClick={onRefresh} disabled={loading}>
           {loading ? 'Loading…' : 'Refresh'}
         </button>

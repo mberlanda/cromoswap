@@ -12,6 +12,8 @@ export default defineConfig({
   use: {
     baseURL,
     trace: 'on-first-retry',
+    // E2E selects elements by stable data-test-id hooks, never styling classes.
+    testIdAttribute: 'data-test-id',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 });
