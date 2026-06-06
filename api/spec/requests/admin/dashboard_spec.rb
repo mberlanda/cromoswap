@@ -21,5 +21,11 @@ RSpec.describe "Admin::Dashboard", type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.body).to include("Backoffice")
     end
+
+    it "is disabled in production while ADMIN_PASSWORD is the default" do
+      allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new("production"))
+      get "/admin", headers: auth
+      expect(response).to have_http_status(:service_unavailable)
+    end
   end
 end

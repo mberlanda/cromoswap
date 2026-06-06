@@ -1,2 +1,5 @@
 
 /coverage/
+
+# Rails master key — must never be committed (rotate the leaked one).
+/config/master.key
