@@ -37,6 +37,7 @@ export function LeaderboardView({
               <button
                 type="button"
                 className="quiet leaderboard-open"
+                data-test-id={`open-${entry.userName}`}
                 onClick={() => onOpenSelection(entry.userName)}
               >
                 Open {entry.userName} selection

@@ -49,7 +49,7 @@ export function BoardPanel({
         />
         <p className="board-admin-note">
           Need to edit or remove this collector?{' '}
-          <a href="/admin" target="_blank" rel="noopener noreferrer" className="board-admin-link">
+          <a href="/admin" target="_blank" rel="noopener noreferrer" className="board-admin-link" data-test-id="admin-link">
             Open admin backoffice
           </a>
         </p>
