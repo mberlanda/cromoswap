@@ -20,6 +20,8 @@ module Admin
       end
       send_data generate_pg_dump,
         filename: "cromoswap-#{Date.current}.sql", type: "application/sql"
+    rescue StandardError => e
+      render plain: "Export failed: #{e.message}", status: :internal_server_error
     end
 
     private
@@ -57,14 +59,10 @@ module Admin
 
     def generate_pg_dump
       config = ActiveRecord::Base.connection_db_config.configuration_hash
-      env = {}
-      env["PGPASSWORD"] = config[:password].to_s if config[:password]
-      cmd = [ "pg_dump" ]
-      cmd += [ "-h", config[:host].to_s ] if config[:host]
-      cmd += [ "-p", config[:port].to_s ] if config[:port]
-      cmd += [ "-U", config[:username].to_s ] if config[:username]
-      cmd << config[:database].to_s
-      out, err, status = Open3.capture3(env, *cmd)
+      env = { "PGPASSWORD" => config[:password].to_s }
+      args = [ "-h", config[:host].to_s, "-p", config[:port].to_s,
+              "-U", config[:username].to_s, config[:database].to_s ]
+      out, err, status = Open3.capture3(env, "pg_dump", *args)
       raise "pg_dump failed: #{err}" unless status.success?
       out
     end

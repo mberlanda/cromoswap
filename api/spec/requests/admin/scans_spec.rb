@@ -39,6 +39,11 @@ RSpec.describe "Admin::Scans", type: :request do
     expect(scan.reload.normalized_code).to eq("BRA07")
   end
 
+  it "re-renders edit on an invalid update" do
+    patch "/admin/scans/#{scan.id}", params: { scan: { normalized_code: "bad" } }, headers: admin_auth
+    expect(response).to have_http_status(:unprocessable_content)
+  end
+
   it "destroys a scan" do
     expect {
       delete "/admin/scans/#{scan.id}", headers: admin_auth

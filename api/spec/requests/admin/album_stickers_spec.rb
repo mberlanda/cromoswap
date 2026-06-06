@@ -37,6 +37,11 @@ RSpec.describe "Admin::AlbumStickers", type: :request do
     expect(sticker.reload.normalized_code).to eq("BRA07")
   end
 
+  it "re-renders edit on an invalid update" do
+    patch "/admin/album_stickers/#{sticker.id}", params: { album_sticker: { normalized_code: "bad" } }, headers: admin_auth
+    expect(response).to have_http_status(:unprocessable_content)
+  end
+
   it "destroys an album sticker" do
     expect {
       delete "/admin/album_stickers/#{sticker.id}", headers: admin_auth
