@@ -25,12 +25,14 @@ A hypertext map of the repo's docs. Legend: ✅ implemented · 🟡 partial/acti
 - [adr/0001-application-stack.md](adr/0001-application-stack.md) — React+TS+Vite / Rails 8 + Postgres / monorepo ✅
 - [adr/0002-storage-and-export-format.md](adr/0002-storage-and-export-format.md) — local-first IndexedDB + repos + text/JSON export ✅ (extended: Local/Cloud + import)
 - [adr/0003-ocr-pipeline.md](adr/0003-ocr-pipeline.md) — injectable OCR pipeline (tesseract.js + mock) ✅
+- [adr/0004-cloud-authentication.md](adr/0004-cloud-authentication.md) — accounts (users table, JWT, bcrypt) for cloud sync 💡 (proposed)
 
-## Implemented feature designs (`superpowers/`)
+## Feature designs (`superpowers/`)
 
-Design specs for features that are now in the product — kept as history, marked
-implemented so they read as records, not TODOs.
+Design specs for product features — marked implemented so they read as records,
+not TODOs (proposed ones are pending implementation).
 
+- [specs/…/cloud-authentication-design.md](superpowers/specs/2026-06-06-cloud-authentication-design.md) + [plan](superpowers/plans/2026-06-06-cloud-authentication.md) — register/login, JWT, save-to-cloud, backoffice user mgmt 💡 (proposed)
 - [specs/…/album-tracker-design.md](superpowers/specs/2026-06-04-album-tracker-design.md) — My Album / My Reps tabs ✅
 - [plans/…/album-tracker.md](superpowers/plans/2026-06-04-album-tracker.md) — its task plan ✅
 - [specs/…/centered-sticker-frame-design.md](superpowers/specs/2026-06-05-centered-sticker-frame-design.md) — centered aspect-ratio frame + live targeting ✅ (#29)
