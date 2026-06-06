@@ -1,18 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="720" height="192" viewBox="0 0 720 192" role="img" aria-labelledby="title desc">
   <title id="title">Cromoswap logo</title>
-  <desc id="desc">Cromoswap wordmark with sticker scan and swap mark.</desc>
-  <rect width="720" height="192" rx="24" fill="#f7faf8"/>
-  <g transform="translate(24 18)">
-    <rect width="156" height="156" rx="32" fill="#17211f"/>
-    <path d="M51 25h54c8 0 14 6 14 14v78c0 8-6 14-14 14H51c-8 0-14-6-14-14V39c0-8 6-14 14-14Z" fill="#ffffff"/>
-    <rect x="84" y="43" width="27" height="7" rx="3.5" fill="#f2b84b"/>
-    <rect x="104" y="43" width="7" height="25" rx="3.5" fill="#f2b84b"/>
-    <rect x="53" y="67" width="44" height="8" rx="4" fill="#1f8a5f"/>
-    <path d="M97 60 115 71 97 82Z" fill="#1f8a5f"/>
-    <rect x="60" y="93" width="44" height="8" rx="4" fill="#2f74d0"/>
-    <path d="M60 86 42 97 60 108Z" fill="#2f74d0"/>
-    <circle cx="78" cy="86" r="8" fill="#d94f4f"/>
+  <desc id="desc">Cromoswap wordmark with a Cobalt Mint sticker scanner mark.</desc>
+  <rect width="720" height="192" rx="24" fill="#f5f9fc"/>
+  <g transform="translate(24 18) scale(0.8125)">
+    <rect width="192" height="192" rx="38" fill="#121a2f"/>
+    <rect x="44" y="44" width="46" height="12" rx="6" fill="#5ee6b5"/>
+    <rect x="44" y="44" width="12" height="46" rx="6" fill="#5ee6b5"/>
+    <rect x="102" y="44" width="46" height="12" rx="6" fill="#5ee6b5"/>
+    <rect x="136" y="44" width="12" height="46" rx="6" fill="#5ee6b5"/>
+    <rect x="44" y="136" width="46" height="12" rx="6" fill="#5ee6b5"/>
+    <rect x="44" y="102" width="12" height="46" rx="6" fill="#5ee6b5"/>
+    <rect x="102" y="136" width="46" height="12" rx="6" fill="#5ee6b5"/>
+    <rect x="136" y="102" width="12" height="46" rx="6" fill="#5ee6b5"/>
+    <rect x="64" y="58" width="64" height="76" rx="13" fill="#ffffff"/>
+    <rect x="74" y="70" width="44" height="46" rx="8" fill="#f5f9fc" stroke="#dce6ef" stroke-width="4"/>
+    <path d="M80 108h30" stroke="#18b394" stroke-width="8" stroke-linecap="round"/>
+    <path d="M102 98 130 112 102 126Z" fill="#3b66f5"/>
+    <circle cx="91" cy="102" r="8" fill="#ef5a6d"/>
+    <path d="M110 76l6 12 13 2-10 9 3 13-12-7-12 7 3-13-10-9 13-2Z" fill="#ffc247"/>
   </g>
-  <text x="208" y="92" fill="#17211f" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="54" font-weight="850" letter-spacing="0">cromoswap</text>
-  <text x="211" y="128" fill="#60706b" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="20" font-weight="700" letter-spacing="0">scan duplicates now, match swaps next</text>
+  <text x="208" y="94" fill="#121a2f" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="56" font-weight="850" letter-spacing="0">cromo</text>
+  <text x="391" y="94" fill="#18b394" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="56" font-weight="850" letter-spacing="0">swap</text>
+  <text x="211" y="130" fill="#5c6780" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="20" font-weight="700" letter-spacing="0">scan duplicates now, match swaps next</text>
 </svg>

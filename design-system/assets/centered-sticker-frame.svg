@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
   <title id="title">Centered sticker frame reference</title>
   <desc id="desc">Scanner target with centered sticker aspect ratio frame and top-right OCR ROI.</desc>
-  <rect width="960" height="540" fill="#202927"/>
-  <rect x="328" y="58" width="304" height="424" rx="8" fill="rgba(255,255,255,0.04)" stroke="#34c759" stroke-width="8"/>
-  <rect x="520" y="72" width="98" height="52" rx="6" fill="rgba(52,199,89,0.14)" stroke="#34c759" stroke-width="5"/>
+  <rect width="960" height="540" fill="#10172a"/>
+  <rect x="328" y="58" width="304" height="424" rx="8" fill="rgba(255,255,255,0.04)" stroke="#5ee6b5" stroke-width="8"/>
+  <rect x="520" y="72" width="98" height="52" rx="6" fill="rgba(94,230,181,0.14)" stroke="#5ee6b5" stroke-width="5"/>
   <line x1="328" y1="164" x2="632" y2="164" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
   <line x1="328" y1="270" x2="632" y2="270" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
   <line x1="328" y1="376" x2="632" y2="376" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
@@ -11,6 +11,6 @@
   <line x1="480" y1="58" x2="480" y2="482" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
   <line x1="556" y1="58" x2="556" y2="482" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
   <rect x="72" y="394" width="816" height="70" rx="8" fill="rgba(255,255,255,0.92)"/>
-  <text x="480" y="438" text-anchor="middle" fill="#17211f" font-family="ui-sans-serif, system-ui, sans-serif" font-size="25" font-weight="900">Guide turns green when the sticker is targeted</text>
+  <text x="480" y="438" text-anchor="middle" fill="#121a2f" font-family="ui-sans-serif, system-ui, sans-serif" font-size="25" font-weight="900">Guide turns mint when the sticker is targeted</text>
   <text x="480" y="524" text-anchor="middle" fill="#ffffff" font-family="ui-sans-serif, system-ui, sans-serif" font-size="19" font-weight="800">Portrait frame uses 3:4 sticker geometry; ROI is nested in the top-right corner.</text>
 </svg>

@@ -72,7 +72,7 @@ const stories = {
     kicker: "Story 3",
     title: "Target the sticker with a centered frame",
     copy:
-      "The scanner now uses a centered sticker-shaped guide and nested top-right ROI. The frame turns green when the sticker is well targeted.",
+      "The scanner now uses a centered sticker-shaped guide and nested top-right ROI. The frame turns mint when the sticker is well targeted.",
     points: [
       "Sticker frame is locked to portrait or landscape aspect ratio.",
       "ROI is nested inside the guide, not the full camera preview.",

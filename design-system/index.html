@@ -25,12 +25,12 @@
     <main>
       <section id="overview" class="overview">
         <div class="overview-copy">
-          <p class="eyebrow">Design system v0.2</p>
-          <h1>Cromoswap now covers album completion, duplicate counters, import, and live scanner targeting.</h1>
+          <p class="eyebrow">Design system v0.3</p>
+          <h1>Cromoswap adopts Cobalt Mint while keeping scanner green as the product anchor.</h1>
           <p>
-            This update translates the approved CX specs into reusable visual decisions:
-            batch album controls, a reps counter grid, import/restore states, a back-home
-            shell pattern, and an aspect-ratio scanner frame that can turn green when targeted.
+            This update folds the brand direction into the approved CX specs: navy and cobalt
+            give the app shell and favicon more presence, while mint still marks scanning,
+            ownership, targeting, and the fastest sticker-sorting actions.
           </p>
         </div>
         <aside class="logo-panel" aria-label="Cromoswap brand assets">
@@ -87,50 +87,57 @@
       <section id="tokens" class="tokens-section">
         <div class="section-heading">
           <p class="eyebrow">Visual tokens</p>
-          <h2>Friendly scanner utility, not generic dashboard</h2>
+          <h2>Cobalt Mint gives the scanner utility a stronger app identity</h2>
           <p class="section-intro">
-            Green remains the scan and ownership anchor. Blue is now explicitly import
-            and information. Amber is review, duplicate spares, and ambiguous text import.
+            Navy is the brand and app-shell anchor. Mint remains scan and ownership.
+            Cobalt is import and information. Amber is review, duplicate spares, and
+            ambiguous text import.
           </p>
         </div>
         <div class="token-grid">
-          <div class="token"><span class="swatch ink"></span><strong>Ink</strong><code>#17211f</code></div>
-          <div class="token"><span class="swatch scan"></span><strong>Scan / owned</strong><code>#1f8a5f</code></div>
-          <div class="token"><span class="swatch info"></span><strong>Info / import</strong><code>#2f74d0</code></div>
-          <div class="token"><span class="swatch review"></span><strong>Review / spare</strong><code>#f2b84b</code></div>
-          <div class="token"><span class="swatch danger"></span><strong>Remove</strong><code>#d94f4f</code></div>
-          <div class="token"><span class="swatch privacy"></span><strong>Privacy / local</strong><code>#6d57c7</code></div>
+          <div class="token"><span class="swatch ink"></span><strong>Ink / brand navy</strong><code>#121a2f</code></div>
+          <div class="token"><span class="swatch scan"></span><strong>Scan / owned</strong><code>#18b394</code></div>
+          <div class="token"><span class="swatch info"></span><strong>Info / import</strong><code>#3b66f5</code></div>
+          <div class="token"><span class="swatch review"></span><strong>Review / spare</strong><code>#ffc247</code></div>
+          <div class="token"><span class="swatch danger"></span><strong>Remove</strong><code>#ef5a6d</code></div>
+          <div class="token"><span class="swatch privacy"></span><strong>Privacy / local</strong><code>#7657f2</code></div>
         </div>
       </section>
 
       <section id="schemes" class="tokens-section">
         <div class="section-heading">
           <p class="eyebrow">Color schemes</p>
-          <h2>Three implementable palettes with the same semantics</h2>
+          <h2>Four brand directions with the same product semantics</h2>
           <p class="section-intro">
             The token files expose these as CSS custom properties and JSON values for
-            the web service. Table day is the default; the other schemes are optional
-            surfaces for low light and high-contrast QA/export contexts.
+            the web service. Cobalt Mint is the default brand direction; the other
+            schemes remain available for review, seasonal, or test builds.
           </p>
         </div>
         <div class="scheme-grid">
           <article class="scheme-card">
-            <div class="scheme-strip scheme-day"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-            <h3>Table day</h3>
-            <p>Default light UI for one-handed sorting around a table.</p>
-            <code>data-cromoswap-scheme="table-day"</code>
+            <div class="scheme-strip scheme-cobalt"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <h3>Cobalt Mint</h3>
+            <p>Default app identity: navy/cobalt presence with mint scanner confidence.</p>
+            <code>data-cromoswap-scheme="cobalt-mint"</code>
           </article>
           <article class="scheme-card">
-            <div class="scheme-strip scheme-night"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-            <h3>Stadium night</h3>
-            <p>Dark scanner surface for dim rooms without changing state meanings.</p>
-            <code>data-cromoswap-scheme="stadium-night"</code>
+            <div class="scheme-strip scheme-grounded"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <h3>Grounded Green</h3>
+            <p>Safest evolution of the current palette with richer green and quiet paper.</p>
+            <code>data-cromoswap-scheme="grounded-green"</code>
           </article>
           <article class="scheme-card">
-            <div class="scheme-strip scheme-proof"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
-            <h3>Print proof</h3>
-            <p>Higher contrast light UI for screenshots, classrooms, and exported docs.</p>
-            <code>data-cromoswap-scheme="print-proof"</code>
+            <div class="scheme-strip scheme-pop"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <h3>Sticker Pop</h3>
+            <p>Friendlier collector energy with brighter accents while staying controlled.</p>
+            <code>data-cromoswap-scheme="sticker-pop"</code>
+          </article>
+          <article class="scheme-card">
+            <div class="scheme-strip scheme-pitch"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <h3>Night Pitch</h3>
+            <p>Football-forward identity with deeper pitch green and bright controls.</p>
+            <code>data-cromoswap-scheme="night-pitch"</code>
           </article>
         </div>
       </section>

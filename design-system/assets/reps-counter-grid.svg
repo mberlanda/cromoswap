@@ -1,42 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
   <title id="title">Reps counter grid reference</title>
   <desc id="desc">Duplicate sticker count grid with add, remove, and clear tap modes.</desc>
-  <rect width="960" height="540" fill="#f7faf8"/>
-  <text x="96" y="96" fill="#17211f" font-family="ui-sans-serif, system-ui, sans-serif" font-size="42" font-weight="900">My Reps grid</text>
-  <rect x="96" y="126" width="768" height="58" rx="8" fill="#ffffff" stroke="#d8e1dd" stroke-width="3"/>
-  <rect x="100" y="130" width="252" height="50" rx="6" fill="#eef4f1"/>
-  <text x="226" y="163" text-anchor="middle" fill="#60706b" font-family="ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="900">Scan</text>
-  <rect x="354" y="130" width="252" height="50" rx="6" fill="#1f8a5f"/>
+  <rect width="960" height="540" fill="#f5f9fc"/>
+  <text x="96" y="96" fill="#121a2f" font-family="ui-sans-serif, system-ui, sans-serif" font-size="42" font-weight="900">My Reps grid</text>
+  <rect x="96" y="126" width="768" height="58" rx="8" fill="#ffffff" stroke="#dce6ef" stroke-width="3"/>
+  <rect x="100" y="130" width="252" height="50" rx="6" fill="#eef6fb"/>
+  <text x="226" y="163" text-anchor="middle" fill="#5c6780" font-family="ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="900">Scan</text>
+  <rect x="354" y="130" width="252" height="50" rx="6" fill="#18b394"/>
   <text x="480" y="163" text-anchor="middle" fill="#ffffff" font-family="ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="900">Grid</text>
   <rect x="608" y="130" width="252" height="50" rx="6" fill="#ffffff"/>
-  <text x="734" y="163" text-anchor="middle" fill="#60706b" font-family="ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="900">Export</text>
-  <rect x="96" y="218" width="768" height="64" rx="8" fill="#ffffff" stroke="#d8e1dd" stroke-width="3"/>
-  <rect x="108" y="230" width="244" height="40" rx="6" fill="#d94f4f"/>
+  <text x="734" y="163" text-anchor="middle" fill="#5c6780" font-family="ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="900">Export</text>
+  <rect x="96" y="218" width="768" height="64" rx="8" fill="#ffffff" stroke="#dce6ef" stroke-width="3"/>
+  <rect x="108" y="230" width="244" height="40" rx="6" fill="#ef5a6d"/>
   <text x="230" y="256" text-anchor="middle" fill="#ffffff" font-family="ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="900">-1 give away</text>
-  <rect x="358" y="230" width="244" height="40" rx="6" fill="#1f8a5f"/>
+  <rect x="358" y="230" width="244" height="40" rx="6" fill="#18b394"/>
   <text x="480" y="256" text-anchor="middle" fill="#ffffff" font-family="ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="900">+1 got one</text>
-  <rect x="608" y="230" width="244" height="40" rx="6" fill="#17211f"/>
+  <rect x="608" y="230" width="244" height="40" rx="6" fill="#121a2f"/>
   <text x="730" y="256" text-anchor="middle" fill="#ffffff" font-family="ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="900">Clear</text>
-  <rect x="96" y="322" width="768" height="132" rx="8" fill="#ffffff" stroke="#d8e1dd" stroke-width="3"/>
-  <text x="128" y="365" fill="#17211f" font-family="ui-sans-serif, system-ui, sans-serif" font-size="24" font-weight="900">🇬🇭 GHA · Ghana</text>
-  <text x="668" y="365" fill="#60706b" font-family="ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="800">16 copies · 6 spare</text>
+  <rect x="96" y="322" width="768" height="132" rx="8" fill="#ffffff" stroke="#dce6ef" stroke-width="3"/>
+  <text x="128" y="365" fill="#121a2f" font-family="ui-sans-serif, system-ui, sans-serif" font-size="24" font-weight="900">🇬🇭 GHA · Ghana</text>
+  <text x="668" y="365" fill="#5c6780" font-family="ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="800">16 copies · 6 spare</text>
   <g font-family="ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="900" text-anchor="middle">
-    <rect x="128" y="388" width="58" height="48" rx="6" fill="#eef4f1" stroke="#d8e1dd"/>
-    <text x="157" y="419" fill="#60706b">01</text>
-    <rect x="202" y="388" width="58" height="48" rx="6" fill="#1f8a5f" stroke="#1f8a5f"/>
+    <rect x="128" y="388" width="58" height="48" rx="6" fill="#eef6fb" stroke="#dce6ef"/>
+    <text x="157" y="419" fill="#5c6780">01</text>
+    <rect x="202" y="388" width="58" height="48" rx="6" fill="#18b394" stroke="#18b394"/>
     <text x="231" y="419" fill="#ffffff">02</text>
-    <rect x="254" y="376" width="28" height="24" rx="12" fill="#fff2cc"/>
-    <text x="268" y="393" fill="#735000" font-size="13">3</text>
-    <rect x="276" y="388" width="58" height="48" rx="6" fill="#1f8a5f" stroke="#1f8a5f"/>
+    <rect x="254" y="376" width="28" height="24" rx="12" fill="#fff1ca"/>
+    <text x="268" y="393" fill="#755200" font-size="13">3</text>
+    <rect x="276" y="388" width="58" height="48" rx="6" fill="#18b394" stroke="#18b394"/>
     <text x="305" y="419" fill="#ffffff">03</text>
-    <rect x="350" y="388" width="58" height="48" rx="6" fill="#1f8a5f" stroke="#1f8a5f"/>
+    <rect x="350" y="388" width="58" height="48" rx="6" fill="#18b394" stroke="#18b394"/>
     <text x="379" y="419" fill="#ffffff">04</text>
-    <rect x="402" y="376" width="28" height="24" rx="12" fill="#fff2cc"/>
-    <text x="416" y="393" fill="#735000" font-size="13">7</text>
-    <rect x="350" y="388" width="58" height="48" rx="6" fill="none" stroke="#9a6b00" stroke-width="4"/>
-    <rect x="424" y="388" width="58" height="48" rx="6" fill="#eef4f1" stroke="#d8e1dd"/>
-    <text x="453" y="419" fill="#60706b">05</text>
-    <rect x="498" y="388" width="58" height="48" rx="6" fill="#1f8a5f" stroke="#1f8a5f"/>
+    <rect x="402" y="376" width="28" height="24" rx="12" fill="#fff1ca"/>
+    <text x="416" y="393" fill="#755200" font-size="13">7</text>
+    <rect x="350" y="388" width="58" height="48" rx="6" fill="none" stroke="#b37b00" stroke-width="4"/>
+    <rect x="424" y="388" width="58" height="48" rx="6" fill="#eef6fb" stroke="#dce6ef"/>
+    <text x="453" y="419" fill="#5c6780">05</text>
+    <rect x="498" y="388" width="58" height="48" rx="6" fill="#18b394" stroke="#18b394"/>
     <text x="527" y="419" fill="#ffffff">06</text>
   </g>
 </svg>

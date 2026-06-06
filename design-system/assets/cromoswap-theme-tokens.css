@@ -1,5 +1,31 @@
 :root,
-[data-cromoswap-scheme="table-day"] {
+[data-cromoswap-scheme="cobalt-mint"] {
+  color-scheme: light;
+  --ink: #121a2f;
+  --muted: #5c6780;
+  --subtle: #dce6ef;
+  --paper: #f5f9fc;
+  --surface: #ffffff;
+  --field: #eef6fb;
+  --scan: #18b394;
+  --scan-strong: #007a65;
+  --info: #3b66f5;
+  --review: #ffc247;
+  --danger: #ef5a6d;
+  --privacy: #7657f2;
+  --camera: #10172a;
+  --overlay: rgba(245, 249, 252, 0.76);
+  --targeted: #5ee6b5;
+  --owned-bg: #def7ef;
+  --owned-text: #007a65;
+  --spare-bg: #fff1ca;
+  --spare-text: #755200;
+  --cap-ring: #b37b00;
+  --import-bg: #e8f0ff;
+  --import-text: #1d4ed8;
+}
+
+[data-cromoswap-scheme="grounded-green"] {
   color-scheme: light;
   --ink: #17211f;
   --muted: #60706b;
@@ -25,54 +51,54 @@
   --import-text: #184f94;
 }
 
-[data-cromoswap-scheme="stadium-night"] {
-  color-scheme: dark;
-  --ink: #eef8f3;
-  --muted: #a8bbb4;
-  --subtle: #3c4c48;
-  --paper: #121716;
-  --surface: #202927;
-  --field: #283430;
-  --scan: #33b982;
-  --scan-strong: #7ce2b2;
-  --info: #78aaf0;
-  --review: #f4c766;
-  --danger: #ff7474;
-  --privacy: #aa98ff;
-  --camera: #080b0a;
-  --overlay: rgba(18, 23, 22, 0.74);
-  --targeted: #58d884;
-  --owned-bg: rgba(51, 185, 130, 0.18);
-  --owned-text: #7ce2b2;
-  --spare-bg: rgba(244, 199, 102, 0.2);
-  --spare-text: #f4c766;
-  --cap-ring: #f4c766;
-  --import-bg: rgba(120, 170, 240, 0.18);
-  --import-text: #b8d5ff;
+[data-cromoswap-scheme="sticker-pop"] {
+  color-scheme: light;
+  --ink: #13201d;
+  --muted: #5d6964;
+  --subtle: #dde6df;
+  --paper: #fbfbf6;
+  --surface: #ffffff;
+  --field: #f1f7f1;
+  --scan: #2aa86f;
+  --scan-strong: #0c7049;
+  --info: #2d7dd8;
+  --review: #ffc83d;
+  --danger: #ff5959;
+  --privacy: #865dd6;
+  --camera: #14201d;
+  --overlay: rgba(251, 251, 246, 0.76);
+  --targeted: #31d28b;
+  --owned-bg: #e3f5eb;
+  --owned-text: #0c7049;
+  --spare-bg: #fff0bd;
+  --spare-text: #6b4b00;
+  --cap-ring: #ff6b5e;
+  --import-bg: #e7f1ff;
+  --import-text: #1559a7;
 }
 
-[data-cromoswap-scheme="print-proof"] {
+[data-cromoswap-scheme="night-pitch"] {
   color-scheme: light;
-  --ink: #0f1c1a;
-  --muted: #4f5f5a;
-  --subtle: #cfd8d4;
-  --paper: #fbfcff;
+  --ink: #0b1613;
+  --muted: #53645e;
+  --subtle: #d8e4dd;
+  --paper: #f6faf7;
   --surface: #ffffff;
-  --field: #f0f4f3;
-  --scan: #0d7a51;
-  --scan-strong: #075438;
-  --info: #1d64ba;
-  --review: #d69a1d;
-  --danger: #c23b3b;
-  --privacy: #5a46b0;
-  --camera: #1c2422;
-  --overlay: rgba(251, 252, 255, 0.78);
-  --targeted: #168f4c;
-  --owned-bg: #dff2e9;
-  --owned-text: #075438;
-  --spare-bg: #fff0bd;
-  --spare-text: #614400;
-  --cap-ring: #7c5600;
-  --import-bg: #e4efff;
-  --import-text: #174b87;
+  --field: #edf5ef;
+  --scan: #0f7a53;
+  --scan-strong: #07583b;
+  --info: #377be8;
+  --review: #f4c84d;
+  --danger: #e84d61;
+  --privacy: #705bd6;
+  --camera: #07110e;
+  --overlay: rgba(246, 250, 247, 0.74);
+  --targeted: #2bd67d;
+  --owned-bg: #ddf3e8;
+  --owned-text: #07583b;
+  --spare-bg: #fff0c7;
+  --spare-text: #664700;
+  --cap-ring: #e4af2d;
+  --import-bg: #e6f0ff;
+  --import-text: #1857a8;
 }

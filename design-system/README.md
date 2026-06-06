@@ -1,6 +1,6 @@
 # Cromoswap Design System
 
-Status: draft v0.2
+Status: draft v0.3
 Branch: `codex/cx-design-system`
 
 Cromoswap is the product name for the WC 2026 duplicate sticker scanner and future swap
@@ -47,8 +47,8 @@ If ImageMagick is unavailable, the script still writes the SVG mockup sources.
 
 ## Implementation Assets
 
-- `assets/cromoswap-theme-tokens.css` exposes the table-day, stadium-night, and
-  print-proof schemes as CSS custom properties.
+- `assets/cromoswap-theme-tokens.css` exposes Cobalt Mint, Grounded Green,
+  Sticker Pop, and Night Pitch schemes as CSS custom properties.
 - `assets/cromoswap-theme-tokens.json` exposes the same values plus component mappings
   for code generation or Rails/React configuration.
 - `assets/album-batch-control.svg`, `assets/reps-counter-grid.svg`,
@@ -61,5 +61,6 @@ If ImageMagick is unavailable, the script still writes the SVG mockup sources.
 - Primary actions stay in the lower third of scanning and import screens.
 - The scan overlay uses a centered sticker frame, with the ROI nested in the top-right.
 - Album and reps grids share chip geometry while preserving binary vs counter semantics.
-- The palette uses green, blue, amber, coral, and violet accents rather than one hue.
+- Cobalt Mint is the default brand direction: navy and cobalt add app presence while
+  mint remains the scanner, targeted-frame, and ownership anchor.
 - Token assets are simple CSS and JSON so the web service can consume them directly.

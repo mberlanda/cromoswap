@@ -23,24 +23,29 @@ fs.mkdirSync(fontCacheDir, { recursive: true });
 const execEnv = { ...process.env, XDG_CACHE_HOME: fontCacheDir };
 
 const colors = {
-  ink: "#17211f",
-  muted: "#60706b",
-  subtle: "#d8e1dd",
-  paper: "#f7faf8",
+  ink: "#121a2f",
+  muted: "#5c6780",
+  subtle: "#dce6ef",
+  paper: "#f5f9fc",
   surface: "#ffffff",
-  field: "#eef4f1",
-  scan: "#1f8a5f",
-  scanStrong: "#12613f",
-  info: "#2f74d0",
-  review: "#f2b84b",
-  danger: "#d94f4f",
-  privacy: "#6d57c7",
-  camera: "#202927",
-  targeted: "#34c759",
-  spareBg: "#fff2cc",
-  spareText: "#735000",
-  importBg: "#eaf2ff",
-  importText: "#184f94"
+  field: "#eef6fb",
+  scan: "#18b394",
+  scanStrong: "#007a65",
+  info: "#3b66f5",
+  review: "#ffc247",
+  danger: "#ef5a6d",
+  privacy: "#7657f2",
+  camera: "#10172a",
+  targeted: "#5ee6b5",
+  ownedBg: "#def7ef",
+  spareBg: "#fff1ca",
+  spareText: "#755200",
+  capRing: "#b37b00",
+  importBg: "#e8f0ff",
+  importText: "#1d4ed8",
+  privacyBg: "rgba(118,87,242,0.1)",
+  privacyBorder: "rgba(118,87,242,0.28)",
+  privacyText: "#4f3bb1"
 };
 
 function text(value, x, y, size = 16, weight = 700, fill = colors.ink, extra = "") {
@@ -72,25 +77,33 @@ function logoMark(x, y, scale = 1) {
   return `
     <g transform="translate(${x} ${y}) scale(${scale})">
       ${rect(0, 0, 42, 42, colors.ink, "none", 8)}
-      <path d="M14 7h15c2 0 4 2 4 4v20c0 2-2 4-4 4H14c-2 0-4-2-4-4V11c0-2 2-4 4-4Z" fill="${colors.surface}"/>
-      <rect x="22" y="13" width="8" height="2.6" rx="1.3" fill="${colors.review}"/>
-      <rect x="27.4" y="13" width="2.6" height="8" rx="1.3" fill="${colors.review}"/>
-      <rect x="14" y="19" width="14" height="3" rx="1.5" fill="${colors.scan}"/>
-      <path d="M28 16.5 34 20.5 28 24.5Z" fill="${colors.scan}"/>
-      <rect x="15" y="27" width="14" height="3" rx="1.5" fill="${colors.info}"/>
-      <path d="M15 24.5 9 28.5 15 32.5Z" fill="${colors.info}"/>
-      <circle cx="21" cy="25" r="2.4" fill="${colors.danger}"/>
+      ${rect(9, 9, 10, 3, colors.targeted, "none", 1.5)}
+      ${rect(9, 9, 3, 10, colors.targeted, "none", 1.5)}
+      ${rect(23, 9, 10, 3, colors.targeted, "none", 1.5)}
+      ${rect(30, 9, 3, 10, colors.targeted, "none", 1.5)}
+      ${rect(9, 30, 10, 3, colors.targeted, "none", 1.5)}
+      ${rect(9, 23, 3, 10, colors.targeted, "none", 1.5)}
+      ${rect(23, 30, 10, 3, colors.targeted, "none", 1.5)}
+      ${rect(30, 23, 3, 10, colors.targeted, "none", 1.5)}
+      ${rect(14, 13, 14, 16, colors.surface, "none", 3)}
+      ${rect(16, 16, 10, 9, colors.paper, colors.subtle, 2, `stroke-width="1"`)}
+      <path d="M17.5 24h6" stroke="${colors.scan}" stroke-width="2" stroke-linecap="round"/>
+      <path d="M23 21.5 30 25 23 28.5Z" fill="${colors.info}"/>
+      <circle cx="20.5" cy="22.5" r="1.9" fill="${colors.danger}"/>
     </g>`;
 }
 
 function screenShell(title, body, opts = {}) {
   const bg = opts.bg || colors.paper;
   const topColor = opts.topColor || colors.ink;
+  const titleText = title
+    ? text(title, opts.logo === false ? 20 : 58, 48, 15, 900, topColor)
+    : "";
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1170" height="2532" viewBox="0 0 390 844">
   ${rect(0, 0, 390, 844, bg, "none", 0)}
   ${opts.logo === false ? "" : logoMark(20, 20, 0.76)}
-  ${text(title, opts.logo === false ? 20 : 58, 48, 15, 900, topColor)}
+  ${titleText}
   ${body}
 </svg>`;
 }
@@ -108,7 +121,7 @@ function smallChip(label, x, y, owned = false) {
 function countChip(label, x, y, count = 0, capped = false) {
   const hasCount = count > 0;
   const fill = hasCount ? colors.scan : colors.field;
-  const stroke = capped ? "#9a6b00" : hasCount ? colors.scan : colors.subtle;
+  const stroke = capped ? colors.capRing : hasCount ? colors.scan : colors.subtle;
   const strokeWidth = capped ? 3 : 1;
   const color = hasCount ? "#ffffff" : colors.muted;
   return `
@@ -135,7 +148,7 @@ function scanRow(x, y, code, meta, count) {
     ${rect(x + 12, y + 10, 42, 46, "#fbfdfc", colors.subtle, 6)}
     ${text(code, x + 68, y + 31, 19, 950)}
     ${text(meta, x + 68, y + 52, 11, 750, colors.muted)}
-    ${rect(x + 300, y + 18, 44, 30, count === "edit" ? colors.spareBg : "#e6f3ed", "none", 15)}
+    ${rect(x + 300, y + 18, 44, 30, count === "edit" ? colors.spareBg : colors.ownedBg, "none", 15)}
     ${text(count, x + 322, y + 38, 12, 850, count === "edit" ? colors.spareText : colors.scanStrong, `text-anchor="middle"`)}
   `;
 }
@@ -172,8 +185,8 @@ const screens = [
       ${rect(20, 566, 350, 54, colors.surface, colors.subtle)}
       ${text("Luca", 36, 600, 18, 850)}
       ${button("Start scanning", 20, 648, 350, true)}
-      ${rect(20, 748, 350, 52, "rgba(109,87,199,0.08)", "rgba(109,87,199,0.24)")}
-      ${text("Local mode keeps images on this device.", 36, 780, 13, 850, "#4b3b91")}
+      ${rect(20, 748, 350, 52, colors.privacyBg, colors.privacyBorder)}
+      ${text("Local mode keeps images on this device.", 36, 780, 13, 850, colors.privacyText)}
       `
     )
   },
@@ -206,10 +219,10 @@ const screens = [
       `
       ${button("Home", 20, 18, 74, false)}
       ${text("Mauro", 108, 48, 15, 900, "#ffffff")}
-      ${badge("Targeted", 284, 24, "#e6f3ed", colors.scanStrong)}
+      ${badge("Targeted", 284, 24, colors.ownedBg, colors.scanStrong)}
       ${rect(0, 74, 390, 770, colors.camera, "none", 0)}
       ${rect(86, 128, 218, 320, "rgba(255,255,255,0.05)", colors.targeted, 10, `stroke-width="3"`)}
-      ${rect(224, 150, 62, 50, "rgba(52,199,89,0.16)", colors.targeted, 8, `stroke-width="3"`)}
+      ${rect(224, 150, 62, 50, "rgba(94,230,181,0.16)", colors.targeted, 8, `stroke-width="3"`)}
       ${rect(20, 624, 350, 44, "rgba(255,255,255,0.94)", "none")}
       ${text("Hold steady inside the frame", 195, 652, 14, 900, colors.ink, `text-anchor="middle"`)}
       ${rect(20, 744, 104, 54, "rgba(255,255,255,0.12)", "rgba(255,255,255,0.24)")}
@@ -229,7 +242,7 @@ const screens = [
       `
       ${button("Home", 20, 18, 74, false)}
       ${text("My Album", 108, 48, 15, 900)}
-      ${badge("642 owned", 276, 24, "#e6f3ed", colors.scanStrong, 94)}
+      ${badge("642 owned", 276, 24, colors.ownedBg, colors.scanStrong, 94)}
       ${text("Group A", 20, 118, 30, 900)}
       ${teamHeader("MEX", "Mexico", "20 / 20", "Clear", 20, 156)}
       ${smallChip("01", 34, 222, true)}${smallChip("02", 82, 222, true)}${smallChip("03", 130, 222, true)}${smallChip("04", 178, 222, true)}${smallChip("05", 226, 222, true)}${smallChip("06", 274, 222, true)}${smallChip("07", 322, 222, true)}
@@ -306,7 +319,7 @@ const screens = [
       `
       ${button("Home", 20, 18, 74, false)}
       ${text("Export", 108, 48, 15, 900)}
-      ${badge("Ready", 284, 24, "#e6f3ed", colors.scanStrong)}
+      ${badge("Ready", 284, 24, colors.ownedBg, colors.scanStrong)}
       ${text("Download", 20, 128, 34, 900)}
       ${text("your lists.", 20, 166, 34, 900)}
       ${text("Text is for swaps. JSON restores local evidence.", 20, 210, 15, 650, colors.muted)}
@@ -317,8 +330,8 @@ const screens = [
       ${summaryLine("Images", "Local only", 40, 446)}
       ${button("Download text", 20, 626, 350, true)}
       ${button("Download JSON backup", 20, 690, 350, false)}
-      ${rect(20, 768, 350, 44, "rgba(109,87,199,0.08)", "rgba(109,87,199,0.24)")}
-      ${text("Keep JSON as a personal backup.", 36, 796, 13, 850, "#4b3b91")}
+      ${rect(20, 768, 350, 44, colors.privacyBg, colors.privacyBorder)}
+      ${text("Keep JSON as a personal backup.", 36, 796, 13, 850, colors.privacyText)}
       `,
       { logo: false }
     )
@@ -331,7 +344,7 @@ function phoneFrame(svg, x, y, scale = 0.42) {
     .replace(/<\/svg>\s*$/, "");
   return `
     <g transform="translate(${x} ${y}) scale(${scale})">
-      ${rect(-12, -12, 414, 868, "#101615", "none", 32)}
+      ${rect(-12, -12, 414, 868, colors.camera, "none", 32)}
       ${inner}
     </g>`;
 }
@@ -352,8 +365,8 @@ function boardSvg() {
 <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
   ${rect(0, 0, width, height, colors.paper, "none", 0)}
   ${logoMark(56, 48, 1.28)}
-  ${text("cromoswap CX v0.2 mockups", 126, 85, 42, 900)}
-  ${text("Album batch controls, reps grid counters, import, export, and centered scan targeting.", 128, 120, 22, 700, colors.muted)}
+  ${text("cromoswap Cobalt Mint CX v0.3", 126, 85, 42, 900)}
+  ${text("Navy/cobalt app presence with mint scanner cues across album, reps, import, export, and targeting.", 128, 120, 22, 700, colors.muted)}
   ${screens.map((screen, index) => phoneFrame(screen.svg, positions[index][0], positions[index][1], 0.49)).join("")}
 </svg>`;
 }

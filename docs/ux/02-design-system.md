@@ -37,59 +37,59 @@ Reference mood:
 
 ## Color Tokens
 
-Use a light theme first. The palette should not be dominated by one hue. Green anchors
-the scan action, blue supports information, amber signals review, and coral handles
-destructive or blocked states.
+Use Cobalt Mint as the default light theme. The palette should not be dominated by
+one hue. Navy anchors the app shell, mint anchors scan and ownership, cobalt supports
+information/import, amber signals review, and coral handles destructive states.
 
 ```css
 :root {
-  --color-ink: #17211f;
-  --color-muted: #60706b;
-  --color-subtle: #d8e1dd;
-  --color-paper: #f7faf8;
-  --color-surface: #ffffff;
-  --color-field: #eef4f1;
+  --ink: #121a2f;
+  --muted: #5c6780;
+  --subtle: #dce6ef;
+  --paper: #f5f9fc;
+  --surface: #ffffff;
+  --field: #eef6fb;
 
-  --color-scan: #1f8a5f;
-  --color-scan-strong: #12613f;
-  --color-info: #2f74d0;
-  --color-review: #f2b84b;
-  --color-danger: #d94f4f;
-  --color-privacy: #6d57c7;
+  --scan: #18b394;
+  --scan-strong: #007a65;
+  --info: #3b66f5;
+  --review: #ffc247;
+  --danger: #ef5a6d;
+  --privacy: #7657f2;
 
-  --color-camera: #202927;
-  --color-overlay: rgba(255, 255, 255, 0.72);
-  --color-roi: #f2b84b;
-  --color-targeted: #34c759;
-  --color-owned-bg: #e6f3ed;
-  --color-owned-text: #12613f;
-  --color-spare-bg: #fff2cc;
-  --color-spare-text: #735000;
-  --color-import-bg: #eaf2ff;
-  --color-import-text: #184f94;
+  --camera: #10172a;
+  --overlay: rgba(245, 249, 252, 0.76);
+  --targeted: #5ee6b5;
+  --owned-bg: #def7ef;
+  --owned-text: #007a65;
+  --spare-bg: #fff1ca;
+  --spare-text: #755200;
+  --cap-ring: #b37b00;
+  --import-bg: #e8f0ff;
+  --import-text: #1d4ed8;
 }
 ```
 
 Semantic mapping:
 
-- Primary action: `--color-scan`
+- Primary action: `--scan`
 - Secondary action: white surface with ink border
-- Review or low confidence: `--color-review`
-- Destructive action: `--color-danger`
-- Privacy or local-only message: `--color-privacy`
-- Camera backdrop: `--color-camera`
-- Targeted scanner frame: `--color-targeted`
-- Owned album chips and reps counts: `--color-scan`
-- Duplicate spare badges and ambiguous text import: `--color-spare-bg` /
-  `--color-spare-text`
-- Import and restore surfaces: `--color-import-bg` / `--color-import-text`
+- Review or low confidence: `--review`
+- Destructive action: `--danger`
+- Privacy or local-only message: `--privacy`
+- Camera backdrop: `--camera`
+- Targeted scanner frame: `--targeted`
+- Owned album chips and reps counts: `--scan`
+- Duplicate spare badges and ambiguous text import: `--spare-bg` /
+  `--spare-text`
+- Import and restore surfaces: `--import-bg` / `--import-text`
 
 Implementation assets:
 
-- `design-system/assets/cromoswap-theme-tokens.css` exposes table-day,
-  stadium-night, and print-proof schemes as CSS custom properties.
-- `design-system/assets/cromoswap-theme-tokens.json` exposes the same schemes and
-  component mappings for the web service.
+- `design-system/assets/cromoswap-theme-tokens.css` exposes Cobalt Mint,
+  Grounded Green, Sticker Pop, and Night Pitch schemes as CSS custom properties.
+- `design-system/assets/cromoswap-theme-tokens.json` exposes the same schemes
+  and component mappings for the web service.
 
 ## Typography
 
@@ -235,7 +235,7 @@ Elements:
 Design notes:
 
 - The ROI box should be amber and clearly anchored to the top-right of the sticker target.
-- The frame border flips to `--color-targeted` green when live targeting is good.
+- The frame border flips to `--targeted` mint when live targeting is good.
 - Use a translucent mask around the target so the sticker silhouette is obvious.
 - Avoid long instructional copy on the camera screen.
 - Show one prominent status at a time.
