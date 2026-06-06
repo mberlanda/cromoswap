@@ -661,18 +661,28 @@ section[aria-label="Resume"] li button {
   color: var(--import-text);
 }
 
-.import-kind-picker {
+.import-kind {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: var(--space-4);
   align-items: center;
+  border: 0;
+  margin: 0;
+  padding: 0;
 }
 
-.import-kind-picker p {
-  width: 100%;
+.import-kind legend {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--import-text);
+  padding: 0;
+  margin-bottom: var(--space-1);
+}
+
+.import-result {
+  color: var(--scan-strong);
+  font-size: 13px;
+  font-weight: 800;
   margin: 0;
-  font-size: 12px;
-  color: var(--muted);
 }
 
 .import-error {

@@ -3,14 +3,17 @@ import type { Session } from '../domain/types';
 import { StorageModeToggle } from './StorageModeToggle';
 import type { StorageMode } from '../composition';
 import {
-  detectTextKind,
-  buildTextImport,
+  parseFlexibleCodes,
+  resolveOwnedCodes,
   parseJsonImport,
-  type ImportKind,
   type JsonImport,
-  type TextImport,
 } from '../import/parse-import';
 import { CROMOSWAP_MARK_SRC } from './brand-assets';
+
+export interface AlbumImport {
+  userName: string;
+  ownedCodes: string[];
+}
 
 interface AlbumCount {
   owned: number;
@@ -26,15 +29,9 @@ interface SessionGateProps {
   storageMode?: StorageMode;
   onChangeMode?: (mode: StorageMode) => void;
   onImportJson?: (data: JsonImport) => void;
-  onImportText?: (data: TextImport) => void;
+  onImportAlbum?: (data: AlbumImport) => void;
   onOpenBoard?: () => void;
 }
-
-const KIND_LABELS: { kind: ImportKind; label: string }[] = [
-  { kind: 'owned', label: 'Owned' },
-  { kind: 'missing', label: 'Missing' },
-  { kind: 'duplicate', label: 'Duplicate' },
-];
 
 /** Entry screen: ask for a name to start a session, or resume an existing one. */
 export function SessionGate({
@@ -46,15 +43,19 @@ export function SessionGate({
   storageMode,
   onChangeMode,
   onImportJson,
-  onImportText,
+  onImportAlbum,
   onOpenBoard,
 }: SessionGateProps) {
   const [name, setName] = useState('');
   const inputId = useId();
-  const importId = useId();
+  const importNameId = useId();
+  const importFileId = useId();
+  const backupId = useId();
   const trimmed = name.trim();
-  // Holds a header-less text file until the user tells us how to read it.
-  const [pendingText, setPendingText] = useState<string | null>(null);
+
+  const [importName, setImportName] = useState('');
+  const [importKind, setImportKind] = useState<'owned' | 'missing'>('owned');
+  const [importResult, setImportResult] = useState<string | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
 
   function handleSubmit(event: FormEvent) {
@@ -63,30 +64,46 @@ export function SessionGate({
     onCreate(trimmed);
   }
 
-  async function handleImportFile(event: ChangeEvent<HTMLInputElement>) {
+  // Album list import: collector name + owned/missing chosen in the form; the
+  // file is just the codes (any common layout).
+  async function handleAlbumFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
-    event.target.value = ''; // let the same file be re-selected later
+    event.target.value = '';
     if (!file) return;
     setImportError(null);
-    setPendingText(null);
-    const content = await file.text();
-    const isJson = file.name.endsWith('.json') || content.trimStart().startsWith('{');
-    try {
-      if (isJson) {
-        onImportJson?.(parseJsonImport(content));
-        return;
-      }
-      const kind = detectTextKind(content);
-      if (kind) onImportText?.(buildTextImport(content, kind));
-      else setPendingText(content);
-    } catch (err) {
-      setImportError(err instanceof Error ? err.message : 'Could not read that file');
+    setImportResult(null);
+    const collector = importName.trim();
+    if (collector === '') {
+      setImportError('Enter a collector name first.');
+      return;
     }
+    const listed = parseFlexibleCodes(await file.text());
+    if (listed.length === 0) {
+      setImportError('No sticker codes found in that file.');
+      return;
+    }
+    const ownedCodes = resolveOwnedCodes(importKind, listed);
+    onImportAlbum?.({ userName: collector, ownedCodes });
+    setImportResult(
+      importKind === 'owned'
+        ? `Imported ${listed.length} owned sticker${listed.length === 1 ? '' : 's'} for ${collector}.`
+        : `Marked ${ownedCodes.length} owned for ${collector} (${listed.length} missing).`,
+    );
   }
 
-  function handlePickKind(kind: ImportKind) {
-    if (pendingText !== null) onImportText?.(buildTextImport(pendingText, kind));
-    setPendingText(null);
+  async function handleBackupFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    setImportError(null);
+    setImportResult(null);
+    try {
+      const data = parseJsonImport(await file.text());
+      onImportJson?.(data);
+      setImportResult(`Restored backup for ${data.userName}.`);
+    } catch (err) {
+      setImportError(err instanceof Error ? err.message : 'Could not read that backup.');
+    }
   }
 
   return (
@@ -145,30 +162,70 @@ export function SessionGate({
           Start scanning
         </button>
       </form>
-      {(onImportJson || onImportText) && (
-        <section aria-label="Import" className="import-section">
-          <label htmlFor={importId} className="import-label">
-            Import a backup (.txt or .json)
+      {onImportAlbum && (
+        <section aria-label="Import collector list" className="import-section">
+          <h2>Import a collector list</h2>
+          <label htmlFor={importNameId}>Collector name</label>
+          <input
+            id={importNameId}
+            data-test-id="import-name"
+            value={importName}
+            onChange={(e) => setImportName(e.target.value)}
+            placeholder="e.g. Luca"
+          />
+          <fieldset className="import-kind">
+            <legend>These stickers are</legend>
+            <label>
+              <input
+                type="radio"
+                name="import-kind"
+                data-test-id="import-owned"
+                checked={importKind === 'owned'}
+                onChange={() => setImportKind('owned')}
+              />{' '}
+              Owned
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="import-kind"
+                data-test-id="import-missing"
+                checked={importKind === 'missing'}
+                onChange={() => setImportKind('missing')}
+              />{' '}
+              Missing
+            </label>
+          </fieldset>
+          <label htmlFor={importFileId} className="import-label">
+            Choose a .txt file of codes
           </label>
           <input
-            id={importId}
+            id={importFileId}
+            data-test-id="import-file"
             type="file"
-            accept=".txt,.json,application/json,text/plain"
-            onChange={handleImportFile}
+            accept=".txt,text/plain"
+            onChange={handleAlbumFile}
           />
-          {pendingText !== null && (
-            <div className="import-kind-picker" role="group" aria-label="Import kind">
-              <p>Can’t tell what this list is — what does it represent?</p>
-              {KIND_LABELS.map(({ kind, label }) => (
-                <button key={kind} type="button" className="secondary" onClick={() => handlePickKind(kind)}>
-                  {label}
-                </button>
-              ))}
-            </div>
-          )}
-          {importError && <p className="import-error" role="alert">{importError}</p>}
         </section>
       )}
+      {onImportJson && (
+        <section aria-label="Restore backup" className="import-section">
+          <label htmlFor={backupId} className="import-label">
+            Restore a full backup (.json)
+          </label>
+          <input
+            id={backupId}
+            data-test-id="restore-json"
+            type="file"
+            accept=".json,application/json"
+            onChange={handleBackupFile}
+          />
+        </section>
+      )}
+      {importResult && (
+        <p className="import-result" data-test-id="import-result">✓ {importResult}</p>
+      )}
+      {importError && <p className="import-error" role="alert">{importError}</p>}
       <p className="privacy-note">
         {storageMode === 'local'
           ? 'Data stored locally on this device only.'

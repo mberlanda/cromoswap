@@ -13,7 +13,7 @@ import { RepsView } from './RepsView';
 import type { RepsViewMode } from './RepsView';
 import type { RepsMode } from './RepsModeToggle';
 import { REPS_CAP } from './RepsGrid';
-import type { JsonImport, TextImport } from '../import/parse-import';
+import type { JsonImport } from '../import/parse-import';
 import { BoardPanel } from './BoardPanel';
 import { CameraPermissionPanel } from './CameraPermissionPanel';
 import { StorageModeToggle } from './StorageModeToggle';
@@ -403,24 +403,13 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
 
   // Merge a text import into a fresh session: duplicate counts become scan rows
   // (capped), owned/missing become album ownership for the parsed user.
-  async function handleImportText(data: TextImport) {
-    const session = await deps.sessionRepo.create(data.userName);
-    if (data.kind === 'duplicate') {
-      for (const [code, count] of Object.entries(data.counts ?? {})) {
-        const copies = Math.min(count, REPS_CAP);
-        for (let i = 0; i < copies; i++) {
-          await deps.scanRepo.add({
-            sessionId: session.id,
-            normalizedCode: code,
-            source: 'manual',
-            confidence: 1,
-            capturedAt: deps.now(),
-          });
-        }
-      }
-    } else {
-      await deps.albumRepo.setMany(data.userName, data.ownedCodes ?? [], true);
+  // Import an owned/missing album list for a collector. Reuses an existing
+  // session for that name so the gate doesn't fill with empty duplicates.
+  async function handleImportAlbum(data: { userName: string; ownedCodes: string[] }) {
+    if (!sessions.some((s) => s.userName === data.userName)) {
+      await deps.sessionRepo.create(data.userName);
     }
+    await deps.albumRepo.setMany(data.userName, data.ownedCodes, true);
     await refreshSessions();
   }
 
@@ -494,7 +483,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
         storageMode={storageMode}
         onChangeMode={onChangeMode}
         onImportJson={handleImportJson}
-        onImportText={handleImportText}
+        onImportAlbum={handleImportAlbum}
         onOpenBoard={deps.fetchLeaderboard ? handleOpenBoard : undefined}
       />
     );

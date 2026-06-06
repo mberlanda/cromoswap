@@ -19,7 +19,7 @@ describe('SessionGate', () => {
     const button = screen.getByRole('button', { name: /start/i });
     expect(button).toBeDisabled();
 
-    await userEvent.type(screen.getByLabelText(/name/i), 'Mauro');
+    await userEvent.type(screen.getByLabelText(/your name/i), 'Mauro');
     expect(button).toBeEnabled();
     await userEvent.click(button);
     expect(onCreate).toHaveBeenCalledWith('Mauro');
@@ -87,8 +87,30 @@ describe('SessionGate', () => {
       <SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} onImportJson={vi.fn()} />,
     );
     const file = new File(['definitely not json'], 'backup.json', { type: 'application/json' });
-    await userEvent.upload(screen.getByLabelText(/import a backup/i), file);
+    await userEvent.upload(screen.getByLabelText(/restore a full backup/i), file);
     expect(await screen.findByRole('alert')).toBeInTheDocument();
+  });
+
+  it('imports an owned list and reports the result', async () => {
+    const onImportAlbum = vi.fn();
+    render(
+      <SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} onImportAlbum={onImportAlbum} />,
+    );
+    await userEvent.type(screen.getByLabelText(/collector name/i), 'Mauro');
+    const file = new File(['ARG01, BRA05'], 'list.txt', { type: 'text/plain' });
+    await userEvent.upload(screen.getByLabelText(/choose a .txt/i), file);
+
+    expect(onImportAlbum).toHaveBeenCalledWith({ userName: 'Mauro', ownedCodes: ['ARG01', 'BRA05'] });
+    expect(await screen.findByText(/imported 2 owned/i)).toBeInTheDocument();
+  });
+
+  it('requires a collector name before importing a list', async () => {
+    render(
+      <SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} onImportAlbum={vi.fn()} />,
+    );
+    const file = new File(['ARG01'], 'list.txt', { type: 'text/plain' });
+    await userEvent.upload(screen.getByLabelText(/choose a .txt/i), file);
+    expect(await screen.findByRole('alert')).toHaveTextContent(/collector name/i);
   });
 
   it('shows the local vs cloud privacy note based on storage mode', () => {

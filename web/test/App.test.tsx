@@ -40,7 +40,7 @@ function makeDeps(overrides: Partial<AppDeps> = {}): AppDeps {
 }
 
 async function startSession(name = 'Mauro') {
-  await userEvent.type(screen.getByLabelText(/name/i), name);
+  await userEvent.type(screen.getByLabelText(/your name/i), name);
   await userEvent.click(screen.getByRole('button', { name: /start/i }));
 }
 
@@ -81,7 +81,7 @@ describe('App', () => {
     await userEvent.click(await findButtonByAriaLabel('Home'));
 
     // Back on the session gate: the name field is shown again.
-    expect(await screen.findByLabelText(/name/i)).toBeInTheDocument();
+    expect(await screen.findByLabelText(/your name/i)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /scan sticker/i })).not.toBeInTheDocument();
   });
 
@@ -135,23 +135,33 @@ describe('App', () => {
     });
     const file = new File([json], 'backup.json', { type: 'application/json' });
 
-    await userEvent.upload(screen.getByLabelText(/import a backup/i), file);
+    await userEvent.upload(screen.getByLabelText(/restore a full backup/i), file);
 
     expect(await screen.findByText('Imported Guy')).toBeInTheDocument();
     expect(await screen.findByText(/2 scans/i)).toBeInTheDocument();
     expect(await screen.findByText(/2 owned/i)).toBeInTheDocument();
   });
 
-  it('imports a header-less text file after the user picks the kind', async () => {
+  it('imports an owned album list via the form (flexible format)', async () => {
     render(<App deps={makeDeps()} />);
-    const file = new File(['BRA: 01, 02, 03'], 'list.txt', { type: 'text/plain' });
+    await userEvent.type(screen.getByLabelText(/collector name/i), 'Mauro');
+    // owned is the default kind; the file is plain one-per-line codes.
+    const file = new File(['ARG01\narg 2\nBRA05'], 'list.txt', { type: 'text/plain' });
 
-    await userEvent.upload(screen.getByLabelText(/import a backup/i), file);
-    // No header → user is asked which kind it is.
-    await userEvent.click(await screen.findByRole('button', { name: /^owned$/i }));
+    await userEvent.upload(screen.getByLabelText(/choose a .txt/i), file);
 
-    // A session is created (named Imported) and shows 3 owned.
-    expect(await screen.findByText(/3 owned/i)).toBeInTheDocument();
+    expect(await screen.findByText(/imported 3 owned/i)).toBeInTheDocument();
+    expect(await screen.findByText('Mauro')).toBeInTheDocument();
+  });
+
+  it('reports a clear error when an imported file has no codes', async () => {
+    render(<App deps={makeDeps()} />);
+    await userEvent.type(screen.getByLabelText(/collector name/i), 'Mauro');
+    const file = new File(['nothing useful here'], 'list.txt', { type: 'text/plain' });
+
+    await userEvent.upload(screen.getByLabelText(/choose a .txt/i), file);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/no sticker codes/i);
   });
 
   it('opens the board from the home gate without starting a session', async () => {
@@ -166,7 +176,7 @@ describe('App', () => {
     expect(screen.getByRole('link', { name: /admin backoffice/i })).toHaveAttribute('href', '/admin');
 
     await userEvent.click(await findButtonByAriaLabel('Home'));
-    expect(await screen.findByLabelText(/name/i)).toBeInTheDocument();
+    expect(await screen.findByLabelText(/your name/i)).toBeInTheDocument();
   });
 
   it('captures, confirms, and stores a scan that appears in the collection', async () => {
@@ -241,7 +251,7 @@ describe('App', () => {
   it('shows the session name and scan count in the header after creating a session', async () => {
     const deps = makeDeps();
     render(<App deps={deps} />);
-    await userEvent.type(screen.getByLabelText(/name/i), 'Mauro');
+    await userEvent.type(screen.getByLabelText(/your name/i), 'Mauro');
     await userEvent.click(screen.getByRole('button', { name: /start/i }));
     const header = screen.getByRole('heading', { name: /mauro/i }).closest('.app-header');
     expect(header).toBeInTheDocument();
