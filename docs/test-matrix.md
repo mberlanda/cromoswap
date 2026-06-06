@@ -11,6 +11,8 @@ tests. Run everything with `scripts/validate.sh ci` (web + api + e2e).
 | API request/model | RSpec + SimpleCov | `api/spec/**` | line >90%, branch >80% (`api/spec/spec_helper.rb`) |
 | End-to-end (docker) | Playwright | `web/e2e-docker/**` | all specs green against the composed stack |
 | End-to-end (preview) | Playwright | `web/e2e/scan-flow.spec.ts` | camera-free manual happy path on the Vite preview |
+| Security | npm audit · bundler-audit · brakeman · Trivy | `validate-web/api.sh`, CI `security` job | no high/critical web advisories; no vulnerable gems; no brakeman warnings; no fixable CRITICAL Trivy findings |
+| Performance | bundle-size budget | `web/scripts/check-bundle-size.mjs` | built JS gzip ≤ 150 KB (`BUNDLE_BUDGET_BYTES`) |
 
 E2E selects elements only by `data-test-id` (Playwright `testIdAttribute`), never
 by copy or styling classes.

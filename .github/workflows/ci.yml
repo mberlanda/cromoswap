@@ -66,3 +66,18 @@ jobs:
 
       - name: Validate e2e (compose up, Playwright, teardown)
         run: ./scripts/validate-e2e.sh
+
+  security:
+    name: Security scan (Trivy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trivy dependency/filesystem scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
