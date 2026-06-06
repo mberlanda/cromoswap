@@ -6,6 +6,7 @@ import { test, expect } from '@playwright/test';
 const ADMIN_USER = 'admin@cromoswap.local';
 const ADMIN_PASS = '!cromoswap!';
 const authHeader = 'Basic ' + Buffer.from(`${ADMIN_USER}:${ADMIN_PASS}`).toString('base64');
+const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost:3000';
 
 // Unique per run so repeated CI runs don't collide on collector name.
 const collector = `E2E_${Date.now()}`;
@@ -41,4 +42,31 @@ test('API + admin round-trip: synced album shows on the board and in the backoff
   });
   expect(collectors.ok()).toBeTruthy();
   expect(await collectors.text()).toContain(collector);
+});
+
+test('browsing a collector from the board surfaces the admin backoffice link', async ({ page, request }) => {
+  const user = `E2E_BOARD_${Date.now()}`;
+  const sync = await request.post('/api/v1/album_stickers/sync', {
+    data: { userName: user, codes: ['ARG01', 'ARG02'] },
+  });
+  expect(sync.ok()).toBeTruthy();
+
+  await page.goto('/');
+  await page.getByTestId('view-board').click();
+  await page.getByTestId(`open-${user}`).click();
+
+  const adminLink = page.getByTestId('admin-link');
+  await expect(adminLink).toBeVisible();
+  await expect(adminLink).toHaveAttribute('href', '/admin');
+});
+
+test('the admin dashboard renders for an authenticated admin', async ({ browser }) => {
+  const ctx = await browser.newContext({
+    baseURL,
+    httpCredentials: { username: ADMIN_USER, password: ADMIN_PASS },
+  });
+  const page = await ctx.newPage();
+  await page.goto('/admin');
+  await expect(page.getByTestId('admin-dashboard')).toBeVisible();
+  await ctx.close();
 });
