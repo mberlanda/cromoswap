@@ -1,0 +1,104 @@
+:root,
+[data-cromoswap-scheme="cobalt-mint"] {
+  color-scheme: light;
+  --ink: #121a2f;
+  --muted: #5c6780;
+  --subtle: #dce6ef;
+  --paper: #f5f9fc;
+  --surface: #ffffff;
+  --field: #eef6fb;
+  --scan: #18b394;
+  --scan-strong: #007a65;
+  --info: #3b66f5;
+  --review: #ffc247;
+  --danger: #ef5a6d;
+  --privacy: #7657f2;
+  --camera: #10172a;
+  --overlay: rgba(245, 249, 252, 0.76);
+  --targeted: #5ee6b5;
+  --owned-bg: #def7ef;
+  --owned-text: #007a65;
+  --spare-bg: #fff1ca;
+  --spare-text: #755200;
+  --cap-ring: #b37b00;
+  --import-bg: #e8f0ff;
+  --import-text: #1d4ed8;
+}
+
+[data-cromoswap-scheme="grounded-green"] {
+  color-scheme: light;
+  --ink: #17211f;
+  --muted: #60706b;
+  --subtle: #d8e1dd;
+  --paper: #f7faf8;
+  --surface: #ffffff;
+  --field: #eef4f1;
+  --scan: #1f8a5f;
+  --scan-strong: #12613f;
+  --info: #2f74d0;
+  --review: #f2b84b;
+  --danger: #d94f4f;
+  --privacy: #6d57c7;
+  --camera: #202927;
+  --overlay: rgba(255, 255, 255, 0.72);
+  --targeted: #34c759;
+  --owned-bg: #e6f3ed;
+  --owned-text: #12613f;
+  --spare-bg: #fff2cc;
+  --spare-text: #735000;
+  --cap-ring: #9a6b00;
+  --import-bg: #eaf2ff;
+  --import-text: #184f94;
+}
+
+[data-cromoswap-scheme="sticker-pop"] {
+  color-scheme: light;
+  --ink: #13201d;
+  --muted: #5d6964;
+  --subtle: #dde6df;
+  --paper: #fbfbf6;
+  --surface: #ffffff;
+  --field: #f1f7f1;
+  --scan: #2aa86f;
+  --scan-strong: #0c7049;
+  --info: #2d7dd8;
+  --review: #ffc83d;
+  --danger: #ff5959;
+  --privacy: #865dd6;
+  --camera: #14201d;
+  --overlay: rgba(251, 251, 246, 0.76);
+  --targeted: #31d28b;
+  --owned-bg: #e3f5eb;
+  --owned-text: #0c7049;
+  --spare-bg: #fff0bd;
+  --spare-text: #6b4b00;
+  --cap-ring: #ff6b5e;
+  --import-bg: #e7f1ff;
+  --import-text: #1559a7;
+}
+
+[data-cromoswap-scheme="night-pitch"] {
+  color-scheme: light;
+  --ink: #0b1613;
+  --muted: #53645e;
+  --subtle: #d8e4dd;
+  --paper: #f6faf7;
+  --surface: #ffffff;
+  --field: #edf5ef;
+  --scan: #0f7a53;
+  --scan-strong: #07583b;
+  --info: #377be8;
+  --review: #f4c84d;
+  --danger: #e84d61;
+  --privacy: #705bd6;
+  --camera: #07110e;
+  --overlay: rgba(246, 250, 247, 0.74);
+  --targeted: #2bd67d;
+  --owned-bg: #ddf3e8;
+  --owned-text: #07583b;
+  --spare-bg: #fff0c7;
+  --spare-text: #664700;
+  --cap-ring: #e4af2d;
+  --import-bg: #e6f0ff;
+  --import-text: #1857a8;
+}

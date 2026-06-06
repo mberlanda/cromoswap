@@ -1,208 +1,207 @@
 # Mockup Specifications
 
-Status: draft v0.1  
-Date: 2026-06-04
+Status: draft v0.2
+Date: 2026-06-05
 
 The static mockup board lives at:
 
 ```text
-docs/ux/mockups/index.html
+design-system/index.html
 ```
 
 Open it directly in a browser. It has no external dependencies and does not require a dev
-server.
+server. The generated SVG/JPEG mockups live in `design-system/mockups/`.
 
 ## Mockup Coverage
 
 The board includes seven primary mobile screens:
 
-1. Welcome and session start.
-2. Camera permission and fallback.
-3. Live scan view.
-4. Detection confirmation.
-5. Manual correction.
+1. Start, resume, or import.
+2. Import text or JSON.
+3. Live scan with centered sticker frame.
+4. My Album team All/Clear.
+5. My Reps counter grid.
 6. Collection list.
 7. Export summary.
 
-It also includes a compact design-token strip for the first visual system.
+It also includes color-scheme cards, reusable component samples, and links to
+implementation-facing CSS, JSON, SVG, and mockup assets.
 
-## Screen 1: Welcome And Session
+## Screen 1: Start, Resume, Import
 
 Intent:
 
-- Start or resume quickly.
-- Make privacy feel simple and local.
-- Set a collector-friendly tone without a landing page.
+- Make returning users fast.
+- Put import beside resume because both recover previous work.
+- Keep new-session creation deliberate and short.
 
 Key UI:
 
-- App name.
-- Short value statement.
+- Product name.
+- Resume card with scan and album counts.
+- Import JSON and Import text actions.
 - Name input.
 - Primary start button.
-- Resume summary.
-- Local privacy note.
+- Local/privacy note.
 
 Review questions:
 
 - Is resume prominent enough for returning users?
-- Does the screen avoid marketing fluff?
-- Can a kid understand what to do first?
+- Does import feel like recovery, not a hidden advanced feature?
+- Can a kid understand the first action?
 
-## Screen 2: Camera Permission
+## Screen 2: Import
 
 Intent:
 
-- Explain why camera access is needed.
-- Make manual entry feel like a supported path.
-- Handle denied or unavailable camera without ending the session.
+- Restore JSON backups without overwriting.
+- Merge text exports with clear semantics.
+- Handle ambiguous text before making changes.
 
 Key UI:
 
-- Camera access request.
-- Primary allow action.
-- Manual entry fallback.
-- Short privacy note.
+- JSON restore card.
+- Text merge card.
+- Detected import summary.
+- Choose file and confirm actions.
 
 Review questions:
 
-- Is the permission ask understandable before the browser prompt?
-- Does manual entry feel normal instead of second-class?
-- Is the local image promise visible without being heavy?
+- Is the difference between restore and merge clear?
+- Does blue vs amber map to information vs review?
+- Does the screen feel non-destructive?
 
 ## Screen 3: Live Scan
 
 Intent:
 
-- Make the sticker placement obvious.
-- Make the top-right ROI unmistakable.
-- Keep actions thumb-reachable.
+- Make sticker placement obvious.
+- Tie the OCR ROI to the sticker frame.
+- Give immediate confidence via the green targeted state.
 
 Key UI:
 
 - Camera preview simulation.
-- Sticker outline.
-- Amber ROI target.
-- Status chip.
-- Bottom controls: manual, pause, collection.
+- Centered sticker outline.
+- Nested top-right ROI target.
+- Targeted status badge.
+- Bottom controls for orientation, size, and pause.
 
 Review questions:
 
-- Does the ROI feel like the most important part of the overlay?
-- Is the bottom control area reachable without covering the sticker?
-- Would this still work in imperfect lighting?
+- Does the centered frame look like the physical sticker?
+- Is the ROI still visually tied to the code corner?
+- Does the green targeted state read as success rather than save/confirm?
 
-## Screen 4: Detection Confirmation
+## Screen 4: My Album
 
 Intent:
 
-- Show the detected code clearly.
-- Let the user save or correct without hesitation.
-- Avoid storing OCR output silently.
+- Speed up mostly-complete team marking.
+- Preserve the simple binary checklist model.
 
 Key UI:
 
-- Large normalized code.
-- Confidence status.
-- Captured evidence crop.
-- Save, Correct, Rescan, Skip.
+- Team cards grouped by album group.
+- Owned and missing chips.
+- Compact All pill when incomplete.
+- Compact Clear pill when complete.
+- Owned/missing export actions.
 
 Review questions:
 
-- Is Save clearly the primary action?
-- Is Correct close enough for fast OCR fixes?
-- Does the thumbnail help verify the code?
+- Is the All/Clear pill visible without dominating the team header?
+- Can users infer the workflow: All, then untick missing stickers?
+- Does read-only leaderboard usage remain visually compatible?
 
-## Screen 5: Manual Correction
+## Screen 5: My Reps Grid
 
 Intent:
 
-- Make correction faster than typing the whole code again.
-- Normalize prefix and number input.
-- Support manual additions when camera is unavailable.
+- Count duplicates quickly using the album mental model.
+- Keep grid data tied to existing scan rows.
 
 Key UI:
 
-- Split prefix and number fields.
-- Validated preview code.
-- Number chips for common quick selection.
-- Save action.
+- Scan/Grid view switch.
+- Tap-mode segmented control.
+- 0 to 7 count chips.
+- Amber spare badges.
+- Cap ring at seven.
 
 Review questions:
 
-- Can the user change one character or digit quickly?
-- Is validation understandable without technical language?
-- Does it feel like a normal path rather than a failure path?
+- Is the active tap mode unmistakable?
+- Are zero, one, duplicate, and capped counts distinguishable at a glance?
+- Does the grid avoid feeling like a separate album feature?
 
 ## Screen 6: Collection List
 
 Intent:
 
-- Review saved scans.
-- Spot duplicates and mistakes.
-- Add, edit, delete, and export.
+- Preserve row-level review, editing, deletion, thumbnails, and source metadata.
+- Keep it secondary to the grid for fast duplicate counting.
 
 Key UI:
 
-- Total and unique counts.
-- Duplicate highlight.
-- Scan rows with code, source, time, count, thumbnail.
-- Row actions.
+- Stats row.
+- Scan rows with code, source, time, count, and thumbnail.
+- Add, scan more, and export actions.
 
 Review questions:
 
 - Are codes easier to scan than timestamps?
-- Are duplicates visible without clutter?
-- Does manual entry stay available?
+- Are manual entries visible without feeling penalized?
+- Does the row list still justify its place after the grid exists?
 
 ## Screen 7: Export
 
 Intent:
 
-- Make text export the fastest share path.
-- Explain JSON as backup/evidence.
-- Summarize what will be downloaded.
+- Make text export the fastest sharing path.
+- Position JSON as a restorable personal backup.
+- Keep import compatibility visible through predictable summaries.
 
 Key UI:
 
 - Session summary.
 - Text export primary action.
-- JSON export secondary action.
-- Privacy note for images.
+- JSON backup secondary action.
+- Privacy note for image-backed JSON.
 
 Review questions:
 
-- Is text export clearly primary?
+- Is text clearly the sharing format?
 - Does JSON sound useful but not required?
-- Is the export metadata predictable?
+- Is the export metadata consistent with import detection?
 
 ## Responsive Notes
 
 Mobile portrait is the primary target. Tablet and desktop should use the same core
-screens in a centered app frame, with the collection list allowed to widen first.
+screens in a centered app frame, with album and reps grids allowed to widen first.
 
 Implementation guidance:
 
 - Keep scan preview aspect ratio stable.
 - Keep primary actions in the bottom third.
 - Avoid UI that shifts when status text changes.
-- Keep code text large and fixed-height.
-- Use scroll only for list-heavy screens, not the scan view.
+- Keep code text and chip sizes fixed.
+- Use scroll for grid-heavy screens, not the scan target itself.
 
 ## Self-Review
 
 Checked in this draft:
 
-- User journeys are represented in screens.
-- Primary action is clear on each screen.
-- OCR uncertainty has a normal correction path.
-- Collection and export screens support future sharing data.
+- June 5 CX specs are represented in screens.
+- Import and export are visually connected.
+- Album and reps grids share structure but not semantics.
+- Scanner targeting uses the approved centered frame and nested ROI.
 - Visual system avoids a single-hue theme.
 - Tap targets are large enough in the mockups.
 
 Needs validation with real materials:
 
-- ROI placement against actual sticker-back photos.
-- Contrast of overlay in bright and dim rooms.
-- How quickly children understand "code in the corner".
-- Whether collectors want a true batch mode after confirming many scans.
+- Scanner contrast in bright and dim rooms.
+- Whether the green targeted frame is obvious during movement.
+- How quickly children understand the reps tap mode.
+- Whether import detection copy is clear with real exported files.

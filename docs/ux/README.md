@@ -1,10 +1,10 @@
 # UX Package - WC 2026 Sticker Scanner
 
-Status: draft v0.1  
-Date: 2026-06-04  
-Scope: UX, visual direction, and static mockups only. No application code changes.
+Status: draft v0.2
+Date: 2026-06-05
+Scope: UX, visual direction, implementation-facing tokens, and static mockups.
 
-This folder defines the first user experience direction for the sticker scanner app. It is
+This folder defines the user experience direction for the sticker scanner app. It is
 written for two overlapping audiences:
 
 - Collection-focused users who want to process a pile of duplicate stickers quickly.
@@ -19,14 +19,14 @@ screen should help the user start or resume a collection session immediately.
 - [Flows And User Stories](01-flows-and-user-stories.md)
 - [Design System](02-design-system.md)
 - [Mockup Specifications](03-mockups.md)
-- [Static Mockup Board](mockups/index.html)
+- [Static Design System And Mockup Board](../../design-system/index.html)
 
 ## UX Direction
 
 The core experience is:
 
 ```text
-Name -> Camera permission -> Scan -> Confirm or correct -> Saved list -> Export
+Name -> Resume/import/create -> Scan or grid-count -> Album/reps review -> Export
 ```
 
 Design principles:
@@ -40,16 +40,17 @@ Design principles:
 
 ## Self-Review Summary
 
-This v0.1 package covers:
+This v0.2 package covers:
 
-- Primary journeys for collectors, kids, returning users, OCR failures, and export.
+- Primary journeys for collectors, kids, returning users, OCR failures, import, and export.
 - MVP flows and user stories aligned with `docs/specs/00-product-spec.md`.
-- A first visual system with colors, typography, spacing, controls, and states.
-- A standalone HTML/CSS mockup board covering the main app surfaces.
+- A visual system with colors, typography, spacing, controls, and states.
+- Implementation-facing CSS/JSON color scheme assets.
+- A standalone HTML/CSS design-system board covering the planned CX surfaces.
 
 Known next UX work:
 
 - Test the scan overlay against real sticker-back photos.
 - Validate language with children and non-technical collectors.
-- Decide whether the app needs a lightweight "batch mode" after the first prototype.
-- Create high-fidelity implementation components once the React app exists.
+- Validate the Reps grid tap-mode copy with real duplicate sorting.
+- Create high-fidelity implementation components for import and Reps grid.
