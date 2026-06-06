@@ -1,7 +1,7 @@
 # Design System
 
-Status: draft v0.1  
-Date: 2026-06-04
+Status: draft v0.2
+Date: 2026-06-05
 
 ## Design Position
 
@@ -60,6 +60,13 @@ destructive or blocked states.
   --color-camera: #202927;
   --color-overlay: rgba(255, 255, 255, 0.72);
   --color-roi: #f2b84b;
+  --color-targeted: #34c759;
+  --color-owned-bg: #e6f3ed;
+  --color-owned-text: #12613f;
+  --color-spare-bg: #fff2cc;
+  --color-spare-text: #735000;
+  --color-import-bg: #eaf2ff;
+  --color-import-text: #184f94;
 }
 ```
 
@@ -71,6 +78,18 @@ Semantic mapping:
 - Destructive action: `--color-danger`
 - Privacy or local-only message: `--color-privacy`
 - Camera backdrop: `--color-camera`
+- Targeted scanner frame: `--color-targeted`
+- Owned album chips and reps counts: `--color-scan`
+- Duplicate spare badges and ambiguous text import: `--color-spare-bg` /
+  `--color-spare-text`
+- Import and restore surfaces: `--color-import-bg` / `--color-import-text`
+
+Implementation assets:
+
+- `design-system/assets/cromoswap-theme-tokens.css` exposes table-day,
+  stadium-night, and print-proof schemes as CSS custom properties.
+- `design-system/assets/cromoswap-theme-tokens.json` exposes the same schemes and
+  component mappings for the web service.
 
 ## Typography
 
@@ -156,6 +175,7 @@ Elements:
 - Name input.
 - Primary "Start scanning" action.
 - Resume card when local session exists.
+- Import button for text and JSON exports.
 - Short privacy note.
 
 Design notes:
@@ -163,6 +183,25 @@ Design notes:
 - Keep form short.
 - Resume should be primary if a session exists.
 - Starting a new session should be secondary and deliberate.
+- Import belongs on the start screen, not inside a scan tab, because it restores or
+  merges previous work.
+
+### Import
+
+Purpose: restore a JSON backup or merge a text list without overwriting current work.
+
+Elements:
+
+- File picker accepting `.txt` and `.json`.
+- JSON restore choice, styled with information blue.
+- Text merge choice, styled with amber review semantics.
+- Detected type summary: owned, missing, duplicate, or ambiguous.
+
+Design notes:
+
+- JSON creates a new session.
+- Text merge is non-destructive.
+- Ambiguous text needs a compact kind picker before merge.
 
 ### Camera Permission Panel
 
@@ -187,17 +226,54 @@ Purpose: scan sticker backs quickly.
 Elements:
 
 - Live camera preview.
-- Sticker-shaped mask.
-- Top-right ROI box.
+- Centered sticker-shaped mask locked to portrait or landscape aspect ratio.
+- Top-right ROI box nested inside the centered frame.
 - Status line: Searching, Candidate found, Low confidence, No code yet.
-- Bottom actions: manual, collection, pause or rescan.
+- Frame size slider and orientation segmented control.
+- Bottom actions: scan, auto collect, pause or rescan.
 
 Design notes:
 
 - The ROI box should be amber and clearly anchored to the top-right of the sticker target.
+- The frame border flips to `--color-targeted` green when live targeting is good.
 - Use a translucent mask around the target so the sticker silhouette is obvious.
 - Avoid long instructional copy on the camera screen.
 - Show one prominent status at a time.
+
+### My Album Team Card
+
+Purpose: mark owned stickers by team and support fast mostly-complete workflows.
+
+Elements:
+
+- Team header with prefix, full name, owned count, and one compact pill.
+- Binary sticker chips.
+- `All` pill when the team is incomplete.
+- `Clear` pill when the team is complete.
+
+Design notes:
+
+- The pill is deliberately small and should not compete with the chips.
+- Users can tap All, then untick the few stickers they are missing.
+- Read-only leaderboard album cards hide the batch action.
+
+### My Reps Grid
+
+Purpose: count duplicate copies from the same album layout.
+
+Elements:
+
+- Scan/Grid view switch.
+- Sticky tap-mode segmented control: `-1`, `+1`, `Clear`.
+- Count chips from 0 to 7.
+- Amber badge for counts 2 through 7.
+- Cap ring at 7.
+
+Design notes:
+
+- Grid count is a projection of scan rows, not a second data model.
+- The active tap mode owns the color: green for add, coral for remove, ink for clear.
+- A zero-count chip should stay dim enough to make owned duplicates easy to scan.
 
 ### Detection Confirmation Sheet
 

@@ -1,0 +1,120 @@
+{
+  "version": "0.2",
+  "updated": "2026-06-05",
+  "schemes": {
+    "tableDay": {
+      "name": "Table day",
+      "intent": "Default light scheme for one-handed sorting around a table.",
+      "tokens": {
+        "ink": "#17211f",
+        "muted": "#60706b",
+        "subtle": "#d8e1dd",
+        "paper": "#f7faf8",
+        "surface": "#ffffff",
+        "field": "#eef4f1",
+        "scan": "#1f8a5f",
+        "scanStrong": "#12613f",
+        "info": "#2f74d0",
+        "review": "#f2b84b",
+        "danger": "#d94f4f",
+        "privacy": "#6d57c7",
+        "camera": "#202927",
+        "targeted": "#34c759",
+        "ownedBg": "#e6f3ed",
+        "ownedText": "#12613f",
+        "spareBg": "#fff2cc",
+        "spareText": "#735000",
+        "importBg": "#eaf2ff",
+        "importText": "#184f94"
+      }
+    },
+    "stadiumNight": {
+      "name": "Stadium night",
+      "intent": "Dark scanner surface for dim rooms while preserving green, blue, amber, coral, and violet semantics.",
+      "tokens": {
+        "ink": "#eef8f3",
+        "muted": "#a8bbb4",
+        "subtle": "#3c4c48",
+        "paper": "#121716",
+        "surface": "#202927",
+        "field": "#283430",
+        "scan": "#33b982",
+        "scanStrong": "#7ce2b2",
+        "info": "#78aaf0",
+        "review": "#f4c766",
+        "danger": "#ff7474",
+        "privacy": "#aa98ff",
+        "camera": "#080b0a",
+        "targeted": "#58d884",
+        "ownedBg": "rgba(51, 185, 130, 0.18)",
+        "ownedText": "#7ce2b2",
+        "spareBg": "rgba(244, 199, 102, 0.2)",
+        "spareText": "#f4c766",
+        "importBg": "rgba(120, 170, 240, 0.18)",
+        "importText": "#b8d5ff"
+      }
+    },
+    "printProof": {
+      "name": "Print proof",
+      "intent": "Higher contrast light scheme for exported docs, QA screenshots, and classroom devices.",
+      "tokens": {
+        "ink": "#0f1c1a",
+        "muted": "#4f5f5a",
+        "subtle": "#cfd8d4",
+        "paper": "#fbfcff",
+        "surface": "#ffffff",
+        "field": "#f0f4f3",
+        "scan": "#0d7a51",
+        "scanStrong": "#075438",
+        "info": "#1d64ba",
+        "review": "#d69a1d",
+        "danger": "#c23b3b",
+        "privacy": "#5a46b0",
+        "camera": "#1c2422",
+        "targeted": "#168f4c",
+        "ownedBg": "#dff2e9",
+        "ownedText": "#075438",
+        "spareBg": "#fff0bd",
+        "spareText": "#614400",
+        "importBg": "#e4efff",
+        "importText": "#174b87"
+      }
+    }
+  },
+  "componentMapping": {
+    "albumAllButton": {
+      "background": "surface",
+      "border": "subtle",
+      "text": "scanStrong"
+    },
+    "albumClearButton": {
+      "background": "field",
+      "border": "subtle",
+      "text": "muted"
+    },
+    "repsAddMode": {
+      "background": "scan",
+      "text": "surface"
+    },
+    "repsRemoveMode": {
+      "background": "danger",
+      "text": "surface"
+    },
+    "repsClearMode": {
+      "background": "ink",
+      "text": "surface"
+    },
+    "repsSpareBadge": {
+      "background": "spareBg",
+      "text": "spareText"
+    },
+    "importButton": {
+      "background": "importBg",
+      "text": "importText"
+    },
+    "targetedStickerFrame": {
+      "border": "targeted",
+      "roiBorder": "targeted"
+    }
+  }
+}

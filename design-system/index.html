@@ -15,7 +15,9 @@
       <nav class="topnav" aria-label="Design system sections">
         <a href="#stories">Stories</a>
         <a href="#tokens">Tokens</a>
+        <a href="#schemes">Schemes</a>
         <a href="#components">Components</a>
+        <a href="#assets">Assets</a>
         <a href="#mockups">Mockups</a>
       </nav>
     </header>
@@ -23,11 +25,12 @@
     <main>
       <section id="overview" class="overview">
         <div class="overview-copy">
-          <p class="eyebrow">Design system v0.1</p>
-          <h1>Cromoswap turns duplicate sticker piles into clean swap-ready lists.</h1>
+          <p class="eyebrow">Design system v0.2</p>
+          <h1>Cromoswap now covers album completion, duplicate counters, import, and live scanner targeting.</h1>
           <p>
-            A scanner-first web experience for collectors and kids: guide the sticker,
-            verify the code, keep the list tidy, and export when the pile is done.
+            This update translates the approved CX specs into reusable visual decisions:
+            batch album controls, a reps counter grid, import/restore states, a back-home
+            shell pattern, and an aspect-ratio scanner frame that can turn green when targeted.
           </p>
         </div>
         <aside class="logo-panel" aria-label="Cromoswap brand assets">
@@ -35,24 +38,27 @@
           <div class="asset-row">
             <a class="button secondary" href="assets/cromoswap-logo.svg">Logo SVG</a>
             <a class="button secondary" href="assets/cromoswap-mark.svg">Mark SVG</a>
+            <a class="button secondary" href="assets/cromoswap-theme-tokens.css">Token CSS</a>
+            <a class="button secondary" href="assets/cromoswap-theme-tokens.json">Token JSON</a>
           </div>
         </aside>
       </section>
 
       <section id="stories" class="section-grid">
         <div>
-          <p class="eyebrow">User stories</p>
+          <p class="eyebrow">Approved CX stories</p>
           <h2>Flow states represented as design surfaces</h2>
           <p class="section-intro">
-            Select a story to see the intended state, main UI decision, and a compact
-            phone mockup. These map to the MVP journeys in the product spec.
+            These states map to the June 5 CX specs: start/resume/import, live scan
+            targeting, My Album batch fill, My Reps grid counters, collection review,
+            and export.
           </p>
           <div class="story-controls" role="tablist" aria-label="Cromoswap user stories">
             <button class="story-tab is-active" type="button" role="tab" data-story="start">Start</button>
-            <button class="story-tab" type="button" role="tab" data-story="permission">Permission</button>
+            <button class="story-tab" type="button" role="tab" data-story="import">Import</button>
             <button class="story-tab" type="button" role="tab" data-story="scan">Scan</button>
-            <button class="story-tab" type="button" role="tab" data-story="confirm">Confirm</button>
-            <button class="story-tab" type="button" role="tab" data-story="correct">Correct</button>
+            <button class="story-tab" type="button" role="tab" data-story="album">Album</button>
+            <button class="story-tab" type="button" role="tab" data-story="repsGrid">Reps grid</button>
             <button class="story-tab" type="button" role="tab" data-story="collection">Collection</button>
             <button class="story-tab" type="button" role="tab" data-story="export">Export</button>
           </div>
@@ -61,15 +67,15 @@
         <article class="story-card">
           <div class="story-meta">
             <p class="eyebrow" id="story-kicker">Story 1</p>
-            <h3 id="story-title">Create or resume a sticker session</h3>
+            <h3 id="story-title">Create, resume, or import</h3>
             <p id="story-copy">
-              The first screen asks for a name and makes resume visible when local data
-              exists. The product opens directly into the scanner workflow.
+              Returning collectors should see resume first, while import is available
+              from the start screen for text lists and JSON backups.
             </p>
             <ul id="story-points">
-              <li>Primary action: Start scanning.</li>
-              <li>Resume shows count, unique codes, and last update.</li>
-              <li>Privacy promise stays short and concrete.</li>
+              <li>Resume card keeps album and scan counts visible.</li>
+              <li>Import sits next to session recovery, not inside a scan tab.</li>
+              <li>New sessions remain deliberate and simple.</li>
             </ul>
           </div>
           <div class="phone" aria-live="polite">
@@ -82,55 +88,147 @@
         <div class="section-heading">
           <p class="eyebrow">Visual tokens</p>
           <h2>Friendly scanner utility, not generic dashboard</h2>
+          <p class="section-intro">
+            Green remains the scan and ownership anchor. Blue is now explicitly import
+            and information. Amber is review, duplicate spares, and ambiguous text import.
+          </p>
         </div>
         <div class="token-grid">
           <div class="token"><span class="swatch ink"></span><strong>Ink</strong><code>#17211f</code></div>
-          <div class="token"><span class="swatch scan"></span><strong>Scan</strong><code>#1f8a5f</code></div>
-          <div class="token"><span class="swatch info"></span><strong>Info</strong><code>#2f74d0</code></div>
-          <div class="token"><span class="swatch review"></span><strong>Review</strong><code>#f2b84b</code></div>
-          <div class="token"><span class="swatch danger"></span><strong>Danger</strong><code>#d94f4f</code></div>
-          <div class="token"><span class="swatch privacy"></span><strong>Privacy</strong><code>#6d57c7</code></div>
+          <div class="token"><span class="swatch scan"></span><strong>Scan / owned</strong><code>#1f8a5f</code></div>
+          <div class="token"><span class="swatch info"></span><strong>Info / import</strong><code>#2f74d0</code></div>
+          <div class="token"><span class="swatch review"></span><strong>Review / spare</strong><code>#f2b84b</code></div>
+          <div class="token"><span class="swatch danger"></span><strong>Remove</strong><code>#d94f4f</code></div>
+          <div class="token"><span class="swatch privacy"></span><strong>Privacy / local</strong><code>#6d57c7</code></div>
+        </div>
+      </section>
+
+      <section id="schemes" class="tokens-section">
+        <div class="section-heading">
+          <p class="eyebrow">Color schemes</p>
+          <h2>Three implementable palettes with the same semantics</h2>
+          <p class="section-intro">
+            The token files expose these as CSS custom properties and JSON values for
+            the web service. Table day is the default; the other schemes are optional
+            surfaces for low light and high-contrast QA/export contexts.
+          </p>
+        </div>
+        <div class="scheme-grid">
+          <article class="scheme-card">
+            <div class="scheme-strip scheme-day"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <h3>Table day</h3>
+            <p>Default light UI for one-handed sorting around a table.</p>
+            <code>data-cromoswap-scheme="table-day"</code>
+          </article>
+          <article class="scheme-card">
+            <div class="scheme-strip scheme-night"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <h3>Stadium night</h3>
+            <p>Dark scanner surface for dim rooms without changing state meanings.</p>
+            <code>data-cromoswap-scheme="stadium-night"</code>
+          </article>
+          <article class="scheme-card">
+            <div class="scheme-strip scheme-proof"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <h3>Print proof</h3>
+            <p>Higher contrast light UI for screenshots, classrooms, and exported docs.</p>
+            <code>data-cromoswap-scheme="print-proof"</code>
+          </article>
         </div>
       </section>
 
       <section id="components" class="components-section">
         <div class="section-heading">
           <p class="eyebrow">Components</p>
-          <h2>Reusable pieces for the MVP</h2>
+          <h2>Reusable pieces for the new CX</h2>
         </div>
         <div class="component-grid">
           <article class="component-card">
+            <h3>Album All / Clear</h3>
+            <div class="mini-team-card">
+              <div class="mini-team-header">
+                <span><strong>ARG</strong> · Argentina</span>
+                <span class="mini-team-actions"><span>18 / 20</span><span class="mini-pill">All</span></span>
+              </div>
+              <div class="mini-chips">
+                <span class="mini-chip owned">01</span>
+                <span class="mini-chip owned">02</span>
+                <span class="mini-chip">03</span>
+                <span class="mini-chip owned">04</span>
+                <span class="mini-chip">05</span>
+                <span class="mini-chip owned">06</span>
+              </div>
+            </div>
+          </article>
+          <article class="component-card">
+            <h3>Reps tap mode</h3>
+            <div class="segmented-sample" aria-label="Tap mode examples">
+              <span class="remove">-1</span>
+              <span class="add">+1</span>
+              <span class="clear">Clear</span>
+            </div>
+            <div class="count-grid">
+              <span class="count-chip">01</span>
+              <span class="count-chip has-count">02<span class="count-badge">3</span></span>
+              <span class="count-chip has-count capped">03<span class="count-badge">7</span></span>
+              <span class="count-chip has-count">04</span>
+            </div>
+          </article>
+          <article class="component-card">
+            <h3>Import choices</h3>
+            <div class="import-card-mini">
+              <span class="import-choice json"><strong>JSON restore</strong>New session with scans, images, and album.</span>
+              <span class="import-choice text"><strong>Text merge</strong>Owned, missing, or duplicate codes.</span>
+            </div>
+          </article>
+          <article class="component-card">
+            <h3>Centered frame</h3>
+            <div class="center-frame-sample">
+              <span class="center-frame"><span class="roi-box"></span></span>
+            </div>
+          </article>
+          <article class="component-card">
             <h3>Buttons</h3>
             <div class="stack">
-              <button class="button primary" type="button">Save sticker</button>
-              <button class="button secondary" type="button">Correct</button>
-              <button class="button quiet" type="button">Enter manually</button>
+              <button class="button primary" type="button">Scan sticker</button>
+              <button class="button secondary" type="button">Import</button>
+              <button class="button quiet" type="button">Back home</button>
             </div>
           </article>
           <article class="component-card">
             <h3>Status badges</h3>
             <div class="inline-wrap">
-              <span class="badge success">High match</span>
+              <span class="badge success">Targeted</span>
               <span class="badge review">Check code</span>
-              <span class="badge info">Local only</span>
-              <span class="badge danger">Blocked</span>
+              <span class="badge info">Imported</span>
+              <span class="badge danger">Remove</span>
             </div>
           </article>
-          <article class="component-card">
-            <h3>Code entry</h3>
-            <div class="entry-grid">
-              <label>Prefix <span>ARG</span></label>
-              <label>No. <span>07</span></label>
-            </div>
-            <p class="hint">Normalize tolerant input into ARG07.</p>
+        </div>
+      </section>
+
+      <section id="assets" class="tokens-section">
+        <div class="section-heading">
+          <p class="eyebrow">Implementation assets</p>
+          <h2>Files ready for the web service</h2>
+          <p class="section-intro">
+            These assets are intentionally simple SVG, CSS, and JSON files so they can be
+            imported, copied, or served by the React/Rails web bundle without extra tooling.
+          </p>
+        </div>
+        <div class="asset-grid">
+          <article class="asset-card">
+            <h3>Theme CSS</h3>
+            <p>CSS custom properties for the default and alternate schemes.</p>
+            <a href="assets/cromoswap-theme-tokens.css">cromoswap-theme-tokens.css</a>
           </article>
-          <article class="component-card">
-            <h3>Scan row</h3>
-            <div class="scan-row">
-              <span class="thumb"></span>
-              <span><strong>ARG07</strong><small>OCR, today 18:12</small></span>
-              <span class="badge success">x2</span>
-            </div>
+          <article class="asset-card">
+            <h3>Theme JSON</h3>
+            <p>Structured token values plus component mapping keys.</p>
+            <a href="assets/cromoswap-theme-tokens.json">cromoswap-theme-tokens.json</a>
+          </article>
+          <article class="asset-card">
+            <h3>CX SVGs</h3>
+            <p>Reference visuals for album batch, reps grid, import, and scanner frame.</p>
+            <a href="assets/reps-counter-grid.svg">reps-counter-grid.svg</a>
           </article>
         </div>
       </section>
@@ -146,10 +244,10 @@
         </div>
         <div class="mockup-links">
           <a href="mockups/jpg/01-start.jpg">01 Start</a>
-          <a href="mockups/jpg/02-permission.jpg">02 Permission</a>
+          <a href="mockups/jpg/02-import.jpg">02 Import</a>
           <a href="mockups/jpg/03-scan.jpg">03 Scan</a>
-          <a href="mockups/jpg/04-confirm.jpg">04 Confirm</a>
-          <a href="mockups/jpg/05-correct.jpg">05 Correct</a>
+          <a href="mockups/jpg/04-album.jpg">04 Album</a>
+          <a href="mockups/jpg/05-reps-grid.jpg">05 Reps grid</a>
           <a href="mockups/jpg/06-collection.jpg">06 Collection</a>
           <a href="mockups/jpg/07-export.jpg">07 Export</a>
           <a href="mockups/jpg/00-board.jpg">Board</a>

@@ -35,7 +35,12 @@ const colors = {
   review: "#f2b84b",
   danger: "#d94f4f",
   privacy: "#6d57c7",
-  camera: "#202927"
+  camera: "#202927",
+  targeted: "#34c759",
+  spareBg: "#fff2cc",
+  spareText: "#735000",
+  importBg: "#eaf2ff",
+  importText: "#184f94"
 };
 
 function text(value, x, y, size = 16, weight = 700, fill = colors.ink, extra = "") {
@@ -56,10 +61,10 @@ function button(label, x, y, w, primary = true) {
   ].join("");
 }
 
-function badge(label, x, y, fill, color) {
+function badge(label, x, y, fill, color, width = 86) {
   return [
-    rect(x, y, 86, 30, fill, "none", 15),
-    text(label, x + 43, y + 20, 12, 850, color, `text-anchor="middle"`)
+    rect(x, y, width, 30, fill, "none", 15),
+    text(label, x + width / 2, y + 20, 12, 850, color, `text-anchor="middle"`)
   ].join("");
 }
 
@@ -90,12 +95,56 @@ function screenShell(title, body, opts = {}) {
 </svg>`;
 }
 
-function stickerPreview(x, y, code = "ARG07") {
+function smallChip(label, x, y, owned = false) {
+  const fill = owned ? colors.scan : colors.field;
+  const stroke = owned ? colors.scan : colors.subtle;
+  const color = owned ? "#ffffff" : colors.muted;
   return `
-    ${rect(x, y, 230, 150, colors.surface, colors.subtle)}
-    ${rect(x + 78, y + 18, 86, 112, "#fbfdfc", colors.subtle)}
-    ${rect(x + 122, y + 30, 48, 24, "rgba(242,184,75,0.12)", colors.review, 6)}
-    ${text(code, x + 146, y + 47, 11, 900, colors.ink, `text-anchor="middle"`)}
+    ${rect(x, y, 40, 34, fill, stroke, 6)}
+    ${text(label, x + 20, y + 22, 12, 900, color, `text-anchor="middle"`)}
+  `;
+}
+
+function countChip(label, x, y, count = 0, capped = false) {
+  const hasCount = count > 0;
+  const fill = hasCount ? colors.scan : colors.field;
+  const stroke = capped ? "#9a6b00" : hasCount ? colors.scan : colors.subtle;
+  const strokeWidth = capped ? 3 : 1;
+  const color = hasCount ? "#ffffff" : colors.muted;
+  return `
+    ${rect(x, y, 42, 36, fill, stroke, 6, `stroke-width="${strokeWidth}"`)}
+    ${text(label, x + 21, y + 23, 12, 900, color, `text-anchor="middle"`)}
+    ${count > 1 ? `${rect(x + 28, y - 9, 24, 22, colors.spareBg, "none", 11)}${text(String(count), x + 40, y + 6, 11, 950, colors.spareText, `text-anchor="middle"`)}`
+      : ""}
+  `;
+}
+
+function teamHeader(prefix, name, count, action, x, y) {
+  return `
+    ${rect(x, y, 350, 46, colors.field, colors.subtle)}
+    ${text(`${prefix} · ${name}`, x + 14, y + 29, 15, 900)}
+    ${text(count, x + 246, y + 29, 12, 800, colors.muted)}
+    ${rect(x + 302, y + 11, 36, 24, action === "Clear" ? colors.field : colors.surface, colors.subtle, 12)}
+    ${text(action, x + 320, y + 27, 10, 900, action === "Clear" ? colors.muted : colors.scanStrong, `text-anchor="middle"`)}
+  `;
+}
+
+function scanRow(x, y, code, meta, count) {
+  return `
+    ${rect(x, y, 350, 66, colors.surface, colors.subtle)}
+    ${rect(x + 12, y + 10, 42, 46, "#fbfdfc", colors.subtle, 6)}
+    ${text(code, x + 68, y + 31, 19, 950)}
+    ${text(meta, x + 68, y + 52, 11, 750, colors.muted)}
+    ${rect(x + 300, y + 18, 44, 30, count === "edit" ? colors.spareBg : "#e6f3ed", "none", 15)}
+    ${text(count, x + 322, y + 38, 12, 850, count === "edit" ? colors.spareText : colors.scanStrong, `text-anchor="middle"`)}
+  `;
+}
+
+function summaryLine(label, value, x, y) {
+  return `
+    ${text(label, x, y, 14, 800, colors.muted)}
+    ${text(value, 344, y, 14, 900, colors.ink, `text-anchor="end"`)}
+    <line x1="${x}" y1="${y + 16}" x2="350" y2="${y + 16}" stroke="#e7eeeb"/>
   `;
 }
 
@@ -105,118 +154,132 @@ const screens = [
     svg: screenShell(
       "cromoswap",
       `
-      ${badge("Local first", 284, 24, "#eaf2ff", "#184f94")}
-      ${text("Scan your", 20, 128, 34, 900)}
-      ${text("duplicate stickers.", 20, 166, 34, 900)}
-      ${text("Build a clean WC 2026 list from sticker backs.", 20, 210, 15, 650, colors.muted)}
-      ${text("What is your name?", 20, 278, 12, 850, colors.muted)}
-      ${rect(20, 292, 350, 54, colors.surface, colors.subtle)}
-      ${text("Mauro", 36, 326, 18, 850)}
-      ${button("Start scanning", 20, 368, 350, true)}
-      ${rect(20, 440, 350, 80, colors.surface, colors.subtle)}
-      ${text("Resume Mauro's session", 36, 470, 16, 850)}
-      ${text("42 scans, 31 unique codes. Updated today.", 36, 496, 13, 700, colors.muted)}
-      ${rect(20, 740, 350, 60, "rgba(109,87,199,0.08)", "rgba(109,87,199,0.24)")}
-      ${text("Images stay on this device in the MVP.", 36, 776, 13, 850, "#4b3b91")}
+      ${badge("Cloud optional", 260, 24, colors.importBg, colors.importText, 110)}
+      ${text("Sort stickers", 20, 128, 34, 900)}
+      ${text("without losing", 20, 166, 34, 900)}
+      ${text("your place.", 20, 204, 34, 900)}
+      ${text("Resume, import, or start a fresh scan session.", 20, 244, 15, 650, colors.muted)}
+      ${rect(20, 300, 350, 82, colors.surface, colors.subtle)}
+      ${text("Resume Mauro", 36, 331, 17, 900)}
+      ${text("42 scans · 642 owned · 338 missing", 36, 358, 13, 750, colors.muted)}
+      ${rect(20, 402, 166, 86, colors.importBg, colors.info)}
+      ${text("JSON restore", 36, 434, 15, 900, colors.importText)}
+      ${text("New session", 36, 460, 12, 800, colors.importText)}
+      ${rect(204, 402, 166, 86, colors.spareBg, colors.review)}
+      ${text("Text merge", 220, 434, 15, 900, colors.spareText)}
+      ${text("Owned or reps", 220, 460, 12, 800, colors.spareText)}
+      ${text("Your name", 20, 550, 12, 850, colors.muted)}
+      ${rect(20, 566, 350, 54, colors.surface, colors.subtle)}
+      ${text("Luca", 36, 600, 18, 850)}
+      ${button("Start scanning", 20, 648, 350, true)}
+      ${rect(20, 748, 350, 52, "rgba(109,87,199,0.08)", "rgba(109,87,199,0.24)")}
+      ${text("Local mode keeps images on this device.", 36, 780, 13, 850, "#4b3b91")}
       `
     )
   },
   {
-    file: "02-permission",
+    file: "02-import",
     svg: screenShell(
-      "Camera setup",
+      "Import",
       `
-      ${badge("Step 2", 284, 24, "#fff2cc", "#735000")}
-      ${text("Use your camera", 20, 128, 34, 900)}
-      ${text("to read sticker codes.", 20, 166, 34, 900)}
-      ${text("Cromoswap looks for the top-right code corner.", 20, 210, 15, 650, colors.muted)}
-      ${stickerPreview(80, 262, "USA13")}
-      ${button("Allow camera", 20, 640, 350, true)}
-      ${button("Enter codes manually", 20, 704, 350, false)}
-      ${rect(20, 776, 350, 44, "rgba(109,87,199,0.08)", "rgba(109,87,199,0.24)")}
-      ${text("No camera? Manual entry still works.", 36, 804, 13, 850, "#4b3b91")}
+      ${button("Back", 306, 20, 64, false)}
+      ${text("Bring a list", 20, 128, 34, 900)}
+      ${text("back in.", 20, 166, 34, 900)}
+      ${text("Restore JSON or merge text codes non-destructively.", 20, 210, 15, 650, colors.muted)}
+      ${rect(20, 270, 350, 116, colors.importBg, colors.info)}
+      ${text("JSON restore", 44, 314, 22, 900, colors.importText)}
+      ${text("Creates a new session with scans, images, and album.", 44, 344, 13, 750, colors.importText)}
+      ${rect(20, 410, 350, 116, colors.spareBg, colors.review)}
+      ${text("Text merge", 44, 454, 22, 900, colors.spareText)}
+      ${text("Detects owned, missing, or duplicate headers.", 44, 484, 13, 750, colors.spareText)}
+      ${rect(20, 560, 350, 108, colors.surface, colors.subtle)}
+      ${summaryLine("Detected type", "My Album owned", 40, 596)}
+      ${summaryLine("Codes found", "642", 40, 640)}
+      ${button("Choose file", 20, 716, 350, true)}
       `
     )
   },
   {
     file: "03-scan",
     svg: screenShell(
-      "Mauro",
+      "",
       `
-      ${badge("42 saved", 284, 24, "#e6f3ed", colors.scanStrong)}
+      ${button("Home", 20, 18, 74, false)}
+      ${text("Mauro", 108, 48, 15, 900, "#ffffff")}
+      ${badge("Targeted", 284, 24, "#e6f3ed", colors.scanStrong)}
       ${rect(0, 74, 390, 770, colors.camera, "none", 0)}
-      ${rect(86, 128, 218, 320, "rgba(255,255,255,0.05)", "rgba(255,255,255,0.9)", 10, `stroke-width="3"`)}
-      ${rect(224, 150, 62, 50, "rgba(242,184,75,0.16)", colors.review, 8, `stroke-width="3"`)}
-      ${text("Code corner", 221, 222, 12, 850, "#ffffff")}
+      ${rect(86, 128, 218, 320, "rgba(255,255,255,0.05)", colors.targeted, 10, `stroke-width="3"`)}
+      ${rect(224, 150, 62, 50, "rgba(52,199,89,0.16)", colors.targeted, 8, `stroke-width="3"`)}
       ${rect(20, 624, 350, 44, "rgba(255,255,255,0.94)", "none")}
-      ${text("Place the code in the corner", 195, 652, 14, 900, colors.ink, `text-anchor="middle"`)}
+      ${text("Hold steady inside the frame", 195, 652, 14, 900, colors.ink, `text-anchor="middle"`)}
       ${rect(20, 744, 104, 54, "rgba(255,255,255,0.12)", "rgba(255,255,255,0.24)")}
       ${rect(143, 744, 104, 54, "rgba(255,255,255,0.12)", "rgba(255,255,255,0.24)")}
       ${rect(266, 744, 104, 54, "rgba(255,255,255,0.12)", "rgba(255,255,255,0.24)")}
-      ${text("Manual", 72, 778, 13, 850, "#ffffff", `text-anchor="middle"`)}
-      ${text("Pause", 195, 778, 13, 850, "#ffffff", `text-anchor="middle"`)}
-      ${text("List", 318, 778, 13, 850, "#ffffff", `text-anchor="middle"`)}
+      ${text("Portrait", 72, 778, 13, 850, "#ffffff", `text-anchor="middle"`)}
+      ${text("Size 72%", 195, 778, 13, 850, "#ffffff", `text-anchor="middle"`)}
+      ${text("Pause", 318, 778, 13, 850, "#ffffff", `text-anchor="middle"`)}
       `,
       { bg: colors.camera, topColor: "#ffffff", logo: false }
     )
   },
   {
-    file: "04-confirm",
+    file: "04-album",
     svg: screenShell(
-      "Check this code",
+      "",
       `
-      ${badge("High match", 284, 24, "#e6f3ed", colors.scanStrong)}
-      ${stickerPreview(80, 112, "ARG07")}
-      ${text("ARG07", 20, 330, 42, 950)}
-      ${text("Confidence", 20, 372, 13, 850, colors.muted)}
-      ${rect(108, 362, 190, 10, colors.field, "none", 5)}
-      ${rect(108, 362, 164, 10, colors.scan, "none", 5)}
-      ${text("86%", 318, 374, 13, 900, colors.muted)}
-      ${button("Save sticker", 20, 626, 350, true)}
-      ${button("Correct", 20, 690, 166, false)}
-      ${button("Rescan", 204, 690, 166, false)}
-      ${rect(20, 760, 350, 44, "#fee7e7", "#fee7e7")}
-      ${text("Skip", 195, 788, 14, 900, "#8e2727", `text-anchor="middle"`)}
-      `
+      ${button("Home", 20, 18, 74, false)}
+      ${text("My Album", 108, 48, 15, 900)}
+      ${badge("642 owned", 276, 24, "#e6f3ed", colors.scanStrong, 94)}
+      ${text("Group A", 20, 118, 30, 900)}
+      ${teamHeader("MEX", "Mexico", "20 / 20", "Clear", 20, 156)}
+      ${smallChip("01", 34, 222, true)}${smallChip("02", 82, 222, true)}${smallChip("03", 130, 222, true)}${smallChip("04", 178, 222, true)}${smallChip("05", 226, 222, true)}${smallChip("06", 274, 222, true)}${smallChip("07", 322, 222, true)}
+      ${teamHeader("ARG", "Argentina", "18 / 20", "All", 20, 306)}
+      ${smallChip("01", 34, 372, true)}${smallChip("02", 82, 372, true)}${smallChip("03", 130, 372, false)}${smallChip("04", 178, 372, true)}${smallChip("05", 226, 372, true)}${smallChip("06", 274, 372, false)}${smallChip("07", 322, 372, true)}
+      ${teamHeader("AUS", "Australia", "11 / 20", "All", 20, 456)}
+      ${smallChip("01", 34, 522, true)}${smallChip("02", 82, 522, false)}${smallChip("03", 130, 522, true)}${smallChip("04", 178, 522, false)}${smallChip("05", 226, 522, true)}${smallChip("06", 274, 522, false)}${smallChip("07", 322, 522, false)}
+      ${button("Export owned", 20, 730, 166, true)}
+      ${button("Export missing", 204, 730, 166, false)}
+      `,
+      { logo: false }
     )
   },
   {
-    file: "05-correct",
+    file: "05-reps-grid",
     svg: screenShell(
-      "Correct code",
+      "",
       `
-      ${badge("Manual", 284, 24, "#fff2cc", "#735000")}
-      ${text("Fix the sticker", 20, 128, 34, 900)}
-      ${text("code.", 20, 166, 34, 900)}
-      ${text("Use the team code and number 01 to 20.", 20, 210, 15, 650, colors.muted)}
-      ${rect(20, 276, 226, 70, colors.surface, colors.subtle)}
-      ${rect(264, 276, 106, 70, colors.surface, colors.subtle)}
-      ${text("Prefix", 36, 304, 12, 850, colors.muted)}
-      ${text("ARG", 36, 332, 24, 950)}
-      ${text("No.", 280, 304, 12, 850, colors.muted)}
-      ${text("07", 280, 332, 24, 950)}
-      ${numberCell("01", 20, 386)}
-      ${numberCell("02", 90, 386)}
-      ${numberCell("03", 160, 386)}
-      ${numberCell("04", 230, 386)}
-      ${numberCell("05", 300, 386)}
-      ${numberCell("06", 20, 438)}
-      ${numberCell("07", 90, 438, true)}
-      ${numberCell("08", 160, 438)}
-      ${numberCell("09", 230, 438)}
-      ${numberCell("10", 300, 438)}
-      ${rect(20, 530, 350, 64, "#e6f3ed", "none")}
-      ${text("ARG07", 195, 572, 34, 950, colors.scanStrong, `text-anchor="middle"`)}
-      ${button("Save code", 20, 690, 350, true)}
-      ${button("Cancel", 20, 754, 350, false)}
-      `
+      ${button("Home", 20, 18, 74, false)}
+      ${text("My Reps", 108, 48, 15, 900)}
+      ${badge("6 spare", 292, 24, colors.spareBg, colors.spareText, 78)}
+      ${rect(20, 94, 350, 48, colors.surface, colors.subtle)}
+      ${rect(139, 98, 112, 40, colors.scan, "none", 6)}
+      ${text("Scan", 78, 125, 13, 900, colors.muted, `text-anchor="middle"`)}
+      ${text("Grid", 195, 125, 13, 900, "#ffffff", `text-anchor="middle"`)}
+      ${text("Export", 312, 125, 13, 900, colors.muted, `text-anchor="middle"`)}
+      ${rect(20, 166, 350, 48, colors.surface, colors.subtle)}
+      ${rect(26, 172, 110, 36, colors.danger, "none", 6)}
+      ${rect(140, 172, 110, 36, colors.scan, "none", 6)}
+      ${rect(254, 172, 110, 36, colors.ink, "none", 6)}
+      ${text("-1", 81, 195, 13, 900, "#ffffff", `text-anchor="middle"`)}
+      ${text("+1", 195, 195, 13, 900, "#ffffff", `text-anchor="middle"`)}
+      ${text("Clear", 309, 195, 13, 900, "#ffffff", `text-anchor="middle"`)}
+      ${rect(20, 248, 350, 214, colors.surface, colors.subtle)}
+      ${text("GHA · Ghana", 36, 286, 17, 900)}
+      ${text("16 copies · 6 spare", 230, 286, 12, 800, colors.muted)}
+      ${countChip("01", 36, 316, 0)}${countChip("02", 88, 316, 3)}${countChip("03", 140, 316, 1)}${countChip("04", 192, 316, 7, true)}${countChip("05", 244, 316, 0)}${countChip("06", 296, 316, 2)}
+      ${countChip("07", 36, 370, 0)}${countChip("08", 88, 370, 1)}${countChip("09", 140, 370, 0)}${countChip("10", 192, 370, 3)}${countChip("11", 244, 370, 0)}${countChip("12", 296, 370, 1)}
+      ${button("Tap stickers to add copies", 20, 730, 350, true)}
+      `,
+      { logo: false }
     )
   },
   {
     file: "06-collection",
     svg: screenShell(
-      "Collection",
+      "",
       `
+      ${button("Home", 20, 18, 74, false)}
+      ${text("Collection", 108, 48, 15, 900)}
       ${button("Add", 304, 20, 66, false)}
       ${rect(20, 96, 106, 74, colors.surface, colors.subtle)}
       ${rect(142, 96, 106, 74, colors.surface, colors.subtle)}
@@ -232,60 +295,35 @@ const screens = [
       ${scanRow(20, 368, "FWC04", "Manual, today 18:08", "edit")}
       ${button("Scan more", 20, 700, 166, true)}
       ${button("Export", 204, 700, 166, false)}
-      `
+      `,
+      { logo: false }
     )
   },
   {
     file: "07-export",
     svg: screenShell(
-      "Export",
+      "",
       `
+      ${button("Home", 20, 18, 74, false)}
+      ${text("Export", 108, 48, 15, 900)}
       ${badge("Ready", 284, 24, "#e6f3ed", colors.scanStrong)}
       ${text("Download", 20, 128, 34, 900)}
-      ${text("your list.", 20, 166, 34, 900)}
-      ${text("Text is best for sharing. JSON keeps evidence.", 20, 210, 15, 650, colors.muted)}
+      ${text("your lists.", 20, 166, 34, 900)}
+      ${text("Text is for swaps. JSON restores local evidence.", 20, 210, 15, 650, colors.muted)}
       ${rect(20, 270, 350, 220, colors.surface, colors.subtle)}
       ${summaryLine("Total scans", "42", 40, 314)}
       ${summaryLine("Unique codes", "31", 40, 358)}
-      ${summaryLine("Duplicates", "8", 40, 402)}
+      ${summaryLine("Album owned", "642", 40, 402)}
       ${summaryLine("Images", "Local only", 40, 446)}
       ${button("Download text", 20, 626, 350, true)}
       ${button("Download JSON backup", 20, 690, 350, false)}
       ${rect(20, 768, 350, 44, "rgba(109,87,199,0.08)", "rgba(109,87,199,0.24)")}
-      ${text("Text exports only codes and counts.", 36, 796, 13, 850, "#4b3b91")}
-      `
+      ${text("Keep JSON as a personal backup.", 36, 796, 13, 850, "#4b3b91")}
+      `,
+      { logo: false }
     )
   }
 ];
-
-function scanRow(x, y, code, meta, count) {
-  return `
-    ${rect(x, y, 350, 66, colors.surface, colors.subtle)}
-    ${rect(x + 12, y + 10, 42, 46, "#fbfdfc", colors.subtle, 6)}
-    ${text(code, x + 68, y + 31, 19, 950)}
-    ${text(meta, x + 68, y + 52, 11, 750, colors.muted)}
-    ${rect(x + 300, y + 18, 44, 30, count === "edit" ? "#fff2cc" : "#e6f3ed", "none", 15)}
-    ${text(count, x + 322, y + 38, 12, 850, count === "edit" ? "#735000" : colors.scanStrong, `text-anchor="middle"`)}
-  `;
-}
-
-function numberCell(label, x, y, active = false) {
-  const fill = active ? "#e6f3ed" : colors.surface;
-  const stroke = active ? colors.scan : colors.subtle;
-  const color = active ? colors.scanStrong : colors.ink;
-  return `
-    ${rect(x, y, 50, 42, fill, stroke)}
-    ${text(label, x + 25, y + 27, 13, 900, color, `text-anchor="middle"`)}
-  `;
-}
-
-function summaryLine(label, value, x, y) {
-  return `
-    ${text(label, x, y, 14, 800, colors.muted)}
-    ${text(value, 344, y, 14, 900, colors.ink, `text-anchor="end"`)}
-    <line x1="${x}" y1="${y + 16}" x2="350" y2="${y + 16}" stroke="#e7eeeb"/>
-  `;
-}
 
 function phoneFrame(svg, x, y, scale = 0.42) {
   const inner = svg
@@ -314,14 +352,14 @@ function boardSvg() {
 <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
   ${rect(0, 0, width, height, colors.paper, "none", 0)}
   ${logoMark(56, 48, 1.28)}
-  ${text("cromoswap mockups", 126, 85, 42, 900)}
-  ${text("Scanner-first screens for collectors, kids, and future swapping.", 128, 120, 22, 700, colors.muted)}
+  ${text("cromoswap CX v0.2 mockups", 126, 85, 42, 900)}
+  ${text("Album batch controls, reps grid counters, import, export, and centered scan targeting.", 128, 120, 22, 700, colors.muted)}
   ${screens.map((screen, index) => phoneFrame(screen.svg, positions[index][0], positions[index][1], 0.49)).join("")}
 </svg>`;
 }
 
 function writeFile(filePath, content) {
-  fs.writeFileSync(filePath, content.trimStart());
+  fs.writeFileSync(filePath, content.trimStart().replace(/[ \t]+$/gm, ""));
 }
 
 for (const screen of screens) {
