@@ -74,6 +74,7 @@ export function RepsView({
           type="button"
           className={`reps-view-btn${view === 'scan' ? ' reps-view-active' : ''}`}
           aria-pressed={view === 'scan'}
+          data-test-id="reps-view-scan"
           onClick={() => onSetView('scan')}
         >
           📷 Scan
@@ -82,6 +83,7 @@ export function RepsView({
           type="button"
           className={`reps-view-btn${view === 'grid' ? ' reps-view-active' : ''}`}
           aria-pressed={view === 'grid'}
+          data-test-id="reps-view-grid"
           onClick={() => onSetView('grid')}
         >
           ▦ Grid
@@ -172,7 +174,7 @@ export function RepsView({
         <p className="export-summary" aria-label="Export summary">
           {total} scan{total !== 1 ? 's' : ''} · {unique} unique · {duplicates} duplicates
         </p>
-        <button type="button" className="primary" onClick={onExportText}>
+        <button type="button" className="primary" data-test-id="export-text" onClick={onExportText}>
           Export text
         </button>
         <button type="button" className="secondary" onClick={onExportJson}>

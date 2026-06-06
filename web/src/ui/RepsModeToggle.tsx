@@ -13,7 +13,7 @@ const MODES: { mode: RepsMode; label: string; hint: string; cls: string }[] = [
 
 export function RepsModeToggle({ value, onChange }: RepsModeToggleProps) {
   return (
-    <div className="reps-mode-toggle" role="group" aria-label="Tap mode">
+    <div className="reps-mode-toggle" role="group" aria-label="Tap mode" data-test-id="reps-mode">
       {MODES.map(({ mode, label, hint, cls }) => {
         const active = value === mode;
         return (

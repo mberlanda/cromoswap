@@ -51,6 +51,29 @@ jobs:
       - name: Run validation
         run: ./scripts/validate.sh
 
+  e2e-preview:
+    name: E2E (local mode, Vite preview)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: web/.nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install web deps + Playwright browser
+        working-directory: web
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Run local-mode e2e (build + preview)
+        working-directory: web
+        run: npm run e2e
+
   docker-e2e:
     name: Docker stack + e2e
     runs-on: ubuntu-latest

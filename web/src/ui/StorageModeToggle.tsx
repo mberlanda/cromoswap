@@ -12,6 +12,7 @@ export function StorageModeToggle({ mode, onChange }: StorageModeToggleProps) {
         type="button"
         role="radio"
         aria-checked={mode === 'local'}
+        data-test-id="storage-local"
         className={mode === 'local' ? 'storage-toggle-btn active' : 'storage-toggle-btn'}
         onClick={() => onChange('local')}
         title="Store data locally on this device only"
@@ -22,6 +23,7 @@ export function StorageModeToggle({ mode, onChange }: StorageModeToggleProps) {
         type="button"
         role="radio"
         aria-checked={mode === 'cloud'}
+        data-test-id="storage-cloud"
         className={mode === 'cloud' ? 'storage-toggle-btn active' : 'storage-toggle-btn'}
         onClick={() => onChange('cloud')}
         title="Store data on the server — visible across devices and on the leaderboard"
