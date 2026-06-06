@@ -8,6 +8,9 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./test/setup.ts'],
     include: ['test/**/*.test.{ts,tsx}'],
+    // v8 coverage instrumentation slows multi-step async tests; keep CI from
+    // flaking on the 5s default (e.g. the reps-grid tap sequence).
+    testTimeout: 15000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],

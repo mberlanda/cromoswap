@@ -28,7 +28,7 @@ RSpec.describe "Admin::Exports", type: :request do
     it "streams a SQL dump when pg_dump is available" do
       allow_any_instance_of(Admin::ExportsController).to receive(:pg_dump_available?).and_return(true)
       status = instance_double(Process::Status, success?: true)
-      allow(Open3).to receive(:capture3).and_return(["-- DUMP\n", "", status])
+      allow(Open3).to receive(:capture3).and_return([ "-- DUMP\n", "", status ])
       get "/admin/export.sql", headers: admin_auth
       expect(response).to have_http_status(:ok)
       expect(response.headers["Content-Disposition"]).to include(".sql")
@@ -38,7 +38,7 @@ RSpec.describe "Admin::Exports", type: :request do
     it "surfaces a pg_dump failure as a 500" do
       allow_any_instance_of(Admin::ExportsController).to receive(:pg_dump_available?).and_return(true)
       status = instance_double(Process::Status, success?: false)
-      allow(Open3).to receive(:capture3).and_return(["", "boom", status])
+      allow(Open3).to receive(:capture3).and_return([ "", "boom", status ])
       get "/admin/export.sql", headers: admin_auth
       expect(response).to have_http_status(:internal_server_error)
     end
