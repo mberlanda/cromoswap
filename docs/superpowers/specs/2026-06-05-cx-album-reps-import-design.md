@@ -2,7 +2,7 @@
 
 Date: 2026-06-05
 Branch: `feat/cx-album-reps-import`
-Status: approved design
+Status: ✅ Implemented (#33)
 
 ## Summary
 

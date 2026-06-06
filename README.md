@@ -5,9 +5,9 @@ stickers, confirming/correcting the detected code, and building an editable, exp
 collection. Local-first (IndexedDB), with an optional Rails 8 + Postgres backend for
 future sharing/matchmaking.
 
-See [`docs/specs/00-product-spec.md`](docs/specs/00-product-spec.md) and the ADRs in
-[`docs/adr/`](docs/adr/) for design and rationale. The live scanner's framing and OCR-crop
-geometry is documented in
+**[`docs/INDEX.md`](docs/INDEX.md) is the hypertext map of all documentation** —
+product spec, ADRs, implemented feature designs, OCR notes, the test matrix, and
+operations. Start there. The live scanner's framing and OCR-crop geometry is in
 [`docs/ocr-scanning-geometry.md`](docs/ocr-scanning-geometry.md).
 
 ## Repository layout

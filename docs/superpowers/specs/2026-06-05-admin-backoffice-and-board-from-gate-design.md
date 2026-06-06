@@ -2,7 +2,7 @@
 
 Date: 2026-06-05
 Branch: `feat/admin-backoffice`
-Status: approved design
+Status: ✅ Implemented (#34; hardened in #47)
 
 ## Summary
 
