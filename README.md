@@ -30,17 +30,22 @@ docker-compose.yml  db + app (web bundle + API on one origin)
 
 ## Validate everything
 
-Run the full validation the same way CI does, before each change set:
+Run the validators the same way CI does, before each change set. Each scope has
+its own script, with `validate.sh` as the dispatcher:
 
 ```bash
 docker compose up -d db        # Postgres for the API tests
-scripts/validate.sh            # web (lint/test/build) + api (rubocop/audit/brakeman/rspec)
-scripts/validate.sh web        # only the frontend checks
-scripts/validate.sh api        # only the backend checks
+
+scripts/validate.sh            # all = web + api (fast pre-commit gate)
+scripts/validate.sh web        # scripts/validate-web.sh  — eslint + vitest + build
+scripts/validate.sh api        # scripts/validate-api.sh  — rubocop + audits + rspec
+scripts/validate.sh e2e        # scripts/validate-e2e.sh  — docker compose + Playwright
+scripts/validate.sh ci         # web + api + e2e (everything)
 ```
 
-The script exits non-zero if any step fails and prints which. `DATABASE_*` env
-vars override the Postgres connection (defaults match `docker-compose.yml`).
+Each script exits non-zero if any step fails and prints which. `DATABASE_*` env
+vars override the Postgres connection (defaults match `docker-compose.yml`). The
+e2e scope needs Docker and ports 3000/5432 free.
 
 ## Frontend (`web/`)
 
