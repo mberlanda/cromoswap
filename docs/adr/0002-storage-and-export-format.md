@@ -2,6 +2,13 @@
 
 Status: accepted · Date: 2026-06-04
 
+> **Update (2026-06):** the local-first model and repo interfaces below still
+> hold, but storage became **user-selectable Local (IndexedDB) or Cloud (API)**
+> and gained **import** alongside export. The JSON export now also embeds the
+> user's album codes. These extensions are designed in
+> [`../superpowers/specs/2026-06-05-cx-album-reps-import-design.md`](../superpowers/specs/2026-06-05-cx-album-reps-import-design.md)
+> and the pluggable-storage work; this ADR is not superseded, only extended.
+
 ## Context
 
 The MVP must persist sessions and scans locally (survive reload, work offline), keep

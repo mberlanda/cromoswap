@@ -1,6 +1,6 @@
 # Centered aspect-ratio sticker frame + live targeting
 
-Date: 2026-06-05. Status: approved.
+Date: 2026-06-05. Status: ✅ Implemented (#29).
 
 ## Problem
 
