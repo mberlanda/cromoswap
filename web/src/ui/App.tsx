@@ -19,6 +19,7 @@ import { CameraPermissionPanel } from './CameraPermissionPanel';
 import { StorageModeToggle } from './StorageModeToggle';
 import { SIZE_DEFAULT } from './SizeSlider';
 import type { StorageMode } from '../composition';
+import { CROMOSWAP_MARK_SRC } from './brand-assets';
 
 export type Orientation = 'portrait' | 'landscape';
 
@@ -464,7 +465,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
             >
               Home
             </button>
-            <img className="app-header-mark" src="/cromoswap-mark.svg" alt="" aria-hidden="true" />
+            <img className="app-header-mark" src={CROMOSWAP_MARK_SRC} alt="" aria-hidden="true" />
             <div className="app-header-copy">
               <h1 className="app-header-name">Board</h1>
             </div>
@@ -535,7 +536,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
         >
           Home
         </button>
-        <img className="app-header-mark" src="/cromoswap-mark.svg" alt="" aria-hidden="true" />
+        <img className="app-header-mark" src={CROMOSWAP_MARK_SRC} alt="" aria-hidden="true" />
         <div className="app-header-copy">
           <h1 className="app-header-name">{active.userName}</h1>
           <p className="app-header-meta">{scans.length} scan{scans.length !== 1 ? 's' : ''}</p>

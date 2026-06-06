@@ -10,6 +10,7 @@ import {
   type JsonImport,
   type TextImport,
 } from '../import/parse-import';
+import { CROMOSWAP_MARK_SRC } from './brand-assets';
 
 interface AlbumCount {
   owned: number;
@@ -92,7 +93,7 @@ export function SessionGate({
     <main aria-label="Session">
       <div className="session-gate-header">
         <div className="brand-lockup">
-          <img className="brand-mark" src="/cromoswap-mark.svg" alt="" aria-hidden="true" />
+          <img className="brand-mark" src={CROMOSWAP_MARK_SRC} alt="" aria-hidden="true" />
           <div className="brand-copy">
             <h1 data-test-id="gate-title">cromoswap</h1>
           </div>
