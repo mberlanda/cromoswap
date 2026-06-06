@@ -39,6 +39,11 @@ RSpec.describe "Admin::Sessions", type: :request do
     expect(session.reload.user_name).to eq("Renamed")
   end
 
+  it "re-renders edit on an invalid update" do
+    patch "/admin/sessions/#{session.id}", params: { session: { user_name: "" } }, headers: admin_auth
+    expect(response).to have_http_status(:unprocessable_content)
+  end
+
   it "destroys a session and its scans" do
     Scan.create!(session: session, normalized_code: "ARG01", source: "ocr", captured_at: Time.current)
     expect {
