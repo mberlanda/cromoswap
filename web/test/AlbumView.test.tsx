@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AlbumView } from '../src/ui/AlbumView';
 import { MemoryAlbumRepo } from '../src/storage/memory-repos';
+import { findByAriaLabel as findChip } from './helpers';
 
 let seq: number;
 const ids = () => `id-${++seq}`;
@@ -12,15 +13,6 @@ const now = clock;
 beforeEach(() => {
   seq = 0;
 });
-
-async function findChip(label: string): Promise<HTMLButtonElement> {
-  let chip: HTMLButtonElement | null = null;
-  await waitFor(() => {
-    chip = document.querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`);
-    expect(chip).toBeInTheDocument();
-  });
-  return chip!;
-}
 
 describe('AlbumView', () => {
   it('renders chip buttons for FWC00 through FWC19', async () => {
