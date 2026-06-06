@@ -501,7 +501,7 @@ h3 {
 
 .roi-box.targeted {
   border-color: var(--targeted);
-  background: rgba(52, 199, 89, 0.14);
+  background: color-mix(in srgb, var(--targeted) 14%, transparent);
 }
 
 .scan-label {
@@ -858,6 +858,11 @@ h3 {
   align-self: start;
   color: var(--scan-strong);
   font-weight: 900;
+}
+
+.asset-links {
+  display: grid;
+  gap: var(--space-2);
 }
 
 .stack {

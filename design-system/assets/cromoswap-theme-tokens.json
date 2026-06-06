@@ -19,11 +19,13 @@
         "danger": "#d94f4f",
         "privacy": "#6d57c7",
         "camera": "#202927",
+        "overlay": "rgba(255, 255, 255, 0.72)",
         "targeted": "#34c759",
         "ownedBg": "#e6f3ed",
         "ownedText": "#12613f",
         "spareBg": "#fff2cc",
         "spareText": "#735000",
+        "capRing": "#9a6b00",
         "importBg": "#eaf2ff",
         "importText": "#184f94"
       }
@@ -45,11 +47,13 @@
         "danger": "#ff7474",
         "privacy": "#aa98ff",
         "camera": "#080b0a",
+        "overlay": "rgba(18, 23, 22, 0.74)",
         "targeted": "#58d884",
         "ownedBg": "rgba(51, 185, 130, 0.18)",
         "ownedText": "#7ce2b2",
         "spareBg": "rgba(244, 199, 102, 0.2)",
         "spareText": "#f4c766",
+        "capRing": "#f4c766",
         "importBg": "rgba(120, 170, 240, 0.18)",
         "importText": "#b8d5ff"
       }
@@ -71,11 +75,13 @@
         "danger": "#c23b3b",
         "privacy": "#5a46b0",
         "camera": "#1c2422",
+        "overlay": "rgba(251, 252, 255, 0.78)",
         "targeted": "#168f4c",
         "ownedBg": "#dff2e9",
         "ownedText": "#075438",
         "spareBg": "#fff0bd",
         "spareText": "#614400",
+        "capRing": "#7c5600",
         "importBg": "#e4efff",
         "importText": "#174b87"
       }
