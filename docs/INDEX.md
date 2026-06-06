@@ -70,6 +70,8 @@ Doc overlap worth merging later:
   [`ux/00-product-overview-and-journeys.md`](ux/00-product-overview-and-journeys.md), and the
   README intro. The spec should be the source of truth; the others should link to it.
 
-Code-level duplication (e.g. the album/reps grid layout shared by `AlbumView`/`TeamCard`
-and `RepsGrid`, and the repeated `findChip`/auth test helpers) is a separate refactor —
-tracked as a follow-up, now made safe by the e2e suite.
+Code-level duplication: the album/reps grid scaffold is now consolidated into
+`AlbumGroupedGrid` (used by both `AlbumView` and `RepsGrid`), and the duplicated
+test helpers into `web/test/helpers.ts`. Remaining candidates: the Rails admin
+CRUD controllers/views share near-identical structure (index/new/edit/show could
+use a shared partial/concern).

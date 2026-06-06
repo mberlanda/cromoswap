@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { AlbumRepo } from '../storage/types';
 import type { Clock } from '../storage/types';
-import { ALBUM_GROUPS, teamFullName, teamFlag, stickerNumbers } from '../domain/album-config';
+import { stickerNumbers } from '../domain/album-config';
 import { toAlbumOwnedExport, toAlbumMissingExport } from '../export/album-export';
 import { TeamCard } from './TeamCard';
+import { AlbumGroupedGrid } from './AlbumGroupedGrid';
 
 interface AlbumViewProps {
   userName: string;
@@ -75,39 +76,20 @@ export function AlbumView({
 
   return (
     <section aria-label="My Album">
-      <div className="album-list">
-        <div className="album-group">
-          <h3 className="album-group-header">🏆 FIFA World Cup</h3>
+      <AlbumGroupedGrid
+        renderTeam={({ prefix, fullName, flag }) => (
           <TeamCard
-            prefix="FWC"
-            fullName="FIFA World Cup"
-            flag="🏆"
-            numbers={stickerNumbers('FWC')}
+            prefix={prefix}
+            fullName={fullName}
+            flag={flag}
+            numbers={stickerNumbers(prefix)}
             ownedCodes={ownedCodes}
             onToggle={handleToggle}
             onSetAll={handleSetAll}
             readOnly={readOnly}
           />
-        </div>
-        {ALBUM_GROUPS.map(({ letter, prefixes }) => (
-          <div key={letter} className="album-group">
-            <h3 className="album-group-header">Group {letter}</h3>
-            {prefixes.map((prefix) => (
-              <TeamCard
-                key={prefix}
-                prefix={prefix}
-                fullName={teamFullName(prefix)}
-                flag={teamFlag(prefix)}
-                numbers={stickerNumbers(prefix)}
-                ownedCodes={ownedCodes}
-                onToggle={handleToggle}
-                onSetAll={handleSetAll}
-                readOnly={readOnly}
-              />
-            ))}
-          </div>
-        ))}
-      </div>
+        )}
+      />
       <div className="album-footer">
         <button type="button" className="primary" onClick={handleExportOwned}>
           Export owned

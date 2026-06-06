@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from '../src/ui/App';
+import { findByAriaLabel as findButtonByAriaLabel } from './helpers';
 import {
   MemorySessionRepo,
   MemoryScanRepo,
@@ -41,15 +42,6 @@ function makeDeps(overrides: Partial<AppDeps> = {}): AppDeps {
 async function startSession(name = 'Mauro') {
   await userEvent.type(screen.getByLabelText(/name/i), name);
   await userEvent.click(screen.getByRole('button', { name: /start/i }));
-}
-
-async function findButtonByAriaLabel(label: string): Promise<HTMLButtonElement> {
-  let button: HTMLButtonElement | null = null;
-  await waitFor(() => {
-    button = document.querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`);
-    expect(button).toBeInTheDocument();
-  });
-  return button!;
 }
 
 beforeEach(() => {

@@ -1,4 +1,5 @@
-import { ALBUM_GROUPS, teamFullName, teamFlag, stickerNumbers } from '../domain/album-config';
+import { stickerNumbers } from '../domain/album-config';
+import { AlbumGroupedGrid } from './AlbumGroupedGrid';
 
 export const REPS_CAP = 7;
 
@@ -70,26 +71,11 @@ function TeamCounts({
 
 export function RepsGrid({ counts, onTap }: RepsGridProps) {
   return (
-    <div className="album-list" aria-label="Reps grid">
-      <div className="album-group">
-        <h3 className="album-group-header">🏆 FIFA World Cup</h3>
-        <TeamCounts prefix="FWC" fullName="FIFA World Cup" flag="🏆" counts={counts} onTap={onTap} />
-      </div>
-      {ALBUM_GROUPS.map(({ letter, prefixes }) => (
-        <div key={letter} className="album-group">
-          <h3 className="album-group-header">Group {letter}</h3>
-          {prefixes.map((prefix) => (
-            <TeamCounts
-              key={prefix}
-              prefix={prefix}
-              fullName={teamFullName(prefix)}
-              flag={teamFlag(prefix)}
-              counts={counts}
-              onTap={onTap}
-            />
-          ))}
-        </div>
-      ))}
-    </div>
+    <AlbumGroupedGrid
+      ariaLabel="Reps grid"
+      renderTeam={({ prefix, fullName, flag }) => (
+        <TeamCounts prefix={prefix} fullName={fullName} flag={flag} counts={counts} onTap={onTap} />
+      )}
+    />
   );
 }
