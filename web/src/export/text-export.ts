@@ -21,7 +21,7 @@ export function toTextExport(session: Session, scans: Scan[], now: Clock): strin
     .map((code) => `${code}: ${counts[code]}`);
 
   const header = [
-    `# WC 2026 Sticker Scanner export`,
+    `# Cromoswap - My Reps export`,
     `user: ${session.userName}`,
     `session: ${session.id}`,
     `exported: ${now()}`,

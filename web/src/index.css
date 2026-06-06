@@ -1,4 +1,32 @@
-:root {
+:root,
+[data-cromoswap-scheme="cobalt-mint"] {
+  color-scheme: light;
+  --ink: #121a2f;
+  --muted: #5c6780;
+  --subtle: #dce6ef;
+  --paper: #f5f9fc;
+  --surface: #ffffff;
+  --field: #eef6fb;
+  --scan: #18b394;
+  --scan-strong: #007a65;
+  --info: #3b66f5;
+  --review: #ffc247;
+  --danger: #ef5a6d;
+  --privacy: #7657f2;
+  --camera: #10172a;
+  --overlay: rgba(245, 249, 252, 0.76);
+  --targeted: #5ee6b5;
+  --owned-bg: #def7ef;
+  --owned-text: #007a65;
+  --spare-bg: #fff1ca;
+  --spare-text: #755200;
+  --cap-ring: #b37b00;
+  --import-bg: #e8f0ff;
+  --import-text: #1d4ed8;
+}
+
+[data-cromoswap-scheme="grounded-green"] {
+  color-scheme: light;
   --ink: #17211f;
   --muted: #60706b;
   --subtle: #d8e1dd;
@@ -12,6 +40,7 @@
   --danger: #d94f4f;
   --privacy: #6d57c7;
   --camera: #202927;
+  --overlay: rgba(255, 255, 255, 0.72);
   --targeted: #34c759;
   --owned-bg: #e6f3ed;
   --owned-text: #12613f;
@@ -20,7 +49,62 @@
   --cap-ring: #9a6b00;
   --import-bg: #eaf2ff;
   --import-text: #184f94;
-  --shadow: 0 18px 44px rgba(23, 33, 31, 0.14);
+}
+
+[data-cromoswap-scheme="sticker-pop"] {
+  color-scheme: light;
+  --ink: #13201d;
+  --muted: #5d6964;
+  --subtle: #dde6df;
+  --paper: #fbfbf6;
+  --surface: #ffffff;
+  --field: #f1f7f1;
+  --scan: #2aa86f;
+  --scan-strong: #0c7049;
+  --info: #2d7dd8;
+  --review: #ffc83d;
+  --danger: #ff5959;
+  --privacy: #865dd6;
+  --camera: #14201d;
+  --overlay: rgba(251, 251, 246, 0.76);
+  --targeted: #31d28b;
+  --owned-bg: #e3f5eb;
+  --owned-text: #0c7049;
+  --spare-bg: #fff0bd;
+  --spare-text: #6b4b00;
+  --cap-ring: #ff6b5e;
+  --import-bg: #e7f1ff;
+  --import-text: #1559a7;
+}
+
+[data-cromoswap-scheme="night-pitch"] {
+  color-scheme: light;
+  --ink: #0b1613;
+  --muted: #53645e;
+  --subtle: #d8e4dd;
+  --paper: #f6faf7;
+  --surface: #ffffff;
+  --field: #edf5ef;
+  --scan: #0f7a53;
+  --scan-strong: #07583b;
+  --info: #377be8;
+  --review: #f4c84d;
+  --danger: #e84d61;
+  --privacy: #705bd6;
+  --camera: #07110e;
+  --overlay: rgba(246, 250, 247, 0.74);
+  --targeted: #2bd67d;
+  --owned-bg: #ddf3e8;
+  --owned-text: #07583b;
+  --spare-bg: #fff0c7;
+  --spare-text: #664700;
+  --cap-ring: #e4af2d;
+  --import-bg: #e6f0ff;
+  --import-text: #1857a8;
+}
+
+:root {
+  --shadow: 0 18px 44px rgb(18 26 47 / 0.14);
   --radius: 8px;
   --space-1: 4px;
   --space-2: 8px;
@@ -41,6 +125,7 @@ body,
 #root {
   margin: 0;
   min-height: 100%;
+  width: 100%;
 }
 
 body {
@@ -65,9 +150,9 @@ input {
 }
 
 #root {
-  max-width: 480px;
+  max-width: 520px;
   margin-inline: auto;
-  padding: var(--space-4) var(--space-4) 96px;
+  padding: var(--space-4) var(--space-4) 104px;
 }
 
 h1 {
@@ -90,7 +175,8 @@ h2 {
 /* Forms & inputs */
 input[type="text"],
 input:not([type]),
-input[type="search"] {
+input[type="search"],
+select {
   width: 100%;
   font-size: 16px;
   padding: var(--space-3) var(--space-4);
@@ -101,9 +187,27 @@ input[type="search"] {
   outline: none;
 }
 
-input:focus {
+input[type="file"] {
+  width: 100%;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+input[type="file"]::file-selector-button {
+  min-height: 40px;
+  margin-right: var(--space-3);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--subtle);
+  border-radius: var(--radius);
+  background: var(--field);
+  color: var(--ink);
+  font-weight: 850;
+}
+
+input:focus,
+select:focus {
   border-color: var(--scan);
-  box-shadow: 0 0 0 3px rgba(31, 138, 95, 0.15);
+  box-shadow: 0 0 0 3px rgb(24 179 148 / 0.18);
 }
 
 label {
@@ -137,6 +241,11 @@ button:disabled {
   cursor: not-allowed;
 }
 
+button:focus-visible {
+  outline: 3px solid rgb(24 179 148 / 0.32);
+  outline-offset: 2px;
+}
+
 /* Button variants */
 button.primary,
 button[type="submit"] {
@@ -144,6 +253,7 @@ button[type="submit"] {
   background: var(--scan);
   border-color: var(--scan);
   color: white;
+  box-shadow: 0 10px 22px rgb(24 179 148 / 0.16);
 }
 
 button.secondary {
@@ -159,9 +269,9 @@ button.quiet {
 }
 
 button.danger {
-  background: #fee7e7;
+  background: color-mix(in srgb, var(--danger) 14%, white);
   border-color: transparent;
-  color: #8e2727;
+  color: color-mix(in srgb, var(--danger) 58%, var(--ink));
 }
 
 button.full {
@@ -212,7 +322,7 @@ form {
   gap: var(--space-3);
   padding: var(--space-4);
   border-radius: var(--radius);
-  background: rgba(23, 33, 31, 0.74);
+  background: rgb(16 23 42 / 0.78);
   color: white;
   text-align: center;
 }
@@ -232,7 +342,7 @@ form {
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  background: rgba(18, 97, 63, 0.9);
+  background: rgb(0 122 101 / 0.92);
   color: white;
   font-size: 12px;
   font-weight: 900;
@@ -247,6 +357,7 @@ form {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  border-top: 1px solid var(--subtle);
 }
 
 .scan-bottom button.primary {
@@ -291,7 +402,7 @@ form {
 .sticker-frame {
   border: 3px solid var(--review);
   border-radius: var(--radius);
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.42);
+  box-shadow: 0 0 0 9999px rgb(16 23 42 / 0.48);
   transition: border-color 120ms ease;
 }
 
@@ -303,7 +414,7 @@ form {
 .roi-box {
   border: 2px solid var(--review);
   border-radius: 6px;
-  background: rgba(242, 184, 75, 0.16);
+  background: rgb(255 194 71 / 0.16);
 }
 
 .sticker-frame.targeted .roi-box {
@@ -362,7 +473,7 @@ section[aria-label="Detected sticker"] {
   border-radius: var(--radius);
   padding: var(--space-3);
   margin-top: var(--space-3);
-  box-shadow: 0 2px 8px rgba(23, 33, 31, 0.06);
+  box-shadow: 0 10px 28px rgb(18 26 47 / 0.08);
 }
 
 section[aria-label="Detected sticker"] img {
@@ -441,13 +552,13 @@ ul[aria-label="Collection"] img {
 }
 
 .badge.duplicate {
-  background: #fff2cc;
-  color: #735000;
+  background: var(--spare-bg);
+  color: var(--spare-text);
 }
 
 .badge.scan-count {
-  background: #e6f3ed;
-  color: var(--scan-strong);
+  background: var(--owned-bg);
+  color: var(--owned-text);
 }
 
 time {
@@ -474,14 +585,35 @@ ul[aria-label="Collection"] li button {
 }
 
 section[aria-label="Export"] {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--space-2);
   margin-top: var(--space-5);
 }
 
+section[aria-label="Export"] button {
+  min-width: 0;
+  white-space: normal;
+  line-height: 1.15;
+}
+
 /* Session gate */
+main[aria-label="Session"] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
 main[aria-label="Session"] h1 {
-  margin-bottom: var(--space-2);
+  margin-bottom: 0;
+}
+
+main[aria-label="Session"] > form {
+  padding: var(--space-4);
+  border: 1px solid var(--subtle);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 10px 28px rgb(18 26 47 / 0.06);
 }
 
 section[aria-label="Resume"] ul {
@@ -494,23 +626,21 @@ section[aria-label="Resume"] ul {
 }
 
 section[aria-label="Resume"] li button {
-  width: 100%;
-  background: var(--field);
-  border-color: transparent;
-  /* Reset .primary's white text — it was invisible on the light field. */
-  color: var(--ink);
+  min-height: 40px;
+  padding-inline: var(--space-3);
 }
 
 /* Privacy note */
 .privacy-note {
   padding: var(--space-3);
-  border: 1px solid rgba(109, 87, 199, 0.24);
+  border: 1px solid color-mix(in srgb, var(--privacy) 24%, white);
   border-radius: var(--radius);
-  background: rgba(109, 87, 199, 0.08);
-  color: #4b3b91;
+  background: color-mix(in srgb, var(--privacy) 8%, white);
+  color: color-mix(in srgb, var(--privacy) 72%, var(--ink));
   font-size: 12px;
   font-weight: 700;
   line-height: 1.4;
+  margin: 0;
 }
 
 /* ── Import section ──────────────────────────────── */
@@ -518,13 +648,17 @@ section[aria-label="Resume"] li button {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-3) 0;
+  padding: var(--space-4);
+  border: 1px solid var(--subtle);
+  border-radius: var(--radius);
+  background: var(--import-bg);
+  color: var(--import-text);
 }
 
 .import-label {
   font-size: 13px;
   font-weight: 800;
-  color: var(--ink);
+  color: var(--import-text);
 }
 
 .import-kind-picker {
@@ -553,8 +687,9 @@ section[aria-label="Resume"] li button {
   position: sticky;
   top: 0;
   z-index: 20;
-  padding: var(--space-2) 0;
-  background: var(--paper);
+  padding: var(--space-2) 0 var(--space-3);
+  background: var(--overlay);
+  backdrop-filter: blur(16px);
   margin-bottom: var(--space-4);
 }
 
@@ -563,7 +698,7 @@ section[aria-label="Resume"] li button {
   padding: var(--space-1);
   border: 1px solid var(--subtle);
   border-radius: var(--radius);
-  background: var(--surface);
+  background: var(--field);
 }
 
 .tab-bar button {
@@ -578,8 +713,9 @@ section[aria-label="Resume"] li button {
 }
 
 .tab-bar button.tab-active {
-  background: var(--field);
-  color: var(--scan-strong);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 6px 18px rgb(18 26 47 / 0.08);
 }
 
 .section-stepper {
@@ -592,6 +728,7 @@ section[aria-label="Resume"] li button {
 .section-stepper button {
   min-height: 36px;
   font-size: 12px;
+  background: var(--surface);
 }
 
 /* ── Team card ───────────────────────────────────── */
@@ -606,6 +743,7 @@ section[aria-label="Resume"] li button {
   border-radius: var(--radius);
   background: var(--surface);
   overflow: hidden;
+  box-shadow: 0 8px 20px rgb(18 26 47 / 0.04);
 }
 
 .team-card-header {
@@ -616,10 +754,15 @@ section[aria-label="Resume"] li button {
   background: var(--field);
   border-bottom: 1px solid var(--subtle);
   font-size: 13px;
+  gap: var(--space-2);
 }
 
 .team-card-name {
   color: var(--ink);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .team-card-header-right {
@@ -647,16 +790,17 @@ section[aria-label="Resume"] li button {
 }
 
 .all-toggle-clear {
-  color: var(--muted);
+  color: var(--danger);
 }
 
 /* ── Reps view switch (Scan | Grid) ──────────────── */
 .reps-view-switch {
   display: flex;
   border: 1px solid var(--subtle);
-  border-radius: 6px;
+  border-radius: var(--radius);
   overflow: hidden;
   margin-bottom: var(--space-3);
+  background: var(--field);
 }
 
 .reps-view-btn {
@@ -664,7 +808,7 @@ section[aria-label="Resume"] li button {
   min-height: 40px;
   border: 0;
   border-radius: 0;
-  background: var(--field);
+  background: transparent;
   color: var(--muted);
   font-size: 13px;
   font-weight: 800;
@@ -672,16 +816,17 @@ section[aria-label="Resume"] li button {
 
 .reps-view-btn.reps-view-active {
   background: var(--ink);
-  color: #fff;
+  color: white;
 }
 
 /* ── Reps tap-mode toggle (-1 / +1 / Clear) ──────── */
 .reps-mode-toggle {
   display: flex;
   border: 1px solid var(--subtle);
-  border-radius: 8px;
+  border-radius: var(--radius);
   overflow: hidden;
   margin-bottom: var(--space-4);
+  background: var(--field);
 }
 
 .reps-mode-btn {
@@ -692,7 +837,7 @@ section[aria-label="Resume"] li button {
   border: 0;
   border-radius: 0;
   border-right: 1px solid var(--subtle);
-  background: var(--field);
+  background: transparent;
   color: var(--muted);
   font-size: 13px;
   font-weight: 800;
@@ -711,17 +856,17 @@ section[aria-label="Resume"] li button {
 
 .reps-mode-btn.reps-mode-active.reps-mode-add {
   background: var(--scan);
-  color: #fff;
+  color: white;
 }
 
 .reps-mode-btn.reps-mode-active.reps-mode-remove {
   background: var(--danger);
-  color: #fff;
+  color: white;
 }
 
 .reps-mode-btn.reps-mode-active.reps-mode-clear {
   background: var(--ink);
-  color: #fff;
+  color: white;
 }
 
 /* ── Reps count chips ────────────────────────────── */
@@ -735,16 +880,16 @@ section[aria-label="Resume"] li button {
   border: 1px solid var(--subtle);
   font-size: 11px;
   font-weight: 900;
-  color: #b6c2bd;
+  color: color-mix(in srgb, var(--muted) 55%, var(--paper));
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
 .rchip-have {
-  background: var(--scan);
-  border-color: var(--scan);
-  color: #fff;
+  background: var(--owned-bg);
+  border-color: color-mix(in srgb, var(--scan) 44%, var(--owned-bg));
+  color: var(--owned-text);
 }
 
 .rchip-badge {
@@ -756,7 +901,7 @@ section[aria-label="Resume"] li button {
   padding: 0 3px;
   border-radius: 999px;
   background: var(--review);
-  color: #3a2c05;
+  color: var(--spare-text);
   font-size: 10px;
   font-weight: 900;
   display: flex;
@@ -766,7 +911,7 @@ section[aria-label="Resume"] li button {
 }
 
 .rchip-cap {
-  box-shadow: 0 0 0 2px var(--review);
+  box-shadow: 0 0 0 2px var(--cap-ring);
 }
 
 .team-card-chips {
@@ -790,9 +935,9 @@ section[aria-label="Resume"] li button {
 }
 
 .chip-owned {
-  background: var(--scan);
-  border-color: var(--scan);
-  color: white;
+  background: var(--owned-bg);
+  border-color: color-mix(in srgb, var(--scan) 44%, var(--owned-bg));
+  color: var(--owned-text);
 }
 
 /* ── Album group headers ─────────────────────────── */
@@ -840,9 +985,9 @@ section[aria-label="Resume"] li button {
 }
 
 .badge.source-manual {
-  background: rgba(47, 116, 208, 0.1);
-  color: var(--info);
-  border: 1px solid rgba(47, 116, 208, 0.3);
+  background: var(--import-bg);
+  color: var(--import-text);
+  border: 1px solid color-mix(in srgb, var(--info) 26%, var(--import-bg));
   font-size: 10px;
   font-weight: 900;
   padding: 1px 5px;
@@ -859,34 +1004,53 @@ section[aria-label="Resume"] li button {
 
 /* ── Session resume card ─────────────────────────── */
 .session-card {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
+  grid-template-areas:
+    "name action"
+    "count action"
+    "album album";
   gap: var(--space-3);
-  padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--subtle);
+  padding: var(--space-3);
+  border: 1px solid var(--subtle);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 8px 20px rgb(18 26 47 / 0.04);
 }
 
 .session-name {
+  grid-area: name;
   font-weight: 900;
   color: var(--ink);
-  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .session-count {
+  grid-area: count;
   font-size: 12px;
   color: var(--muted);
   font-weight: 700;
 }
 
 .session-album-counts {
+  grid-area: album;
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
   font-size: 12px;
   font-weight: 700;
 }
 
+.session-card button {
+  grid-area: action;
+}
+
 .session-owned {
-  color: var(--scan);
+  color: var(--owned-text);
 }
 
 .session-missing {
@@ -934,13 +1098,13 @@ section[aria-label="Resume"] li button {
 }
 
 .scan-status.scanning {
-  background: rgba(47, 116, 208, 0.1);
+  background: var(--import-bg);
   color: var(--info);
 }
 
 .scan-status.no-detection {
-  background: rgba(242, 184, 75, 0.15);
-  color: #8a6200;
+  background: var(--spare-bg);
+  color: var(--spare-text);
 }
 
 /* ── Orientation segmented control ──────────────── */
@@ -950,6 +1114,7 @@ section[aria-label="Resume"] li button {
   border-radius: var(--radius);
   overflow: hidden;
   align-self: flex-start;
+  background: var(--field);
 }
 
 .seg-btn {
@@ -976,8 +1141,9 @@ section[aria-label="Resume"] li button {
 /* ── App header ──────────────────────────────────── */
 .app-header {
   display: flex;
-  align-items: baseline;
-  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
   padding: var(--space-3) 0 var(--space-2);
   border-bottom: 1px solid var(--subtle);
   margin-bottom: var(--space-2);
@@ -986,7 +1152,7 @@ section[aria-label="Resume"] li button {
 .app-header-home {
   align-self: center;
   min-height: 0;
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-1) var(--space-3);
   font-size: 12px;
   font-weight: 800;
   color: var(--ink);
@@ -994,11 +1160,26 @@ section[aria-label="Resume"] li button {
   border-color: transparent;
 }
 
+.app-header-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius);
+  flex: 0 0 auto;
+}
+
+.app-header-copy {
+  min-width: 0;
+  flex: 1;
+}
+
 .app-header-name {
   font-size: 18px;
   font-weight: 900;
   color: var(--ink);
   margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .app-header-meta {
@@ -1010,6 +1191,7 @@ section[aria-label="Resume"] li button {
 
 /* ── Export section ──────────────────────────────── */
 .export-summary {
+  grid-column: 1 / -1;
   font-size: 12px;
   color: var(--muted);
   font-weight: 700;
@@ -1017,6 +1199,7 @@ section[aria-label="Resume"] li button {
 }
 
 .privacy-note-inline {
+  grid-column: 1 / -1;
   font-size: 11px;
   color: var(--muted);
   margin: var(--space-2) 0 0;
@@ -1029,6 +1212,9 @@ section[aria-label="Resume"] li button {
   gap: var(--space-4);
   padding: var(--space-8) var(--space-4);
   text-align: center;
+  border: 1px solid var(--subtle);
+  border-radius: var(--radius);
+  background: var(--surface);
 }
 
 .camera-permission-msg {
@@ -1051,17 +1237,17 @@ section[aria-label="Resume"] li button {
 }
 
 .sync-indicator.sync-local {
-  background: rgba(109, 87, 199, 0.12);
+  background: color-mix(in srgb, var(--privacy) 12%, white);
   color: var(--privacy);
 }
 
 .sync-indicator.sync-pending {
-  background: rgba(47, 116, 208, 0.1);
+  background: var(--import-bg);
   color: var(--info);
 }
 
 .sync-indicator.sync-failed {
-  background: rgba(217, 79, 79, 0.12);
+  background: color-mix(in srgb, var(--danger) 12%, white);
   color: var(--danger);
 }
 
@@ -1082,19 +1268,23 @@ section[aria-label="Resume"] li button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-4) var(--space-4) var(--space-2);
+  padding: var(--space-3) 0 var(--space-2);
 }
 
 .leaderboard-title {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 900;
   margin: 0;
+  color: var(--ink);
 }
 
 .leaderboard-list {
   list-style: none;
   margin: 0;
-  padding: 0 var(--space-4);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
 .leaderboard-row {
@@ -1102,18 +1292,20 @@ section[aria-label="Resume"] li button {
   grid-template-columns: 2.5rem minmax(0, 1fr) auto auto;
   gap: var(--space-2);
   align-items: center;
-  padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--subtle);
+  padding: var(--space-3);
+  border: 1px solid var(--subtle);
+  border-radius: var(--radius);
+  background: var(--surface);
 }
 
 .leaderboard-rank {
-  font-weight: 700;
-  color: var(--muted);
+  font-weight: 900;
+  color: var(--info);
   font-size: 0.875rem;
 }
 
 .leaderboard-name {
-  font-weight: 600;
+  font-weight: 850;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1121,7 +1313,7 @@ section[aria-label="Resume"] li button {
 
 .leaderboard-owned {
   font-size: 0.8125rem;
-  color: var(--scan);
+  color: var(--owned-text);
   white-space: nowrap;
 }
 
@@ -1155,7 +1347,11 @@ section[aria-label="Resume"] li button {
 /* Board access from the home gate + admin link in the read-only selection */
 .gate-board-link {
   width: 100%;
-  margin-bottom: var(--space-3);
+  justify-content: space-between;
+  min-height: 48px;
+  color: var(--import-text);
+  background: var(--import-bg);
+  border: 1px solid color-mix(in srgb, var(--info) 18%, var(--import-bg));
 }
 
 .board-admin-note {
@@ -1177,11 +1373,35 @@ section[aria-label="Resume"] li button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-4) var(--space-4) 0;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-2) 0 0;
+}
+
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: var(--space-3);
+}
+
+.brand-mark {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  box-shadow: 0 12px 26px rgb(18 26 47 / 0.16);
+  flex: 0 0 auto;
+}
+
+.brand-copy {
+  min-width: 0;
 }
 
 .session-gate-header h1 {
   margin: 0;
+  font-size: 28px;
+  line-height: 1.05;
+  color: var(--ink);
 }
 
 .storage-toggle {
@@ -1189,24 +1409,48 @@ section[aria-label="Resume"] li button {
   border: 1px solid var(--subtle);
   border-radius: var(--radius);
   overflow: hidden;
+  background: var(--field);
+  flex: 0 0 auto;
 }
 
 .storage-toggle-btn {
   background: none;
   border: none;
-  padding: var(--space-1) var(--space-3);
+  min-height: 36px;
+  padding: 0 var(--space-3);
   font-size: 0.8125rem;
-  font-weight: 500;
+  font-weight: 850;
   cursor: pointer;
   color: var(--muted);
   transition: background 0.15s, color 0.15s;
 }
 
 .storage-toggle-btn.active {
-  background: var(--scan);
-  color: #fff;
+  background: var(--surface);
+  color: var(--scan-strong);
+  box-shadow: 0 4px 12px rgb(18 26 47 / 0.08);
 }
 
 .app-header .storage-toggle {
   margin-left: auto;
+}
+
+@media (max-width: 380px) {
+  #root {
+    padding-inline: var(--space-3);
+  }
+
+  .session-gate-header .storage-toggle,
+  .app-header .storage-toggle {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .storage-toggle-btn {
+    flex: 1;
+  }
+
+  .app-header-copy {
+    flex-basis: 0;
+  }
 }

@@ -80,7 +80,7 @@ export function RepsView({
           data-test-id="reps-view-scan"
           onClick={() => onSetView('scan')}
         >
-          📷 Scan
+          Scan
         </button>
         <button
           type="button"
@@ -89,7 +89,7 @@ export function RepsView({
           data-test-id="reps-view-grid"
           onClick={() => onSetView('grid')}
         >
-          ▦ Grid
+          Grid
         </button>
       </div>
 
