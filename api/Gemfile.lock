@@ -390,7 +390,8 @@ DEPENDENCIES
   rack-cors
   rails (~> 8.1.3)
   rspec-rails (~> 7.0)
-  rubocop-rails-omakase
+  rubocop (= 1.87.0)
+  rubocop-rails-omakase (= 1.1.0)
   simplecov
   solid_cable
   solid_cache
