@@ -49,6 +49,9 @@ group :development, :test do
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
 
-  # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
-  gem "rubocop-rails-omakase", require: false
+  # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/].
+  # Pinned (incl. the rubocop core, which omakase only floats as ">= 1.72") so
+  # the linter behaves identically locally and in CI.
+  gem "rubocop", "1.87.0", require: false
+  gem "rubocop-rails-omakase", "1.1.0", require: false
 end
