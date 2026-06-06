@@ -12,11 +12,11 @@ const collector = `E2E_${Date.now()}`;
 
 test('the served SPA loads and can open the board', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: /cromoswap/i })).toBeVisible();
-  await expect(page.getByLabel(/name/i)).toBeVisible();
+  await expect(page.getByTestId('gate-title')).toBeVisible();
+  await expect(page.getByTestId('session-name')).toBeVisible();
 
-  await page.getByRole('button', { name: /view board/i }).click();
-  await expect(page.getByRole('heading', { name: /leaderboard/i })).toBeVisible();
+  await page.getByTestId('view-board').click();
+  await expect(page.getByTestId('leaderboard-title')).toBeVisible();
 });
 
 test('API + admin round-trip: synced album shows on the board and in the backoffice', async ({ request }) => {

@@ -91,13 +91,13 @@ export function SessionGate({
   return (
     <main aria-label="Session">
       <div className="session-gate-header">
-        <h1>Cromoswap</h1>
+        <h1 data-test-id="gate-title">Cromoswap</h1>
         {storageMode && onChangeMode && (
           <StorageModeToggle mode={storageMode} onChange={onChangeMode} />
         )}
       </div>
       {onOpenBoard && (
-        <button type="button" className="quiet gate-board-link" onClick={onOpenBoard}>
+        <button type="button" className="quiet gate-board-link" data-test-id="view-board" onClick={onOpenBoard}>
           🏆 View board
         </button>
       )}
@@ -129,8 +129,8 @@ export function SessionGate({
       )}
       <form onSubmit={handleSubmit}>
         <label htmlFor={inputId}>Your name</label>
-        <input id={inputId} value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Luca" />
-        <button type="submit" disabled={trimmed === ''}>
+        <input id={inputId} data-test-id="session-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Luca" />
+        <button type="submit" data-test-id="start-session" disabled={trimmed === ''}>
           Start scanning
         </button>
       </form>
