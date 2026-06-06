@@ -27,4 +27,18 @@ describe('OrientationToggle', () => {
     await userEvent.click(screen.getByRole('button', { name: /portrait/i }));
     expect(onChange).not.toHaveBeenCalled();
   });
+
+  it('does not call onChange when the active landscape option is clicked', async () => {
+    const onChange = vi.fn();
+    render(<OrientationToggle value="landscape" onChange={onChange} />);
+    await userEvent.click(screen.getByRole('button', { name: /landscape/i }));
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('switches back to portrait from landscape', async () => {
+    const onChange = vi.fn();
+    render(<OrientationToggle value="landscape" onChange={onChange} />);
+    await userEvent.click(screen.getByRole('button', { name: /portrait/i }));
+    expect(onChange).toHaveBeenCalledWith('portrait');
+  });
 });

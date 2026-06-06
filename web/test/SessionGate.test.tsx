@@ -81,4 +81,25 @@ describe('SessionGate', () => {
     expect(screen.queryByText(/owned/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/missing/i)).not.toBeInTheDocument();
   });
+
+  it('shows an alert when an imported JSON backup is malformed', async () => {
+    render(
+      <SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} onImportJson={vi.fn()} />,
+    );
+    const file = new File(['definitely not json'], 'backup.json', { type: 'application/json' });
+    await userEvent.upload(screen.getByLabelText(/import a backup/i), file);
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+  });
+
+  it('shows the local vs cloud privacy note based on storage mode', () => {
+    const { rerender } = render(
+      <SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} storageMode="local" onChangeMode={vi.fn()} />,
+    );
+    expect(screen.getByText(/stored locally on this device/i)).toBeInTheDocument();
+
+    rerender(
+      <SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} storageMode="cloud" onChangeMode={vi.fn()} />,
+    );
+    expect(screen.getByText(/synced to the server/i)).toBeInTheDocument();
+  });
 });
