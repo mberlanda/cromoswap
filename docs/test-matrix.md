@@ -36,7 +36,7 @@ camera — via `npm run e2e`. Fast feedback for the offline-first UI.
 
 | # | Scenario | Asserts | Selectors |
 |---|----------|---------|-----------|
-| L1 | Manual add persists across reload + exports | switch to Local, create session, grant (fake) camera, add ARG01 → in collection; reload → resume → still there; export text contains ARG01 | `storage-local`, `session-name`, `start-session`, `allow-camera`, `manual-prefix`, `manual-number`, `manual-add`, `resume-<user>`, `export-text` |
+| L1 | Manual add persists across reload + exports | switch to Local, create session, opt out of camera, add ARG01 → in collection; reload → resume → still there; export text contains ARG01 | `storage-local`, `session-name`, `start-session`, `enter-manually`, `manual-prefix`, `manual-number`, `manual-add`, `resume-<user>`, `export-text` |
 | L2 | Navigate album / reps grid / home | album tab shows FWC group; reps tab → Grid → mode toggle visible; Home → back to gate | `tab-album`, `tab-reps`, `reps-view-grid`, `reps-mode`, `home` |
 
 ### data-test-id registry
@@ -78,10 +78,9 @@ camera — via `npm run e2e`. Fast feedback for the offline-first UI.
 - Admin CRUD create/edit/delete through the rendered forms.
 - Collector "delete everything" cascade from the backoffice.
 
-## Notes / known gaps
+## Notes
 
-- **Manual entry requires a granted camera.** The "no-camera" permission panel
-  only loops back to itself, so a user who has no camera (or denies it) cannot
-  reach manual entry — its message ("you can still add codes manually") is
-  misleading. The e2e grants a fake camera to work around this; the UX gap is
-  worth fixing separately.
+- **Manual entry without a camera** is now reachable: choosing "Enter manually"
+  (or a device with no camera) renders the reps view in manual mode (camera
+  scanner hidden, manual entry + grid + collection available). The L1/L2 flows
+  exercise this path.

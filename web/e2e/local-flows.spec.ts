@@ -10,8 +10,8 @@ async function startLocalSession(page: Page, name = 'Mauro') {
   await page.getByTestId('storage-local').click();
   await page.getByTestId('session-name').fill(name);
   await page.getByTestId('start-session').click();
-  // Grant the (fake) camera so the scanner + manual entry render.
-  await page.getByTestId('allow-camera').click();
+  // Opt out of the camera — manual entry must be reachable without one.
+  await page.getByTestId('enter-manually').click();
 }
 
 async function addManually(page: Page, prefix: string, number: string) {
@@ -30,7 +30,7 @@ test('local: manual add persists across reload and exports', async ({ page }) =>
   // Persists across reload -> resume (IndexedDB).
   await page.reload();
   await page.getByTestId('resume-Mauro').click();
-  await page.getByTestId('allow-camera').click();
+  await page.getByTestId('enter-manually').click();
   await expect(collection.getByText('ARG01')).toBeVisible();
 
   // Export text contains the code.

@@ -55,6 +55,24 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: /scan sticker/i })).toBeInTheDocument();
   });
 
+  it('allows manual entry without a camera', async () => {
+    const startCamera = vi.fn(async () => ({ state: 'granted' as const, stream: {} as MediaStream }));
+    render(<App deps={makeDeps({ startCamera })} />);
+    await startSession();
+
+    // idle -> permission panel; the user opts out of the camera.
+    await userEvent.click(screen.getByRole('button', { name: /enter manually/i }));
+
+    // Manual entry is reachable (and the camera scanner is not shown).
+    expect(screen.queryByRole('button', { name: /scan sticker/i })).not.toBeInTheDocument();
+    await userEvent.type(screen.getByLabelText(/^prefix$/i), 'USA');
+    await userEvent.selectOptions(screen.getByLabelText(/^number$/i), '13');
+    await userEvent.click(screen.getByRole('button', { name: /^add$/i }));
+
+    const collection = screen.getByRole('list', { name: /collection/i });
+    expect(within(collection).getByText('USA13')).toBeInTheDocument();
+  });
+
   it('returns to the home screen via the header Home button without reload', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();

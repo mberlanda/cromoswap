@@ -560,15 +560,16 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
           now={deps.now}
         />
       )}
-      {tab === 'reps' && cameraState !== 'granted' && (
+      {tab === 'reps' && cameraState !== 'granted' && cameraState !== 'no-camera' && (
         <CameraPermissionPanel
           state={cameraState}
           onRequest={handleRequestCamera}
           onSkip={handleSkipToManual}
         />
       )}
-      {tab === 'reps' && cameraState === 'granted' && (
+      {tab === 'reps' && (cameraState === 'granted' || cameraState === 'no-camera') && (
         <RepsView
+          cameraAvailable={cameraState === 'granted'}
           view={repsView}
           onSetView={setRepsView}
           mode={repsMode}
