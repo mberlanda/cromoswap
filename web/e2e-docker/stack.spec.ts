@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 
 // Full-stack smoke against the assembled image: the Rails app serves the web
 // bundle and the API on one origin, with the admin backoffice and Postgres.
@@ -68,5 +69,47 @@ test('the admin dashboard renders for an authenticated admin', async ({ browser 
   const page = await ctx.newPage();
   await page.goto('/admin');
   await expect(page.getByTestId('admin-dashboard')).toBeVisible();
+  await ctx.close();
+});
+
+test('the admin SQL export returns a non-empty dump with schema and seeded data', async ({ browser, request }) => {
+  const seed = {
+    userName: 'GiacomoPietro',
+    codes: ['ALG05', 'ARG01'],
+  };
+  const sync = await request.post('/api/v1/album_stickers/sync', { data: seed });
+  expect(sync.ok()).toBeTruthy();
+
+  const ctx = await browser.newContext({
+    baseURL,
+    httpCredentials: { username: ADMIN_USER, password: ADMIN_PASS },
+  });
+  const page = await ctx.newPage();
+  await page.goto('/admin');
+  await expect(page.getByTestId('admin-dashboard')).toBeVisible();
+
+  const responsePromise = page.waitForResponse((response) => {
+    return new URL(response.url()).pathname === '/admin/export.sql';
+  });
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('link', { name: 'Export SQL' }).click();
+
+  const response = await responsePromise;
+  expect(response.status()).toBe(200);
+
+  const download = await downloadPromise;
+  await expect(page.getByText('Export failed:')).not.toBeVisible();
+  expect(await download.failure()).toBeNull();
+  const path = await download.path();
+  expect(path).toBeTruthy();
+
+  const sql = await readFile(path!, 'utf8');
+  expect(sql.length).toBeGreaterThan(1000);
+  expect(sql).toContain('CREATE TABLE public.album_stickers');
+  expect(sql).toContain(seed.userName);
+  expect(sql).toContain('ALG05');
+  expect(sql).toContain('ARG01');
+  expect(sql).not.toContain('Export failed:');
+
   await ctx.close();
 });
