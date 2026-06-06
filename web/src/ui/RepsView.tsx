@@ -16,6 +16,8 @@ import { countByCode } from '../domain/counts';
 export type RepsViewMode = 'scan' | 'grid';
 
 export interface RepsViewProps {
+  /** When false, the camera scanner is hidden and only manual entry is shown. */
+  cameraAvailable?: boolean;
   view: RepsViewMode;
   onSetView: (view: RepsViewMode) => void;
   mode: RepsMode;
@@ -50,6 +52,7 @@ export interface RepsViewProps {
 }
 
 export function RepsView({
+  cameraAvailable = true,
   view, onSetView, mode, onSetMode, onGridTap,
   scans, thumbnails, detection, noDetection, scanning, cameraPaused, videoMode,
   orientation, size, targeted, videoRef, onCapture, onResumeCamera, onPauseCamera,
@@ -99,6 +102,7 @@ export function RepsView({
 
       {view === 'scan' && (
       <>
+      {cameraAvailable && (
       <section aria-label="Scan" className="scan-area">
         <div className="camera-wrap">
           <video ref={videoRef} playsInline muted className="camera-preview" />
@@ -155,6 +159,7 @@ export function RepsView({
           </button>
         </div>
       </section>
+      )}
 
       <section aria-label="Manual entry">
         <h2>Add manually</h2>
