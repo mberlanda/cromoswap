@@ -63,7 +63,7 @@ describe('composition camera binding', () => {
     const deps = await buildCameraDeps();
 
     render(<App deps={deps} />);
-    await userEvent.type(screen.getByLabelText(/name/i), 'Mauro');
+    await userEvent.type(screen.getByLabelText(/your name/i), 'Mauro');
     await userEvent.click(screen.getByRole('button', { name: /start/i }));
     await userEvent.click(await screen.findByRole('button', { name: /allow camera/i }));
 

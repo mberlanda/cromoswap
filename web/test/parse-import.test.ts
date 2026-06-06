@@ -4,6 +4,7 @@ import {
   parseUserName,
   parseGroupedCodes,
   parseDuplicateCounts,
+  parseFlexibleCodes,
   resolveOwnedCodes,
   buildTextImport,
   parseJsonImport,
@@ -140,5 +141,27 @@ describe('parseJsonImport', () => {
 
   it('throws when the shape is not a session export', () => {
     expect(() => parseJsonImport('{"foo":1}')).toThrow(/session export/i);
+  });
+});
+
+describe('parseFlexibleCodes', () => {
+  it('parses one code per line', () => {
+    expect(parseFlexibleCodes('ARG01\nBRA05\nUSA13').sort()).toEqual(['ARG01', 'BRA05', 'USA13']);
+  });
+
+  it('parses comma/space separated and tolerant spacing', () => {
+    expect(parseFlexibleCodes('arg01, bra 5; usa-13').sort()).toEqual(['ARG01', 'BRA05', 'USA13']);
+  });
+
+  it('parses the grouped PREFIX: nn, nn format', () => {
+    expect(parseFlexibleCodes('BRA: 01, 02, 05').sort()).toEqual(['BRA01', 'BRA02', 'BRA05']);
+  });
+
+  it('ignores unknown codes and prose, and de-duplicates', () => {
+    expect(parseFlexibleCodes('My list: ARG01 and ARG01, plus ZZZ99 (not real)')).toEqual(['ARG01']);
+  });
+
+  it('returns [] when nothing parses', () => {
+    expect(parseFlexibleCodes('no codes here')).toEqual([]);
   });
 });

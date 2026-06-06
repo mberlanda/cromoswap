@@ -10,6 +10,37 @@ export function allCodes(): string[] {
   );
 }
 
+/**
+ * Extract valid sticker codes from free-form text, tolerating most layouts:
+ * one per line, comma/space separated (`ARG01 BRA05`), spaced or dashed
+ * (`ARG 1`, `arg-01`), and grouped (`BRA: 01, 02, 05`). Only codes that are
+ * real album stickers are kept; everything else is ignored.
+ */
+export function parseFlexibleCodes(content: string): string[] {
+  const valid = new Set(allCodes());
+  const found = new Set<string>();
+  const upper = content.toUpperCase();
+
+  // Grouped "PREFIX: nn, nn" — one prefix, many numbers.
+  for (const line of upper.split('\n')) {
+    const match = line.match(/^\s*([A-Z]{3})\s*:\s*(.+)$/);
+    if (!match) continue;
+    for (const token of match[2].split(/[^0-9]+/)) {
+      if (token === '') continue;
+      const code = `${match[1]}${token.padStart(2, '0')}`;
+      if (valid.has(code)) found.add(code);
+    }
+  }
+
+  // Standalone full codes anywhere in the text.
+  for (const match of upper.matchAll(/([A-Z]{3})\s*-?\s*(\d{1,2})/g)) {
+    const code = `${match[1]}${match[2].padStart(2, '0')}`;
+    if (valid.has(code)) found.add(code);
+  }
+
+  return [...found];
+}
+
 /** Guess the kind of a text export from its header, or null if unrecognized. */
 export function detectTextKind(content: string): ImportKind | null {
   if (/album/i.test(content)) {
