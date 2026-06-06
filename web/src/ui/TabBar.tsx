@@ -25,6 +25,7 @@ export function TabBar({ active, onChange, showBoard = false }: TabBarProps) {
             type="button"
             role="tab"
             aria-selected={active === tab.id}
+            data-test-id={`tab-${tab.id}`}
             className={active === tab.id ? 'tab-active' : ''}
             onClick={() => onChange(tab.id)}
           >

@@ -29,6 +29,16 @@ Postgres on one origin) via `scripts/validate-e2e.sh`.
 | E3 | Browse a collector from the board | Browser (SPA) | open the collector's read-only selection; admin backoffice link points to `/admin` | `view-board`, `open-<user>`, `admin-link` |
 | E4 | Admin dashboard for an authenticated admin | Browser (Rails admin) | `/admin` renders the Backoffice dashboard with HTTP Basic auth | `admin-dashboard` |
 
+## Local-mode E2E matrix (`web/e2e/local-flows.spec.ts`)
+
+Runs against the Vite preview in **Local (IndexedDB)** mode — no backend, fake
+camera — via `npm run e2e`. Fast feedback for the offline-first UI.
+
+| # | Scenario | Asserts | Selectors |
+|---|----------|---------|-----------|
+| L1 | Manual add persists across reload + exports | switch to Local, create session, grant (fake) camera, add ARG01 → in collection; reload → resume → still there; export text contains ARG01 | `storage-local`, `session-name`, `start-session`, `allow-camera`, `manual-prefix`, `manual-number`, `manual-add`, `resume-<user>`, `export-text` |
+| L2 | Navigate album / reps grid / home | album tab shows FWC group; reps tab → Grid → mode toggle visible; Home → back to gate | `tab-album`, `tab-reps`, `reps-view-grid`, `reps-mode`, `home` |
+
 ### data-test-id registry
 
 | id | Element |
@@ -36,6 +46,15 @@ Postgres on one origin) via `scripts/validate-e2e.sh`.
 | `gate-title` | Session gate heading |
 | `session-name` | Name input on the gate |
 | `start-session` | Start scanning button |
+| `storage-local` / `storage-cloud` | Storage-mode toggle |
+| `resume-<userName>` | Resume a session (per row) |
+| `allow-camera` / `enter-manually` | Camera permission panel buttons |
+| `manual-prefix` / `manual-number` / `manual-add` | Manual sticker entry |
+| `tab-album` / `tab-reps` / `tab-board` | Primary section tabs |
+| `reps-view-scan` / `reps-view-grid` | Reps view switch |
+| `reps-mode` | Reps tap-mode toggle group |
+| `export-text` | Export text button |
+| `home` | In-session Home button |
 | `view-board` | View board button (gate, cloud mode) |
 | `leaderboard-title` | Leaderboard heading |
 | `open-<userName>` | Open a collector's selection (per row) |
@@ -53,8 +72,16 @@ Postgres on one origin) via `scripts/validate-e2e.sh`.
 
 ## Candidate scenarios (not yet automated)
 
-- Cloud session create + manual sticker add (blocked on `data-test-id`s for the
-  split prefix/number manual entry).
+- Cloud session create + manual add on the docker stack (local-mode L1 covers
+  the UI; a cloud variant would also exercise the API persistence).
+- Album All/Clear and import flows end-to-end (unit-tested today).
 - Admin CRUD create/edit/delete through the rendered forms.
 - Collector "delete everything" cascade from the backoffice.
-- Reps counter-grid add/remove/clear (covered by web unit tests; not e2e).
+
+## Notes / known gaps
+
+- **Manual entry requires a granted camera.** The "no-camera" permission panel
+  only loops back to itself, so a user who has no camera (or denies it) cannot
+  reach manual entry — its message ("you can still add codes manually") is
+  misleading. The e2e grants a fake camera to work around this; the UX gap is
+  worth fixing separately.

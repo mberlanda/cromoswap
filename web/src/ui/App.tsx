@@ -527,6 +527,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
           type="button"
           className="app-header-home"
           aria-label="Home"
+          data-test-id="home"
           onClick={handleHome}
         >
           ← Home

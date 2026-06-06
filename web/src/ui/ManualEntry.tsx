@@ -57,6 +57,7 @@ export function ManualEntry({ onAdd, recentPrefixes = [] }: ManualEntryProps) {
       <label htmlFor={prefixId}>Prefix</label>
       <input
         id={prefixId}
+        data-test-id="manual-prefix"
         value={prefix}
         onChange={(e) => handlePrefixChange(e.target.value)}
         placeholder="ARG"
@@ -73,6 +74,7 @@ export function ManualEntry({ onAdd, recentPrefixes = [] }: ManualEntryProps) {
       <label htmlFor={numberId}>Number</label>
       <select
         id={numberId}
+        data-test-id="manual-number"
         value={effectiveNumber}
         onChange={(e) => setNumber(e.target.value)}
         disabled={!prefixValid}
@@ -83,7 +85,7 @@ export function ManualEntry({ onAdd, recentPrefixes = [] }: ManualEntryProps) {
           </option>
         ))}
       </select>
-      <button type="submit" disabled={!codeValid}>
+      <button type="submit" data-test-id="manual-add" disabled={!codeValid}>
         Add
       </button>
     </form>

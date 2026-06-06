@@ -118,7 +118,12 @@ export function SessionGate({
                       <span className="session-missing">{album.missing} missing</span>
                     </span>
                   )}
-                  <button type="button" className="primary" onClick={() => onResume(session.id)}>
+                  <button
+                    type="button"
+                    className="primary"
+                    data-test-id={`resume-${session.userName}`}
+                    onClick={() => onResume(session.id)}
+                  >
                     Resume
                   </button>
                 </li>
