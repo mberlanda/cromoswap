@@ -16,7 +16,7 @@ export function detectTextKind(content: string): ImportKind | null {
     if (/owned/i.test(content)) return 'owned';
     if (/missing/i.test(content)) return 'missing';
   }
-  if (/sticker scanner export/i.test(content) || /counts by code/i.test(content)) {
+  if (/sticker scanner export/i.test(content) || /my reps/i.test(content) || /counts by code/i.test(content)) {
     return 'duplicate';
   }
   return null;

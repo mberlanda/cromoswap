@@ -462,9 +462,12 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
               aria-label="Home"
               onClick={() => setHomeView('gate')}
             >
-              ← Home
+              Home
             </button>
-            <h1 className="app-header-name">Board</h1>
+            <img className="app-header-mark" src="/cromoswap-mark.svg" alt="" aria-hidden="true" />
+            <div className="app-header-copy">
+              <h1 className="app-header-name">Board</h1>
+            </div>
           </div>
           <BoardPanel
             entries={leaderboard}
@@ -530,10 +533,13 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
           data-test-id="home"
           onClick={handleHome}
         >
-          ← Home
+          Home
         </button>
-        <h1 className="app-header-name">{active.userName}</h1>
-        <p className="app-header-meta">{scans.length} scan{scans.length !== 1 ? 's' : ''}</p>
+        <img className="app-header-mark" src="/cromoswap-mark.svg" alt="" aria-hidden="true" />
+        <div className="app-header-copy">
+          <h1 className="app-header-name">{active.userName}</h1>
+          <p className="app-header-meta">{scans.length} scan{scans.length !== 1 ? 's' : ''}</p>
+        </div>
         {storageMode && onChangeMode && (
           <StorageModeToggle mode={storageMode} onChange={onChangeMode} />
         )}

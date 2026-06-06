@@ -27,7 +27,7 @@ const missingExport = [
 ].join('\n');
 
 const repsExport = [
-  '# WC 2026 Sticker Scanner export',
+  '# Cromoswap - My Reps export',
   'user: Ana',
   'session: s1',
   'exported: 2026-06-05',

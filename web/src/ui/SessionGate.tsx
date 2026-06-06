@@ -91,14 +91,19 @@ export function SessionGate({
   return (
     <main aria-label="Session">
       <div className="session-gate-header">
-        <h1 data-test-id="gate-title">Cromoswap</h1>
+        <div className="brand-lockup">
+          <img className="brand-mark" src="/cromoswap-mark.svg" alt="" aria-hidden="true" />
+          <div className="brand-copy">
+            <h1 data-test-id="gate-title">cromoswap</h1>
+          </div>
+        </div>
         {storageMode && onChangeMode && (
           <StorageModeToggle mode={storageMode} onChange={onChangeMode} />
         )}
       </div>
       {onOpenBoard && (
         <button type="button" className="quiet gate-board-link" data-test-id="view-board" onClick={onOpenBoard}>
-          🏆 View board
+          View board
         </button>
       )}
       {sessions.length > 0 && (
