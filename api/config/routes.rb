@@ -11,6 +11,10 @@ Rails.application.routes.draw do
         resources :scans, only: %i[index], shallow: false
       end
       resources :scans, only: %i[create update destroy]
+      post "auth/register", to: "auth#register"
+      post "auth/login",    to: "auth#login"
+      get  "auth/me",       to: "auth#me"
+      post "auth/password", to: "auth#password"
       get  "album_stickers",        to: "album_stickers#index"
       post "album_stickers/toggle", to: "album_stickers#toggle"
       post "album_stickers/sync",   to: "album_stickers#sync"

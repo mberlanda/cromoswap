@@ -7,6 +7,15 @@ module Api
 
       private
 
+      def user_json(user)
+        {
+          id: user.id,
+          username: user.username,
+          createdAt: user.created_at,
+          updatedAt: user.updated_at
+        }
+      end
+
       def session_json(session)
         {
           id: session.id,
