@@ -5,6 +5,18 @@ import type { AlbumRepo, ScanInput, ScanRepo, SessionRepo } from './types';
 // screen without a server-side user account system.
 const SESSION_IDS_KEY = 'wc-session-ids';
 
+/** Supplies the current bearer token (or null when logged out). */
+export type TokenProvider = () => string | null;
+
+// Headers for an authenticated JSON write: includes the bearer token when one
+// is available. Reads use the public endpoints and don't need it.
+function writeHeaders(getToken?: TokenProvider): Record<string, string> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const token = getToken?.();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
+}
+
 function getLocalSessionIds(): string[] {
   try {
     return JSON.parse(localStorage.getItem(SESSION_IDS_KEY) ?? '[]') as string[];
@@ -52,12 +64,16 @@ function mapAlbumEntry(d: Record<string, unknown>): AlbumEntry {
 
 export class ApiSessionRepo implements SessionRepo {
   baseUrl: string;
-  constructor(baseUrl: string) { this.baseUrl = baseUrl; }
+  private getToken?: TokenProvider;
+  constructor(baseUrl: string, getToken?: TokenProvider) {
+    this.baseUrl = baseUrl;
+    this.getToken = getToken;
+  }
 
   async create(userName: string): Promise<Session> {
     const res = await fetch(`${this.baseUrl}/api/v1/sessions`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: writeHeaders(this.getToken),
       body: JSON.stringify({ session: { userName }, scans: [] }),
     });
     if (!res.ok) throw new Error(`Failed to create session: ${res.status}`);
@@ -86,7 +102,7 @@ export class ApiSessionRepo implements SessionRepo {
   async update(id: string, patch: Partial<Pick<Session, 'userName'>>): Promise<Session> {
     const res = await fetch(`${this.baseUrl}/api/v1/sessions/${id}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: writeHeaders(this.getToken),
       body: JSON.stringify({ session: patch }),
     });
     if (!res.ok) throw new Error(`Failed to update session: ${res.status}`);
@@ -96,12 +112,16 @@ export class ApiSessionRepo implements SessionRepo {
 
 export class ApiScanRepo implements ScanRepo {
   baseUrl: string;
-  constructor(baseUrl: string) { this.baseUrl = baseUrl; }
+  private getToken?: TokenProvider;
+  constructor(baseUrl: string, getToken?: TokenProvider) {
+    this.baseUrl = baseUrl;
+    this.getToken = getToken;
+  }
 
   async add(input: ScanInput): Promise<Scan> {
     const res = await fetch(`${this.baseUrl}/api/v1/scans`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: writeHeaders(this.getToken),
       body: JSON.stringify({
         sessionId: input.sessionId,
         normalizedCode: input.normalizedCode,
@@ -124,7 +144,7 @@ export class ApiScanRepo implements ScanRepo {
   async update(id: string, patch: Partial<Pick<Scan, 'normalizedCode'>>): Promise<Scan> {
     const res = await fetch(`${this.baseUrl}/api/v1/scans/${id}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: writeHeaders(this.getToken),
       body: JSON.stringify({ normalizedCode: patch.normalizedCode }),
     });
     if (!res.ok) throw new Error(`Failed to update scan: ${res.status}`);
@@ -132,13 +152,20 @@ export class ApiScanRepo implements ScanRepo {
   }
 
   async delete(id: string): Promise<void> {
-    await fetch(`${this.baseUrl}/api/v1/scans/${id}`, { method: 'DELETE' });
+    await fetch(`${this.baseUrl}/api/v1/scans/${id}`, {
+      method: 'DELETE',
+      headers: writeHeaders(this.getToken),
+    });
   }
 }
 
 export class ApiAlbumRepo implements AlbumRepo {
   baseUrl: string;
-  constructor(baseUrl: string) { this.baseUrl = baseUrl; }
+  private getToken?: TokenProvider;
+  constructor(baseUrl: string, getToken?: TokenProvider) {
+    this.baseUrl = baseUrl;
+    this.getToken = getToken;
+  }
 
   async listByUser(userName: string): Promise<AlbumEntry[]> {
     const res = await fetch(
@@ -149,10 +176,12 @@ export class ApiAlbumRepo implements AlbumRepo {
     return data.map(mapAlbumEntry);
   }
 
+  // userName is sent for compatibility but the server authorizes off the token
+  // and ignores a matching value (a mismatched one is rejected).
   async toggle(userName: string, normalizedCode: string): Promise<'added' | 'removed'> {
     const res = await fetch(`${this.baseUrl}/api/v1/album_stickers/toggle`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: writeHeaders(this.getToken),
       body: JSON.stringify({ userName, normalizedCode }),
     });
     if (!res.ok) throw new Error(`Failed to toggle sticker: ${res.status}`);

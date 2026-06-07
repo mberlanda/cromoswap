@@ -36,10 +36,17 @@ export interface LeaderboardEntry {
  * images) to the backend. Never throws: resolves { ok: false } on any failure
  * so the local-first app keeps working offline.
  */
+function jsonHeaders(token: string | null): Record<string, string> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
+}
+
 export async function pushSession(
   session: Session,
   scans: Scan[],
   baseUrl: string,
+  token: string | null,
   fetchImpl: FetchImpl,
 ): Promise<SyncResult> {
   const body = JSON.stringify({
@@ -50,7 +57,7 @@ export async function pushSession(
   try {
     const response = await fetchImpl(`${baseUrl}/api/v1/sessions`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: jsonHeaders(token),
       body,
     });
     return { ok: response.ok };
@@ -59,17 +66,22 @@ export async function pushSession(
   }
 }
 
-/** Syncs the full set of album-owned codes for a user. Best-effort; never throws. */
+/**
+ * Syncs the full set of album-owned codes for `userName`. Sends a bearer token
+ * when provided; the server authorizes the write against that token (a userName
+ * that doesn't match the token user is rejected). Best-effort; never throws.
+ */
 export async function syncAlbumStickers(
   userName: string,
   codes: string[],
   baseUrl: string,
+  token: string | null,
   fetchImpl: FetchImpl,
 ): Promise<SyncResult> {
   try {
     const response = await fetchImpl(`${baseUrl}/api/v1/album_stickers/sync`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: jsonHeaders(token),
       body: JSON.stringify({ userName, codes }),
     });
     return { ok: response.ok };

@@ -241,3 +241,39 @@ describe('ApiAlbumRepo', () => {
     expect(JSON.parse(toggleCalls[0][1].body).normalizedCode).toBe('BRA01');
   });
 });
+
+describe('bearer token on writes', () => {
+  const token = () => 'jwt-123';
+
+  it('ApiScanRepo.add sends Authorization when a token is provided', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ id: 'x', sessionId: 's', normalizedCode: 'ARG01', source: 'ocr', confidence: 1, capturedAt: 'c' }, 201));
+    await new ApiScanRepo(BASE, token).add({
+      sessionId: 's', normalizedCode: 'ARG01', source: 'ocr', confidence: 1, capturedAt: 'c',
+    });
+    expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe('Bearer jwt-123');
+  });
+
+  it('ApiScanRepo.delete sends Authorization', async () => {
+    fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
+    await new ApiScanRepo(BASE, token).delete('x');
+    expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe('Bearer jwt-123');
+  });
+
+  it('ApiSessionRepo.create sends Authorization', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ id: 's1', userName: 'mauro', createdAt: 'c', updatedAt: 'u' }, 201));
+    await new ApiSessionRepo(BASE, token).create('mauro');
+    expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe('Bearer jwt-123');
+  });
+
+  it('ApiAlbumRepo.toggle sends Authorization', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ action: 'added' }, 201));
+    await new ApiAlbumRepo(BASE, token).toggle('mauro', 'ARG01');
+    expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe('Bearer jwt-123');
+  });
+
+  it('omits Authorization when no token is available', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ action: 'added' }, 201));
+    await new ApiAlbumRepo(BASE, () => null).toggle('mauro', 'ARG01');
+    expect(fetchMock.mock.calls[0][1].headers.Authorization).toBeUndefined();
+  });
+});
