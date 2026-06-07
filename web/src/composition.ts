@@ -4,7 +4,7 @@ import { openStickerDb } from './storage/db';
 import { IdbSessionRepo, IdbScanRepo, IdbImageStore, IdbAlbumRepo } from './storage/idb-repos';
 import { ApiSessionRepo, ApiScanRepo, ApiAlbumRepo } from './storage/api-repos';
 import { fetchLeaderboard as fetchLeaderboardClient } from './storage/sync-client';
-import { getToken } from './auth/auth';
+import { getToken, createAuthClient } from './auth/auth';
 import { TesseractAdapter } from './ocr/tesseract-adapter';
 import { runPipelineMultiOrientation } from './ocr/pipeline';
 import { BrightnessLocalizer } from './ocr/localizer';
@@ -179,6 +179,7 @@ export async function createAppDeps(mode: StorageMode = getStorageMode()): Promi
     scanRepo,
     imageStore: new IdbImageStore(db),
     albumRepo,
+    auth: mode === 'cloud' ? createAuthClient(API_BASE_URL) : undefined,
     scanOnce,
     detectTargeted,
     attachVideo,

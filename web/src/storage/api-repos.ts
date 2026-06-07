@@ -31,6 +31,11 @@ function saveLocalSessionId(id: string): void {
   localStorage.setItem(SESSION_IDS_KEY, JSON.stringify([...ids]));
 }
 
+/** Record a cloud session id so it appears in the home resume list. */
+export function rememberSessionId(id: string): void {
+  saveLocalSessionId(id);
+}
+
 function mapSession(d: Record<string, unknown>): Session {
   return {
     id: d['id'] as string,

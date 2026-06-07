@@ -140,3 +140,37 @@ export async function changePassword(
   });
   if (!res.ok) throw new Error(await readError(res));
 }
+
+/** A baseUrl-bound auth façade that persists the token on register/login. */
+export interface AuthClient {
+  register(username: string, password: string): Promise<AuthResponse>;
+  login(username: string, password: string): Promise<AuthResponse>;
+  changePassword(currentPassword: string, newPassword: string): Promise<void>;
+  currentUser(): TokenClaims | null;
+  logout(): void;
+}
+
+export function createAuthClient(
+  baseUrl: string,
+  fetchImpl: FetchImpl = (u, i) => fetch(u, i),
+): AuthClient {
+  return {
+    async register(username, password) {
+      const res = await register(baseUrl, username, password, fetchImpl);
+      setToken(res.token);
+      return res;
+    },
+    async login(username, password) {
+      const res = await login(baseUrl, username, password, fetchImpl);
+      setToken(res.token);
+      return res;
+    },
+    changePassword(currentPassword, newPassword) {
+      const token = getToken();
+      if (!token) return Promise.reject(new Error('Not logged in'));
+      return changePassword(baseUrl, token, currentPassword, newPassword, fetchImpl);
+    },
+    currentUser: getStoredUser,
+    logout: clearToken,
+  };
+}

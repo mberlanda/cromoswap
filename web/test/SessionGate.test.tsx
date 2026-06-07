@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SessionGate } from '../src/ui/SessionGate';
 import type { Session } from '../src/domain/types';
+import type { AuthClient, TokenClaims } from '../src/auth/auth';
 
 const existing: Session = {
   id: 'sess-1',
@@ -10,6 +11,17 @@ const existing: Session = {
   createdAt: '2026-06-01T00:00:00.000Z',
   updatedAt: '2026-06-01T00:00:00.000Z',
 };
+
+function makeAuth(user: TokenClaims | null, over: Partial<AuthClient> = {}): AuthClient {
+  return {
+    register: vi.fn(),
+    login: vi.fn(),
+    changePassword: vi.fn(async () => undefined),
+    currentUser: vi.fn(() => user),
+    logout: vi.fn(),
+    ...over,
+  };
+}
 
 describe('SessionGate', () => {
   it('creates a session with the entered name', async () => {
@@ -123,5 +135,51 @@ describe('SessionGate', () => {
       <SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} storageMode="cloud" onChangeMode={vi.fn()} />,
     );
     expect(screen.getByText(/synced to the server/i)).toBeInTheDocument();
+  });
+
+  describe('cloud auth', () => {
+    it('shows the auth panel (not the name form) when logged out in cloud mode', () => {
+      render(
+        <SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} auth={makeAuth(null)} onAuthenticated={vi.fn()} />,
+      );
+      expect(screen.getByRole('tab', { name: 'Register' })).toBeInTheDocument();
+      expect(screen.queryByLabelText(/your name/i)).not.toBeInTheDocument();
+    });
+
+    it('still lets a logged-out user browse the board', async () => {
+      const onOpenBoard = vi.fn();
+      render(
+        <SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} auth={makeAuth(null)} onOpenBoard={onOpenBoard} />,
+      );
+      await userEvent.click(screen.getByRole('button', { name: /view board/i }));
+      expect(onOpenBoard).toHaveBeenCalled();
+    });
+
+    it('shows the account bar and logs out when authenticated', async () => {
+      const onLogout = vi.fn();
+      const auth = makeAuth({ userId: 'u1', exp: 9999999999 });
+      render(
+        <SessionGate sessions={[existing]} onCreate={vi.fn()} onResume={vi.fn()} auth={auth} onLogout={onLogout} />,
+      );
+      // name form hidden, resume still available
+      expect(screen.queryByLabelText(/your name/i)).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^resume$/i })).toBeInTheDocument();
+      await userEvent.click(screen.getByRole('button', { name: /log out/i }));
+      expect(onLogout).toHaveBeenCalled();
+    });
+
+    it('toggles the password-change form and submits via the auth client', async () => {
+      const auth = makeAuth({ userId: 'u1', exp: 9999999999 });
+      render(<SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} auth={auth} />);
+
+      // Toggle reads "Change password"; after opening it becomes "Hide password
+      // form", so the only remaining "Change password" button is the submit.
+      await userEvent.click(screen.getByRole('button', { name: 'Change password' }));
+      await userEvent.type(screen.getByLabelText('Current password'), 'oldpassword');
+      await userEvent.type(screen.getByLabelText('New password'), 'brandnew123');
+      await userEvent.click(screen.getByRole('button', { name: 'Change password' }));
+
+      expect(auth.changePassword).toHaveBeenCalledWith('oldpassword', 'brandnew123');
+    });
   });
 });

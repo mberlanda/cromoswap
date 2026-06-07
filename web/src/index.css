@@ -1464,3 +1464,50 @@ section[aria-label="Resume"] li button {
     flex-basis: 0;
   }
 }
+
+/* Cloud auth: account gate, account bar, password change */
+.auth-panel,
+.account-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-block: var(--space-4);
+}
+
+.auth-tabs {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.auth-tabs button {
+  flex: 1;
+}
+
+.account-actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.auth-hint {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin: 0;
+}
+
+.auth-error {
+  color: #b00020;
+  margin: 0;
+}
+
+.auth-result {
+  color: #0a7d33;
+  margin: 0;
+}
+
+.password-change {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}

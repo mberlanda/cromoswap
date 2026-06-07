@@ -20,6 +20,8 @@ import { StorageModeToggle } from './StorageModeToggle';
 import { SIZE_DEFAULT } from './SizeSlider';
 import type { StorageMode } from '../composition';
 import { CROMOSWAP_MARK_SRC } from './brand-assets';
+import type { AuthClient, AuthResponse } from '../auth/auth';
+import { rememberSessionId } from '../storage/api-repos';
 
 export type Orientation = 'portrait' | 'landscape';
 
@@ -56,6 +58,8 @@ export interface AppDeps {
   videoScanIntervalMs?: number;
   /** Optional: fetch the global leaderboard from the backend. */
   fetchLeaderboard?: () => Promise<LeaderboardEntry[]>;
+  /** Optional (cloud mode): account auth — register/login/password/logout. */
+  auth?: AuthClient;
 }
 
 interface AppProps {
@@ -90,6 +94,9 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
   // Pre-session home can show the gate or the board (browse the leaderboard
   // without starting a session).
   const [homeView, setHomeView] = useState<'gate' | 'board'>('gate');
+  // Bumped on login/logout so the gate re-evaluates auth state (token lives in
+  // localStorage, not React state).
+  const [, setAuthTick] = useState(0);
   // When startCamera is provided, camera starts only on user action; tests without it skip the panel.
   const [cameraState, setCameraState] = useState<CameraState>(
     deps.startCamera ? 'idle' : 'granted',
@@ -191,6 +198,23 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
     if (!session) return;
     setActive(session);
     await refreshScans(session);
+  }
+
+  // Cloud auth succeeded (register/login): adopt the returned cloud session and
+  // remember its id so it shows in the home resume list on later visits.
+  async function handleAuthenticated(res: AuthResponse) {
+    setAuthTick((n) => n + 1);
+    if (res.session) {
+      rememberSessionId(res.session.id);
+      await handleResume(res.session.id);
+    }
+  }
+
+  function handleLogout() {
+    deps.auth?.logout();
+    setActive(null);
+    setScans([]);
+    setAuthTick((n) => n + 1);
   }
 
   const storeScan = useCallback(
@@ -485,6 +509,9 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
         onImportJson={handleImportJson}
         onImportAlbum={handleImportAlbum}
         onOpenBoard={deps.fetchLeaderboard ? handleOpenBoard : undefined}
+        auth={deps.auth}
+        onAuthenticated={handleAuthenticated}
+        onLogout={handleLogout}
       />
     );
   }
