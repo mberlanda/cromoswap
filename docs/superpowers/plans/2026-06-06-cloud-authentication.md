@@ -40,16 +40,16 @@ ADR: [`../../adr/0004-cloud-authentication.md`](../../adr/0004-cloud-authenticat
       `sessionId` and scan `id`), own-data 200, reads open.
 - [x] Update `SECURITY.md` (writes now authenticated).
 
-## Phase 5 — Web auth
-- [ ] `auth` module: token store (localStorage), decode, current user.
-- [ ] Inject a token provider into the cloud repos; send Bearer on writes.
-- [ ] Cloud session gate: Register / Log in (username + password) when no token;
+## Phase 5 — Web auth (#59 data layer, #60 UI; merged)
+- [x] `auth` module: token store (localStorage), decode, current user.
+- [x] Inject a token provider into the cloud repos; send Bearer on writes.
+- [x] Cloud session gate: Register / Log in (username + password) when no token;
       board browsing stays logged-out-friendly.
-- [ ] Password-change form. Unit tests + `data-test-id`s.
+- [x] Password-change form. Unit tests + `data-test-id`s.
 
-## Phase 6 — Save local → cloud
-- [ ] "Save to cloud" action from a local session: register/login + upload album
-      (`sync`) + scans. Tests + e2e (register → add → reload → still signed in).
+## Phase 6 — Save local → cloud (this PR)
+- [x] "Save to cloud" action from a local session: register/login + upload album
+      (`sync`) + scans. `CloudSaver` + `SaveToCloud` UI; unit tests.
 
 ## Phase 7 — Backoffice user management
 - [ ] `Admin::UsersController` CRUD + set/reset password + connect user↔collector

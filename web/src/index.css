@@ -1511,3 +1511,16 @@ section[aria-label="Resume"] li button {
   gap: var(--space-2);
   margin-top: var(--space-3);
 }
+
+.save-to-cloud {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-block: var(--space-3);
+}
+
+.save-to-cloud-hint {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin: 0;
+}
