@@ -60,6 +60,12 @@ camera — via `npm run e2e`. Fast feedback for the offline-first UI.
 | `open-<userName>` | Open a collector's selection (per row) |
 | `admin-link` | "Open admin backoffice" link in the read-only board view |
 | `admin-dashboard` | Backoffice dashboard heading (`/admin`) |
+| `auth-tab-login` / `auth-tab-register` | Cloud auth panel tabs |
+| `auth-username` / `auth-password` / `auth-submit` | Cloud register/login form |
+| `auth-error` | Cloud auth error message |
+| `logout` / `change-password-toggle` | Account bar (cloud, signed in) |
+| `password-current` / `password-new` / `password-submit` | Change-password form |
+| `save-to-cloud` | Save-local-to-cloud button (local mode) |
 
 ## Coverage snapshot
 
