@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type APIRequestContext } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 
 // Full-stack smoke against the assembled image: the Rails app serves the web
@@ -9,8 +9,20 @@ const ADMIN_PASS = '!cromoswap!';
 const authHeader = 'Basic ' + Buffer.from(`${ADMIN_USER}:${ADMIN_PASS}`).toString('base64');
 const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost:3000';
 
-// Unique per run so repeated CI runs don't collide on collector name.
-const collector = `E2E_${Date.now()}`;
+// Unique per run so repeated CI runs don't collide on collector name. Usernames
+// are constrained to lowercase alphanumeric (^[a-z0-9]+$), so no underscores.
+const collector = `e2e${Date.now()}`;
+
+// Writes now require a Bearer JWT scoped to the registering user; the album is
+// keyed by the session's user_name (== username). Returns the token.
+async function registerCollector(request: APIRequestContext, username: string): Promise<string> {
+  const res = await request.post('/api/v1/auth/register', {
+    data: { username, password: 'supersecret' },
+  });
+  expect(res.ok()).toBeTruthy();
+  const { token } = (await res.json()) as { token: string };
+  return token;
+}
 
 test('the served SPA loads and can open the board', async ({ page }) => {
   await page.goto('/');
@@ -22,9 +34,11 @@ test('the served SPA loads and can open the board', async ({ page }) => {
 });
 
 test('API + admin round-trip: synced album shows on the board and in the backoffice', async ({ request }) => {
-  // Sync an album through the public API.
+  // Register, then sync an album through the authenticated API.
+  const token = await registerCollector(request, collector);
   const sync = await request.post('/api/v1/album_stickers/sync', {
-    data: { userName: collector, codes: ['ARG01', 'ARG02', 'BRA05'] },
+    headers: { Authorization: `Bearer ${token}` },
+    data: { codes: ['ARG01', 'ARG02', 'BRA05'] },
   });
   expect(sync.ok()).toBeTruthy();
 
@@ -46,9 +60,11 @@ test('API + admin round-trip: synced album shows on the board and in the backoff
 });
 
 test('browsing a collector from the board surfaces the admin backoffice link', async ({ page, request }) => {
-  const user = `E2E_BOARD_${Date.now()}`;
+  const user = `e2eboard${Date.now()}`;
+  const token = await registerCollector(request, user);
   const sync = await request.post('/api/v1/album_stickers/sync', {
-    data: { userName: user, codes: ['ARG01', 'ARG02'] },
+    headers: { Authorization: `Bearer ${token}` },
+    data: { codes: ['ARG01', 'ARG02'] },
   });
   expect(sync.ok()).toBeTruthy();
 
@@ -74,10 +90,14 @@ test('the admin dashboard renders for an authenticated admin', async ({ browser 
 
 test('the admin SQL export returns a non-empty dump with schema and seeded data', async ({ browser, request }) => {
   const seed = {
-    userName: 'GiacomoPietro',
+    userName: 'giacomopietro',
     codes: ['ALG05', 'ARG01'],
   };
-  const sync = await request.post('/api/v1/album_stickers/sync', { data: seed });
+  const token = await registerCollector(request, seed.userName);
+  const sync = await request.post('/api/v1/album_stickers/sync', {
+    headers: { Authorization: `Bearer ${token}` },
+    data: { codes: seed.codes },
+  });
   expect(sync.ok()).toBeTruthy();
 
   const ctx = await browser.newContext({

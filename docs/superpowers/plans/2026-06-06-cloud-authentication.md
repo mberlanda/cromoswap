@@ -6,41 +6,41 @@
 Spec: [`../specs/2026-06-06-cloud-authentication-design.md`](../specs/2026-06-06-cloud-authentication-design.md)
 ADR: [`../../adr/0004-cloud-authentication.md`](../../adr/0004-cloud-authentication.md)
 
-## Phase 1 — Docs (this PR)
+## Phase 1 — Docs (#54, merged)
 - [x] ADR-0004, spec, this plan; link from `docs/INDEX.md`.
-- [ ] `@copilot` review; address; merge.
+- [x] `@copilot` review; address; merge.
 
-## Phase 2 — Backend identity (no behavior change)
-- [ ] Add `bcrypt` gem.
-- [ ] Migration: `users` (uuid, `username`, `password_digest`) with a **unique
+## Phase 2 — Backend identity (#56, merged)
+- [x] Add `bcrypt` gem.
+- [x] Migration: `users` (uuid, `username`, `password_digest`) with a **unique
       index on `lower(username)`** (case-insensitive uniqueness without `citext`)
       + `sessions.user_id` (uuid, null, unique, fk).
-- [ ] `User` model: `has_secure_password`, `has_one :session`,
+- [x] `User` model: `has_secure_password`, `has_one :session`,
       `before_validation { username&.downcase! }`, username presence +
       **format `/\A[a-z0-9]+\z/` length 3..30** + case-insensitive uniqueness;
       password min length 8; `Session belongs_to :user, optional`.
-- [ ] Model specs (validations incl. format/length/normalization, digest,
+- [x] Model specs (validations incl. format/length/normalization, digest,
       association). No API/route change.
 
-## Phase 3 — Auth endpoints + JWT
-- [ ] Add `jwt` gem; `JsonWebToken` encode/decode helper (HS256, exp 30d).
-- [ ] `Authenticated` controller concern: parse Bearer, set `current_user`,
+## Phase 3 — Auth endpoints + JWT (#57, merged)
+- [x] Add `jwt` gem; `JsonWebToken` encode/decode helper (HS256, exp 30d).
+- [x] `Authenticated` controller concern: parse Bearer, set `current_user`,
       401 on missing/invalid.
-- [ ] `Api::V1::AuthController`: `register`, `login`, `me`, `password`.
+- [x] `Api::V1::AuthController`: `register`, `login`, `me`, `password`.
       register creates user + session (`user_name = username`).
-- [ ] Routes for `/auth/*`. Request specs (happy/duplicate/bad-creds/expired).
+- [x] Routes for `/auth/*`. Request specs (happy/duplicate/bad-creds/expired).
 
-## Phase 4 — Authorize writes
-- [ ] Apply `Authenticated` to `sessions`/`scans`/`album_stickers` write actions.
-- [ ] Resolve the session from the token and **scope all lookups** through it:
+## Phase 4 — Authorize writes (this PR)
+- [x] Apply `Authenticated` to `sessions`/`scans`/`album_stickers` write actions.
+- [x] Resolve the session from the token and **scope all lookups** through it:
       `current_user.session.scans.find(...)`, reject mismatched `sessionId`/
       session `id`, ignore client `user_name`. Foreign ids → 403/404.
-- [ ] Keep `leaderboard` + `album_stickers#index` open.
-- [ ] Request specs for: token required, cross-user 403/404 (incl. foreign
+- [x] Keep `leaderboard` + `album_stickers#index` open.
+- [x] Request specs for: token required, cross-user 403/404 (incl. foreign
       `sessionId` and scan `id`), own-data 200, reads open.
-- [ ] Update `SECURITY.md` (writes now authenticated).
+- [x] Update `SECURITY.md` (writes now authenticated).
 
-## Phase 5 — Web auth
+ — Web auth
 - [ ] `auth` module: token store (localStorage), decode, current user.
 - [ ] Inject a token provider into the cloud repos; send Bearer on writes.
 - [ ] Cloud session gate: Register / Log in (username + password) when no token;

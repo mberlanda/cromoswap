@@ -7,9 +7,10 @@ an operator must take before exposing the app publicly.
 ## Threat model in one line
 
 The web app is local-first; the backend exists for optional cross-device sync and
-a leaderboard. The **public JSON API is intentionally unauthenticated**; the
-**admin backoffice is the only privileged surface** and is gated by HTTP Basic
-auth over HTTPS.
+a leaderboard. **Write endpoints require a Bearer JWT** scoped to the acting user
+(register/login mint the token); **reads stay public** (leaderboard + read-only
+album/session views). The **admin backoffice** is a separate privileged surface
+gated by HTTP Basic auth over HTTPS.
 
 ## Operator checklist (required for a public deployment)
 
@@ -36,14 +37,21 @@ auth over HTTPS.
 
 ## Known, accepted risks
 
-- **Unauthenticated public API.** `POST /api/v1/sessions`, `scans` CRUD,
-  `album_stickers#toggle`/`sync` accept any `user_name` with no auth or rate
-  limiting. Anyone can add/modify/delete any collector's data or spam the DB.
-  This matches the local-first model; for a hardened deployment, add a write
-  token and/or rate limiting (e.g. `rack-attack`).
+- **No rate limiting on `/auth/*` or writes.** Auth and write endpoints are not
+  rate-limited; brute-force and spam are possible. For a hardened deployment add
+  rate limiting (e.g. `rack-attack`). Tracked as future hardening.
+- **Public reads are open by design.** `GET /leaderboard`, `GET /album_stickers`,
+  and session reads require no token, so anyone can browse the board. UUID
+  session ids are unguessable but not secret.
 
 ## Reviewed and OK
 
+- **Authenticated, user-scoped writes.** `sessions`/`scans` CRUD and
+  `album_stickers#toggle`/`sync` require a Bearer JWT; the acting user comes from
+  the token, never the request body. Every lookup is scoped to the token user's
+  session (foreign `sessionId`/`userName` → 403, foreign scan id → 404), closing
+  the former open-write gap. Passwords are bcrypt (`has_secure_password`); the
+  digest is never returned. JWT is HS256 with a 30-day expiry.
 - **No injection:** controllers use strong params; the `pg_dump` export shells
   out via `Open3.capture3` with array args (no shell); no user input is
   interpolated into SQL.
