@@ -58,6 +58,12 @@ describe('AuthPanel', () => {
     expect(username()).toHaveValue('mauro9');
   });
 
+  it('clamps the username to 30 characters', async () => {
+    render(<AuthPanel auth={makeAuth()} onAuthenticated={vi.fn()} />);
+    await userEvent.type(username(), 'a'.repeat(40));
+    expect(username()).toHaveValue('a'.repeat(30));
+  });
+
   it('keeps submit disabled until username ≥3 and password ≥8', async () => {
     render(<AuthPanel auth={makeAuth()} onAuthenticated={vi.fn()} />);
     const submit = () => screen.getByRole('button', { name: 'Log in' });

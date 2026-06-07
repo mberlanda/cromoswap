@@ -20,9 +20,9 @@ export function AuthPanel({ auth, onAuthenticated }: AuthPanelProps) {
   const userFieldId = useId();
   const passFieldId = useId();
 
-  // Mirror the server constraint: lowercase a-z0-9 only.
+  // Mirror the server constraint: lowercase a-z0-9, max 30 chars.
   const onUsername = (value: string) =>
-    setUsername(value.toLowerCase().replace(/[^a-z0-9]/g, ''));
+    setUsername(value.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 30));
 
   const select = (next: 'login' | 'register') => {
     setTab(next);

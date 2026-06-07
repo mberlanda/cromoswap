@@ -61,6 +61,14 @@ export function SessionGate({
   // Cloud mode (auth set) requires login before scanning; local mode has no auth.
   const cloudUser = auth ? auth.currentUser() : null;
   const needsAuth = !!auth && cloudUser === null;
+
+  function handleLogout() {
+    setShowPasswordForm(false);
+    // Prefer the app handler; fall back to clearing the token directly so the
+    // button is never a no-op when onLogout isn't wired.
+    if (onLogout) onLogout();
+    else auth?.logout();
+  }
   const inputId = useId();
   const importNameId = useId();
   const importFileId = useId();
@@ -185,7 +193,7 @@ export function SessionGate({
             >
               {showPasswordForm ? 'Hide password form' : 'Change password'}
             </button>
-            <button type="button" className="quiet" data-test-id="logout" onClick={() => onLogout?.()}>
+            <button type="button" className="quiet" data-test-id="logout" onClick={handleLogout}>
               Log out
             </button>
           </div>

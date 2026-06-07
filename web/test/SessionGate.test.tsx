@@ -168,6 +168,13 @@ describe('SessionGate', () => {
       expect(onLogout).toHaveBeenCalled();
     });
 
+    it('falls back to auth.logout() when no onLogout is provided', async () => {
+      const auth = makeAuth({ userId: 'u1', exp: 9999999999 });
+      render(<SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} auth={auth} />);
+      await userEvent.click(screen.getByRole('button', { name: /log out/i }));
+      expect(auth.logout).toHaveBeenCalled();
+    });
+
     it('toggles the password-change form and submits via the auth client', async () => {
       const auth = makeAuth({ userId: 'u1', exp: 9999999999 });
       render(<SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} auth={auth} />);
