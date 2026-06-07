@@ -1,9 +1,10 @@
 module AuthHelpers
   # Creates a user + its 1:1 session, mirroring what /auth/register does.
-  def register_collector(username: "collector1", password: "supersecret")
+  # Pass display_name to simulate a session whose user_name differs from the
+  # account username (e.g. "GiacomoPietro" registered as "giacomopietro").
+  def register_collector(username: "collector1", password: "supersecret", display_name: nil)
     user = User.create!(username: username, password: password)
-    # Use the normalized username so session.user_name matches the token identity.
-    session = Session.create!(user_name: user.username, user: user)
+    session = Session.create!(user_name: display_name || user.username, user: user)
     [ user, session ]
   end
 

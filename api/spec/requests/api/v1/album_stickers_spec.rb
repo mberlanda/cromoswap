@@ -4,6 +4,12 @@ RSpec.describe "API V1 Album Stickers", type: :request do
   # toggle/sync act on the token user's own album (keyed by session.user_name).
   let(:user) { register_collector(username: "mauro").first }
 
+  # Simulates a user whose scan-session display name differs from their account
+  # username (the production bug: "GiacomoPietro" account "giacomopietro").
+  let(:display_user) do
+    register_collector(username: "giacomopietro", display_name: "GiacomoPietro").first
+  end
+
   describe "GET /api/v1/album_stickers" do
     it "returns owned stickers for the given user" do
       AlbumSticker.create!(user_name: "Mauro", normalized_code: "ARG01", owned_at: Time.current)
@@ -39,6 +45,31 @@ RSpec.describe "API V1 Album Stickers", type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body["action"]).to eq("removed")
       expect(AlbumSticker.where(user_name: "mauro", normalized_code: "ARG01").count).to eq(0)
+    end
+
+    context "when session display name differs from account username" do
+      it "allows toggle when userName matches the session display name" do
+        post "/api/v1/album_stickers/toggle",
+             params: { userName: "GiacomoPietro", normalizedCode: "KOR03" },
+             headers: bearer(display_user), as: :json
+        expect(response).to have_http_status(:created)
+        expect(AlbumSticker.where(user_name: "GiacomoPietro", normalized_code: "KOR03").count).to eq(1)
+      end
+
+      it "allows toggle without userName and stores under the session display name" do
+        post "/api/v1/album_stickers/toggle",
+             params: { normalizedCode: "KOR03" },
+             headers: bearer(display_user), as: :json
+        expect(response).to have_http_status(:created)
+        expect(AlbumSticker.where(user_name: "GiacomoPietro", normalized_code: "KOR03").count).to eq(1)
+      end
+
+      it "returns 403 when userName targets a different user's album" do
+        post "/api/v1/album_stickers/toggle",
+             params: { userName: "SomeoneElse", normalizedCode: "KOR03" },
+             headers: bearer(display_user), as: :json
+        expect(response).to have_http_status(:forbidden)
+      end
     end
   end
 
