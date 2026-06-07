@@ -30,6 +30,8 @@ Rails.application.routes.draw do
     get "/admin/#{res}/new",      to: "admin/#{res}#new",  as: :"new_admin_#{singular}"
     get "/admin/#{res}/:id/edit", to: "admin/#{res}#edit", as: :"edit_admin_#{singular}"
   end
+  # Users has a new form but no edit page (password reset/connect live on show).
+  get "/admin/users/new", to: "admin/users#new", as: :new_admin_user
 
   namespace :admin do
     root "dashboard#index"
@@ -37,6 +39,13 @@ Rails.application.routes.draw do
     resources :scans
     resources :album_stickers
     resources :collectors, only: %i[index destroy], param: :user_name
+    resources :users, only: %i[index create show destroy] do
+      member do
+        patch :reset_password
+        patch :connect
+        patch :disconnect
+      end
+    end
     # Literal .json/.sql segments (format: false) so each maps to its own action.
     get "export.json", to: "exports#json", as: :export,     format: false
     get "export.sql",  to: "exports#sql",  as: :export_sql, format: false
