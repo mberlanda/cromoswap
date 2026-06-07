@@ -27,10 +27,18 @@ async function registerCollector(request: APIRequestContext, username: string): 
 test('the served SPA loads and can open the board', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByTestId('gate-title')).toBeVisible();
-  await expect(page.getByTestId('session-name')).toBeVisible();
+  // Cloud is the default storage mode, so the gate asks you to log in / register.
+  // The board stays browsable without an account.
+  await expect(page.getByTestId('auth-username')).toBeVisible();
 
   await page.getByTestId('view-board').click();
   await expect(page.getByTestId('leaderboard-title')).toBeVisible();
+});
+
+test('switching to local mode shows the name-based session gate', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('storage-local').click();
+  await expect(page.getByTestId('session-name')).toBeVisible();
 });
 
 test('API + admin round-trip: synced album shows on the board and in the backoffice', async ({ request }) => {
