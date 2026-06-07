@@ -2,7 +2,8 @@ module AuthHelpers
   # Creates a user + its 1:1 session, mirroring what /auth/register does.
   def register_collector(username: "collector1", password: "supersecret")
     user = User.create!(username: username, password: password)
-    session = Session.create!(user_name: username, user: user)
+    # Use the normalized username so session.user_name matches the token identity.
+    session = Session.create!(user_name: user.username, user: user)
     [ user, session ]
   end
 

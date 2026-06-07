@@ -21,12 +21,13 @@ module Api
       # Upserts the token user's own session (1:1) and batch-syncs scans into it.
       # The client-supplied session id is ignored — the token is the authority —
       # so a client that still owns a local UUID adopts the server's session id.
+      # `user_name` is NOT mutable here: it is the identity key album writes are
+      # scoped by, so a client must never be able to rename it to another
+      # collector's name. (A distinct, editable display_name is future work.)
       def create
         return render_forbidden unless current_session
 
         session = current_session
-        display_name = params.dig(:session, :userName)
-        session.update!(user_name: display_name) if display_name.present?
 
         Array(params[:scans]).each do |scan_params|
           scan = session.scans.find_or_initialize_by(id: scan_params[:id])

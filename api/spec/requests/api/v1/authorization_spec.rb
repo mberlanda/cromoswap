@@ -87,6 +87,17 @@ RSpec.describe "API V1 write authorization", type: :request do
       expect(response).to have_http_status(:forbidden)
       expect(AlbumSticker.where(user_name: "intruder").count).to eq(0)
     end
+
+    it "cannot hijack another album by first renaming the session" do
+      # Attempt to rename the session to the victim's name (must be ignored)...
+      post "/api/v1/sessions", params: { session: { userName: "intruder" }, scans: [] },
+                               headers: bearer(owner), as: :json
+      # ...then a token-scoped album write still lands in the owner's album.
+      post "/api/v1/album_stickers/toggle", params: { normalizedCode: "ARG01" },
+                                            headers: bearer(owner), as: :json
+      expect(AlbumSticker.where(user_name: "intruder").count).to eq(0)
+      expect(AlbumSticker.where(user_name: "owner", normalized_code: "ARG01").count).to eq(1)
+    end
   end
 
   describe "POST /api/v1/album_stickers/sync" do

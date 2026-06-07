@@ -53,11 +53,11 @@ RSpec.describe "API V1 Sessions", type: :request do
       expect(body["scans"].first["normalizedCode"]).to eq("ARG01")
     end
 
-    it "updates the session's display name" do
-      post "/api/v1/sessions", params: { session: { userName: "mauro the great" }, scans: [] },
+    it "ignores a client attempt to rename user_name (identity is token-anchored)" do
+      post "/api/v1/sessions", params: { session: { userName: "someoneelse" }, scans: [] },
                                headers: bearer(user), as: :json
       expect(response).to have_http_status(:created)
-      expect(session.reload.user_name).to eq("mauro the great")
+      expect(session.reload.user_name).to eq("mauro")
     end
 
     it "is idempotent: re-posting the same scan ids upserts rather than duplicates" do

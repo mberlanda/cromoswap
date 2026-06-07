@@ -40,7 +40,7 @@ ADR: [`../../adr/0004-cloud-authentication.md`](../../adr/0004-cloud-authenticat
       `sessionId` and scan `id`), own-data 200, reads open.
 - [x] Update `SECURITY.md` (writes now authenticated).
 
- — Web auth
+## Phase 5 — Web auth
 - [ ] `auth` module: token store (localStorage), decode, current user.
 - [ ] Inject a token provider into the cloud repos; send Bearer on writes.
 - [ ] Cloud session gate: Register / Log in (username + password) when no token;
