@@ -7,6 +7,10 @@ module Api
 
       private
 
+      def render_forbidden
+        render json: { error: "forbidden" }, status: :forbidden
+      end
+
       def user_json(user)
         {
           id: user.id,

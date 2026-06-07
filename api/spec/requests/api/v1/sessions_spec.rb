@@ -1,12 +1,15 @@
 require "rails_helper"
 
 RSpec.describe "API V1 Sessions", type: :request do
-  let(:session_id) { "11111111-1111-4111-8111-111111111111" }
+  let(:user) { register_collector(username: "mauro").first }
+  let(:session) { user.session }
   let(:scan_id) { "22222222-2222-4222-8222-222222222222" }
 
+  # The client-supplied session id is ignored under auth — the token owns the
+  # session — so we pass one to prove it's ignored in favour of the user's own.
   def payload(extra_scan = {})
     {
-      session: { id: session_id, userName: "Mauro", createdAt: "2026-06-01T00:00:00Z" },
+      session: { id: "11111111-1111-4111-8111-111111111111", userName: "mauro" },
       scans: [
         {
           id: scan_id,
@@ -21,12 +24,12 @@ RSpec.describe "API V1 Sessions", type: :request do
 
   describe "GET /api/v1/sessions" do
     it "returns sessions matching the given IDs" do
-      post "/api/v1/sessions", params: payload, as: :json
-      get "/api/v1/sessions?ids[]=#{session_id}"
+      post "/api/v1/sessions", params: payload, headers: bearer(user), as: :json
+      get "/api/v1/sessions?ids[]=#{session.id}"
       expect(response).to have_http_status(:ok)
       body = response.parsed_body
       expect(body.length).to eq(1)
-      expect(body.first["id"]).to eq(session_id)
+      expect(body.first["id"]).to eq(session.id)
       expect(body.first["scanCount"]).to eq(1)
     end
 
@@ -38,42 +41,49 @@ RSpec.describe "API V1 Sessions", type: :request do
   end
 
   describe "POST /api/v1/sessions" do
-    it "creates a session and its scans (codes + metadata)" do
+    it "upserts scans into the token user's own session (ignoring client id)" do
       expect {
-        post "/api/v1/sessions", params: payload, as: :json
-      }.to change(Session, :count).by(1).and change(Scan, :count).by(1)
+        post "/api/v1/sessions", params: payload, headers: bearer(user), as: :json
+      }.to change(Scan, :count).by(1)
 
       expect(response).to have_http_status(:created)
       body = response.parsed_body
-      expect(body["userName"]).to eq("Mauro")
+      expect(body["id"]).to eq(session.id)
+      expect(body["userName"]).to eq("mauro")
       expect(body["scans"].first["normalizedCode"]).to eq("ARG01")
     end
 
-    it "creates a session without a client-provided ID" do
-      post "/api/v1/sessions", params: { session: { userName: "Alice" }, scans: [] }, as: :json
+    it "ignores a client attempt to rename user_name (identity is token-anchored)" do
+      post "/api/v1/sessions", params: { session: { userName: "someoneelse" }, scans: [] },
+                               headers: bearer(user), as: :json
       expect(response).to have_http_status(:created)
-      expect(response.parsed_body["id"]).to be_present
-      expect(response.parsed_body["userName"]).to eq("Alice")
+      expect(session.reload.user_name).to eq("mauro")
     end
 
-    it "is idempotent: re-posting the same ids upserts rather than duplicates" do
-      post "/api/v1/sessions", params: payload, as: :json
+    it "is idempotent: re-posting the same scan ids upserts rather than duplicates" do
+      post "/api/v1/sessions", params: payload, headers: bearer(user), as: :json
       expect {
-        post "/api/v1/sessions", params: payload, as: :json
+        post "/api/v1/sessions", params: payload, headers: bearer(user), as: :json
       }.not_to change(Scan, :count)
     end
 
     it "ignores any image fields that are sent" do
-      post "/api/v1/sessions", params: payload(imageDataUrl: "data:image/png;base64,AAAA"), as: :json
+      post "/api/v1/sessions", params: payload(imageDataUrl: "data:image/png;base64,AAAA"),
+                               headers: bearer(user), as: :json
       expect(response).to have_http_status(:created)
       expect(Scan.column_names).not_to include("image_data_url")
+    end
+
+    it "401s without a token" do
+      post "/api/v1/sessions", params: payload, as: :json
+      expect(response).to have_http_status(:unauthorized)
     end
   end
 
   describe "GET /api/v1/sessions/:id" do
     it "returns the session and its scans" do
-      post "/api/v1/sessions", params: payload, as: :json
-      get "/api/v1/sessions/#{session_id}"
+      post "/api/v1/sessions", params: payload, headers: bearer(user), as: :json
+      get "/api/v1/sessions/#{session.id}"
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body["scans"].length).to eq(1)
     end
@@ -86,8 +96,8 @@ RSpec.describe "API V1 Sessions", type: :request do
 
   describe "GET /api/v1/sessions/:session_id/scans" do
     it "returns scans for the session" do
-      post "/api/v1/sessions", params: payload, as: :json
-      get "/api/v1/sessions/#{session_id}/scans"
+      post "/api/v1/sessions", params: payload, headers: bearer(user), as: :json
+      get "/api/v1/sessions/#{session.id}/scans"
       expect(response).to have_http_status(:ok)
       body = response.parsed_body
       expect(body.length).to eq(1)
