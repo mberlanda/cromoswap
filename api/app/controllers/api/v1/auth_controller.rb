@@ -54,8 +54,11 @@ module Api
         }
       end
 
+      # Lightweight (no scan list) so auth calls don't load every scan. `session`
+      # can legitimately be null for a user with no session yet — e.g. a
+      # backoffice-created user not yet connected to a collector (Phase 7).
       def session_or_nil(session)
-        session && session_json(session)
+        session && session_summary_json(session)
       end
 
       def render_errors(record)

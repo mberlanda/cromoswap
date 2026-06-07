@@ -10,6 +10,8 @@ RSpec.describe "Api::V1::Auth", type: :request do
       expect(response).to have_http_status(:created)
       expect(json["token"]).to be_present
       expect(json["user"]).to include("username" => "collector1")
+      # password must never leak — guard the real attribute name, not just camelCase
+      expect(json["user"]).not_to have_key("password_digest")
       expect(json["user"]).not_to have_key("passwordDigest")
       expect(json["session"]).to include("userName" => "collector1")
 
@@ -42,13 +44,22 @@ RSpec.describe "Api::V1::Auth", type: :request do
   end
 
   describe "POST /api/v1/auth/login" do
-    before { User.create!(username: "collector1", password: "supersecret") }
+    let!(:user) { User.create!(username: "collector1", password: "supersecret") }
+    let!(:session) { Session.create!(user_name: "collector1", user: user) }
 
-    it "returns a token for valid credentials" do
+    it "returns a token + the user's session for valid credentials" do
       post "/api/v1/auth/login", params: { username: "Collector1", password: "supersecret" }
       expect(response).to have_http_status(:ok)
       expect(json["token"]).to be_present
       expect(json["user"]["username"]).to eq("collector1")
+      expect(json["session"]["id"]).to eq(session.id)
+    end
+
+    it "returns session: null when the user has no session yet" do
+      User.create!(username: "lonely", password: "supersecret")
+      post "/api/v1/auth/login", params: { username: "lonely", password: "supersecret" }
+      expect(response).to have_http_status(:ok)
+      expect(json["session"]).to be_nil
     end
 
     it "401s on a wrong password" do

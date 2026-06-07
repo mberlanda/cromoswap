@@ -26,6 +26,18 @@ module Api
         }
       end
 
+      # Lightweight session shape (no full scan list) — used where the scan
+      # payload would be wasteful, e.g. auth responses and the home screen.
+      def session_summary_json(session)
+        {
+          id: session.id,
+          userName: session.user_name,
+          createdAt: session.created_at,
+          updatedAt: session.updated_at,
+          scanCount: session.scans.count
+        }
+      end
+
       def scan_json(scan)
         {
           id: scan.id,
