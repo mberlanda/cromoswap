@@ -22,6 +22,8 @@ import type { StorageMode } from '../composition';
 import { CROMOSWAP_MARK_SRC } from './brand-assets';
 import type { AuthClient, AuthResponse } from '../auth/auth';
 import { rememberSessionId } from '../storage/api-repos';
+import { SaveToCloud } from './SaveToCloud';
+import type { CloudSaver } from '../storage/save-to-cloud';
 
 export type Orientation = 'portrait' | 'landscape';
 
@@ -60,6 +62,8 @@ export interface AppDeps {
   fetchLeaderboard?: () => Promise<LeaderboardEntry[]>;
   /** Optional (cloud mode): account auth — register/login/password/logout. */
   auth?: AuthClient;
+  /** Optional (local mode): push the local collection to a cloud account. */
+  saveToCloud?: CloudSaver;
 }
 
 interface AppProps {
@@ -561,6 +565,18 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
           <StorageModeToggle mode={storageMode} onChange={onChangeMode} />
         )}
       </header>
+      {storageMode === 'local' && deps.saveToCloud && (
+        <SaveToCloud
+          saver={deps.saveToCloud}
+          resolveSnapshot={async () => ({
+            session: active,
+            scans,
+            ownedCodes: (await deps.albumRepo.listByUser(active.userName)).map(
+              (entry) => entry.normalizedCode,
+            ),
+          })}
+        />
+      )}
       <TabBar active={tab} onChange={handleTabChange} showBoard={!!deps.fetchLeaderboard} />
       {tab === 'album' && (
         <AlbumView

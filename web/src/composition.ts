@@ -5,6 +5,7 @@ import { IdbSessionRepo, IdbScanRepo, IdbImageStore, IdbAlbumRepo } from './stor
 import { ApiSessionRepo, ApiScanRepo, ApiAlbumRepo } from './storage/api-repos';
 import { fetchLeaderboard as fetchLeaderboardClient } from './storage/sync-client';
 import { getToken, createAuthClient } from './auth/auth';
+import { buildCloudSaver } from './storage/save-to-cloud';
 import { TesseractAdapter } from './ocr/tesseract-adapter';
 import { runPipelineMultiOrientation } from './ocr/pipeline';
 import { BrightnessLocalizer } from './ocr/localizer';
@@ -180,6 +181,8 @@ export async function createAppDeps(mode: StorageMode = getStorageMode()): Promi
     imageStore: new IdbImageStore(db),
     albumRepo,
     auth: mode === 'cloud' ? createAuthClient(API_BASE_URL) : undefined,
+    // Available in local mode too: pushes the local collection to a cloud account.
+    saveToCloud: LEADERBOARD_ENABLED && mode === 'local' ? buildCloudSaver(API_BASE_URL) : undefined,
     scanOnce,
     detectTargeted,
     attachVideo,
