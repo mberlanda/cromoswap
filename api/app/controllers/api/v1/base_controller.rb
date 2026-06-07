@@ -7,6 +7,15 @@ module Api
 
       private
 
+      def user_json(user)
+        {
+          id: user.id,
+          username: user.username,
+          createdAt: user.created_at,
+          updatedAt: user.updated_at
+        }
+      end
+
       def session_json(session)
         {
           id: session.id,
@@ -14,6 +23,18 @@ module Api
           createdAt: session.created_at,
           updatedAt: session.updated_at,
           scans: session.scans.map { |scan| scan_json(scan) }
+        }
+      end
+
+      # Lightweight session shape (no full scan list) — used where the scan
+      # payload would be wasteful, e.g. auth responses and the home screen.
+      def session_summary_json(session)
+        {
+          id: session.id,
+          userName: session.user_name,
+          createdAt: session.created_at,
+          updatedAt: session.updated_at,
+          scanCount: session.scans.count
         }
       end
 

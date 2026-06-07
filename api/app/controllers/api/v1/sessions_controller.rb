@@ -44,18 +44,6 @@ module Api
         session = Session.find(params[:id])
         render json: session_json(session)
       end
-
-      private
-
-      def session_summary_json(session)
-        {
-          id: session.id,
-          userName: session.user_name,
-          createdAt: session.created_at,
-          updatedAt: session.updated_at,
-          scanCount: session.scans.count
-        }
-      end
     end
   end
 end
