@@ -66,7 +66,11 @@ export async function pushSession(
   }
 }
 
-/** Syncs the full set of album-owned codes for the token user. Best-effort; never throws. */
+/**
+ * Syncs the full set of album-owned codes for `userName`. Sends a bearer token
+ * when provided; the server authorizes the write against that token (a userName
+ * that doesn't match the token user is rejected). Best-effort; never throws.
+ */
 export async function syncAlbumStickers(
   userName: string,
   codes: string[],

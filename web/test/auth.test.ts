@@ -45,6 +45,13 @@ describe('decodeToken', () => {
     expect(decodeToken('garbage')).toBeNull();
     expect(decodeToken('a.b')).toBeNull();
   });
+
+  it('decodes an unpadded base64url payload (no = padding)', () => {
+    const token = fakeJwt({ user_id: 'abc', exp: future() });
+    // fakeJwt strips '=' padding, matching real JWTs.
+    expect(token.split('.')[1]).not.toMatch(/=/);
+    expect(decodeToken(token)?.userId).toBe('abc');
+  });
 });
 
 describe('isExpired / getStoredUser', () => {

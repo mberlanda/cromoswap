@@ -59,7 +59,9 @@ export function decodeToken(token: string): TokenClaims | null {
   if (parts.length !== 3) return null;
   try {
     const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-    const payload = JSON.parse(atob(b64)) as Record<string, unknown>;
+    // JWT segments are unpadded base64url; atob needs the '=' padding restored.
+    const padded = b64.padEnd(Math.ceil(b64.length / 4) * 4, '=');
+    const payload = JSON.parse(atob(padded)) as Record<string, unknown>;
     if (typeof payload['user_id'] !== 'string' || typeof payload['exp'] !== 'number') return null;
     return { userId: payload['user_id'], exp: payload['exp'] };
   } catch {
@@ -73,7 +75,8 @@ export function isExpired(token: string): boolean {
   return claims.exp * 1000 <= Date.now();
 }
 
-/** The user from the stored token, or null if missing/expired/invalid. */
+/** The token claims (userId/exp) from the stored token, or null if
+ *  missing/expired/invalid. Not a full AuthUser — just what the JWT carries. */
 export function getStoredUser(): TokenClaims | null {
   const token = getToken();
   if (!token || isExpired(token)) return null;
