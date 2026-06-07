@@ -23,7 +23,7 @@ const scan: Scan = {
 describe('pushSession', () => {
   it('POSTs codes + metadata and returns ok on success', async () => {
     const fetchImpl = vi.fn(async () => new Response(null, { status: 201 }));
-    const result = await pushSession(session, [scan], 'http://api.test', fetchImpl);
+    const result = await pushSession(session, [scan], 'http://api.test', null, fetchImpl);
 
     expect(result.ok).toBe(true);
     const [url, init] = fetchImpl.mock.calls[0];
@@ -36,7 +36,7 @@ describe('pushSession', () => {
 
   it('never sends image fields', async () => {
     const fetchImpl = vi.fn(async () => new Response(null, { status: 201 }));
-    await pushSession(session, [scan], 'http://api.test', fetchImpl);
+    await pushSession(session, [scan], 'http://api.test', null, fetchImpl);
     const body = JSON.parse(fetchImpl.mock.calls[0][1]!.body as string);
     const serialized = JSON.stringify(body).toLowerCase();
     expect(serialized).not.toContain('image');
@@ -47,13 +47,13 @@ describe('pushSession', () => {
     const fetchImpl = vi.fn(async () => {
       throw new Error('network down');
     });
-    const result = await pushSession(session, [scan], 'http://api.test', fetchImpl);
+    const result = await pushSession(session, [scan], 'http://api.test', null, fetchImpl);
     expect(result.ok).toBe(false);
   });
 
   it('resolves ok:false on non-2xx response', async () => {
     const fetchImpl = vi.fn(async () => new Response(null, { status: 500 }));
-    const result = await pushSession(session, [scan], 'http://api.test', fetchImpl);
+    const result = await pushSession(session, [scan], 'http://api.test', null, fetchImpl);
     expect(result.ok).toBe(false);
   });
 });
@@ -61,7 +61,7 @@ describe('pushSession', () => {
 describe('syncAlbumStickers', () => {
   it('POSTs userName and codes to the album sync endpoint', async () => {
     const fetchImpl = vi.fn(async () => new Response(JSON.stringify({ ok: true, owned: 2 }), { status: 200 }));
-    const result = await syncAlbumStickers('Mauro', ['ARG01', 'BRA07'], 'http://api.test', fetchImpl);
+    const result = await syncAlbumStickers('Mauro', ['ARG01', 'BRA07'], 'http://api.test', null, fetchImpl);
 
     expect(result.ok).toBe(true);
     const [url, init] = fetchImpl.mock.calls[0];
@@ -73,8 +73,15 @@ describe('syncAlbumStickers', () => {
 
   it('resolves ok:false on network failure', async () => {
     const fetchImpl = vi.fn(async () => { throw new Error('down'); });
-    const result = await syncAlbumStickers('Mauro', [], 'http://api.test', fetchImpl);
+    const result = await syncAlbumStickers('Mauro', [], 'http://api.test', null, fetchImpl);
     expect(result.ok).toBe(false);
+  });
+
+  it('sends the bearer token when one is provided', async () => {
+    const fetchImpl = vi.fn(async () => new Response(JSON.stringify({ ok: true, owned: 0 }), { status: 200 }));
+    await syncAlbumStickers('Mauro', ['ARG01'], 'http://api.test', 'jwt-9', fetchImpl);
+    const init = fetchImpl.mock.calls[0][1]!;
+    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer jwt-9');
   });
 });
 
