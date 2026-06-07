@@ -12,11 +12,15 @@ ADR: [`../../adr/0004-cloud-authentication.md`](../../adr/0004-cloud-authenticat
 
 ## Phase 2 — Backend identity (no behavior change)
 - [ ] Add `bcrypt` gem.
-- [ ] Migration: `users` (uuid, `username` unique citext-ish, `password_digest`)
+- [ ] Migration: `users` (uuid, `username`, `password_digest`) with a **unique
+      index on `lower(username)`** (case-insensitive uniqueness without `citext`)
       + `sessions.user_id` (uuid, null, unique, fk).
-- [ ] `User` model: `has_secure_password`, `has_one :session`, username
-      presence + case-insensitive uniqueness; `Session belongs_to :user, optional`.
-- [ ] Model specs (validations, digest, association). No API/route change.
+- [ ] `User` model: `has_secure_password`, `has_one :session`,
+      `before_validation { username&.downcase! }`, username presence +
+      **format `/\A[a-z0-9]+\z/` length 3..30** + case-insensitive uniqueness;
+      password min length 8; `Session belongs_to :user, optional`.
+- [ ] Model specs (validations incl. format/length/normalization, digest,
+      association). No API/route change.
 
 ## Phase 3 — Auth endpoints + JWT
 - [ ] Add `jwt` gem; `JsonWebToken` encode/decode helper (HS256, exp 30d).
@@ -28,9 +32,12 @@ ADR: [`../../adr/0004-cloud-authentication.md`](../../adr/0004-cloud-authenticat
 
 ## Phase 4 — Authorize writes
 - [ ] Apply `Authenticated` to `sessions`/`scans`/`album_stickers` write actions.
-- [ ] Resolve `user_name`/session from the token; reject cross-user writes (403).
+- [ ] Resolve the session from the token and **scope all lookups** through it:
+      `current_user.session.scans.find(...)`, reject mismatched `sessionId`/
+      session `id`, ignore client `user_name`. Foreign ids → 403/404.
 - [ ] Keep `leaderboard` + `album_stickers#index` open.
-- [ ] Request specs for: token required, cross-user 403, own-data 200, reads open.
+- [ ] Request specs for: token required, cross-user 403/404 (incl. foreign
+      `sessionId` and scan `id`), own-data 200, reads open.
 - [ ] Update `SECURITY.md` (writes now authenticated).
 
 ## Phase 5 — Web auth
