@@ -20,7 +20,7 @@ module Api
       # Adds the sticker if absent, removes it if present. Idempotent per direction.
       def toggle
         return render_forbidden unless own_album?
-        user_name = current_user.username
+        user_name = album_user_name
         normalized_code = params.require(:normalizedCode)
 
         sticker = AlbumSticker.find_by(user_name: user_name, normalized_code: normalized_code)
@@ -41,7 +41,7 @@ module Api
       # Legacy batch-sync: replaces all owned codes for the token user atomically.
       def sync
         return render_forbidden unless own_album?
-        user_name = current_user.username
+        user_name = album_user_name
         codes = Array(params[:codes])
                   .map(&:to_s)
                   .select { |c| c.match?(VALID_CODE) }
@@ -63,11 +63,16 @@ module Api
 
       private
 
-      # Album authorization is anchored to the immutable token identity
-      # (`current_user.username`), never a mutable session field. A
-      # client-supplied userName must match it (or be omitted).
+      # The album is keyed by the scan session's display name (e.g. "GiacomoPietro"),
+      # not the lowercase account username. Fall back to the account username when
+      # no session is linked yet.
+      def album_user_name
+        current_user.session&.user_name || current_user.username
+      end
+
+      # A client-supplied userName must match the album identity (or be omitted).
       def own_album?
-        params[:userName].blank? || params[:userName] == current_user.username
+        params[:userName].blank? || params[:userName] == album_user_name
       end
     end
   end
