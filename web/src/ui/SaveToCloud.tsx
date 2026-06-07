@@ -27,14 +27,20 @@ export function SaveToCloud({ saver, resolveSnapshot }: SaveToCloudProps) {
 
   async function handleAuthenticated(res: AuthResponse) {
     setStatus('uploading');
-    const snapshot = await resolveSnapshot();
-    const result = await saver.upload(
-      snapshot.session,
-      snapshot.scans,
-      snapshot.ownedCodes,
-      res.user.username,
-    );
-    setStatus(result.ok ? 'done' : 'error');
+    try {
+      const snapshot = await resolveSnapshot();
+      const result = await saver.upload(
+        snapshot.session,
+        snapshot.scans,
+        snapshot.ownedCodes,
+        res.user.username,
+      );
+      setStatus(result.ok ? 'done' : 'error');
+    } catch {
+      // Snapshot read (e.g. IndexedDB) or upload threw — surface the error state
+      // rather than hanging on "Uploading…".
+      setStatus('error');
+    }
   }
 
   if (status === 'idle') {

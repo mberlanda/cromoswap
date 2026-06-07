@@ -81,4 +81,18 @@ describe('SaveToCloud', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/couldn.?t save/i);
   });
+
+  it('shows the error state when resolving the snapshot rejects', async () => {
+    const saver = makeSaver();
+    const failing = () => Promise.reject(new Error('idb read failed'));
+    render(<SaveToCloud saver={saver} resolveSnapshot={failing} />);
+
+    await userEvent.click(screen.getByRole('button', { name: /save to cloud/i }));
+    await userEvent.type(screen.getByLabelText('Username'), 'mauro');
+    await userEvent.type(screen.getByLabelText('Password'), 'supersecret');
+    await userEvent.click(screen.getByRole('button', { name: 'Log in' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/couldn.?t save/i);
+    expect(saver.upload).not.toHaveBeenCalled();
+  });
 });
