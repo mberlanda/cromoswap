@@ -1,6 +1,6 @@
 # ADR-0004: Cloud authentication
 
-Status: proposed · Date: 2026-06-06
+Status: accepted (implemented #54–#62) · Date: 2026-06-06
 
 ## Context
 

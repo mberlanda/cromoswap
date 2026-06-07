@@ -1,7 +1,7 @@
 # Cloud authentication
 
 Date: 2026-06-06
-Status: proposed (docs PR; implementation follows in incremental PRs)
+Status: implemented (#54–#62; Phase 8 mockup refresh pending)
 ADR: [`docs/adr/0004-cloud-authentication.md`](../../adr/0004-cloud-authentication.md)
 
 ## Goal
