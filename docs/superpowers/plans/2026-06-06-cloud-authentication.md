@@ -51,8 +51,8 @@ ADR: [`../../adr/0004-cloud-authentication.md`](../../adr/0004-cloud-authenticat
 - [x] "Save to cloud" action from a local session: register/login + upload album
       (`sync`) + scans. `CloudSaver` + `SaveToCloud` UI; unit tests.
 
-## Phase 7 — Backoffice user management
-- [ ] `Admin::UsersController` CRUD + set/reset password + connect user↔collector
+## Phase 7 — Backoffice user management (this PR)
+- [x] `Admin::UsersController` CRUD + set/reset password + connect user↔collector
       (link `sessions.user_id` by `user_name`, enforce 1:1). Request specs.
 
 ## Phase 8 — UX polish + mockups

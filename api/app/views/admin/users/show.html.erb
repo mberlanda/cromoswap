@@ -1,0 +1,40 @@
+<h1>User — <%= @user.username %></h1>
+<p><%= link_to "Back", admin_users_path, class: "btn" %></p>
+<p><strong>ID:</strong> <%= @user.id %><br>
+   <strong>Created:</strong> <%= @user.created_at %></p>
+
+<h2>Linked collector</h2>
+<% if @user.session %>
+  <p>
+    Linked to <strong><%= @user.session.user_name %></strong>
+    (<%= @user.session.scans.size %> scans).
+    <%= button_to "Unlink", disconnect_admin_user_path(@user), method: :patch, class: "btn" %>
+  </p>
+<% else %>
+  <p>Not linked to a collector.</p>
+  <%= form_with url: connect_admin_user_path(@user), method: :patch do |f| %>
+    <div class="field">
+      <%= f.label :user_name, "Connect to collector" %>
+      <% if @unlinked_sessions.any? %>
+        <%= f.select :user_name, @unlinked_sessions.map { |s| [s.user_name, s.user_name] } %>
+      <% else %>
+        <%= f.text_field :user_name, placeholder: "collector user_name" %>
+      <% end %>
+    </div>
+    <%= f.submit "Connect", class: "btn btn-primary" %>
+  <% end %>
+<% end %>
+
+<h2>Reset password</h2>
+<% if @user.errors.any? %>
+  <div class="flash flash-alert">
+    <%= @user.errors.full_messages.to_sentence %>
+  </div>
+<% end %>
+<%= form_with model: [:admin, @user], url: reset_password_admin_user_path(@user), method: :patch do |f| %>
+  <div class="field">
+    <%= f.label :password, "New password" %>
+    <%= f.password_field :password, autocomplete: "new-password" %>
+  </div>
+  <%= f.submit "Reset password", class: "btn btn-primary" %>
+<% end %>
