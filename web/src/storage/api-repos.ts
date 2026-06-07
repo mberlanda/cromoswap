@@ -26,9 +26,19 @@ function getLocalSessionIds(): string[] {
 }
 
 function saveLocalSessionId(id: string): void {
-  const ids = new Set(getLocalSessionIds());
-  ids.add(id);
-  localStorage.setItem(SESSION_IDS_KEY, JSON.stringify([...ids]));
+  try {
+    const ids = new Set(getLocalSessionIds());
+    ids.add(id);
+    localStorage.setItem(SESSION_IDS_KEY, JSON.stringify([...ids]));
+  } catch {
+    // localStorage may be unavailable (private mode); adopting the session
+    // must not fail because we couldn't persist its id for the resume list.
+  }
+}
+
+/** Record a cloud session id so it appears in the home resume list. */
+export function rememberSessionId(id: string): void {
+  saveLocalSessionId(id);
 }
 
 function mapSession(d: Record<string, unknown>): Session {

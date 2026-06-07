@@ -9,6 +9,9 @@ import {
   type JsonImport,
 } from '../import/parse-import';
 import { CROMOSWAP_MARK_SRC } from './brand-assets';
+import type { AuthClient, AuthResponse } from '../auth/auth';
+import { AuthPanel } from './AuthPanel';
+import { PasswordChangeForm } from './PasswordChangeForm';
 
 export interface AlbumImport {
   userName: string;
@@ -31,6 +34,10 @@ interface SessionGateProps {
   onImportJson?: (data: JsonImport) => void;
   onImportAlbum?: (data: AlbumImport) => void;
   onOpenBoard?: () => void;
+  /** Cloud mode only: account auth. When set, the gate requires login. */
+  auth?: AuthClient;
+  onAuthenticated?: (res: AuthResponse) => void;
+  onLogout?: () => void;
 }
 
 /** Entry screen: ask for a name to start a session, or resume an existing one. */
@@ -45,8 +52,23 @@ export function SessionGate({
   onImportJson,
   onImportAlbum,
   onOpenBoard,
+  auth,
+  onAuthenticated,
+  onLogout,
 }: SessionGateProps) {
   const [name, setName] = useState('');
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  // Cloud mode (auth set) requires login before scanning; local mode has no auth.
+  const cloudUser = auth ? auth.currentUser() : null;
+  const needsAuth = !!auth && cloudUser === null;
+
+  function handleLogout() {
+    setShowPasswordForm(false);
+    // Prefer the app handler; fall back to clearing the token directly so the
+    // button is never a no-op when onLogout isn't wired.
+    if (onLogout) onLogout();
+    else auth?.logout();
+  }
   const inputId = useId();
   const importNameId = useId();
   const importFileId = useId();
@@ -124,6 +146,10 @@ export function SessionGate({
           View board
         </button>
       )}
+      {needsAuth && auth ? (
+        <AuthPanel auth={auth} onAuthenticated={(res) => onAuthenticated?.(res)} />
+      ) : (
+       <>
       {sessions.length > 0 && (
         <section aria-label="Resume">
           <h2>Resume a session</h2>
@@ -155,13 +181,35 @@ export function SessionGate({
           </ul>
         </section>
       )}
-      <form onSubmit={handleSubmit}>
-        <label htmlFor={inputId}>Your name</label>
-        <input id={inputId} data-test-id="session-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Luca" />
-        <button type="submit" data-test-id="start-session" disabled={trimmed === ''}>
-          Start scanning
-        </button>
-      </form>
+      {auth ? (
+        <section aria-label="Account" className="account-bar">
+          <p data-test-id="account-status">Signed in to the cloud.</p>
+          <div className="account-actions">
+            <button
+              type="button"
+              className="quiet"
+              data-test-id="change-password-toggle"
+              onClick={() => setShowPasswordForm((v) => !v)}
+            >
+              {showPasswordForm ? 'Hide password form' : 'Change password'}
+            </button>
+            <button type="button" className="quiet" data-test-id="logout" onClick={handleLogout}>
+              Log out
+            </button>
+          </div>
+          {showPasswordForm && (
+            <PasswordChangeForm onSubmit={(cur, next) => auth.changePassword(cur, next)} />
+          )}
+        </section>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <label htmlFor={inputId}>Your name</label>
+          <input id={inputId} data-test-id="session-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Luca" />
+          <button type="submit" data-test-id="start-session" disabled={trimmed === ''}>
+            Start scanning
+          </button>
+        </form>
+      )}
       {onImportAlbum && (
         <section aria-label="Import collector list" className="import-section">
           <h2>Import a collector list</h2>
@@ -226,6 +274,8 @@ export function SessionGate({
         <p className="import-result" data-test-id="import-result">✓ {importResult}</p>
       )}
       {importError && <p className="import-error" role="alert">{importError}</p>}
+       </>
+      )}
       <p className="privacy-note">
         {storageMode === 'local'
           ? 'Data stored locally on this device only.'
