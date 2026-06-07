@@ -92,6 +92,12 @@ RSpec.describe "Admin::Users", type: :request do
       expect(flash_after_redirect).to include("No collector")
     end
 
+    it "rejects a blank collector name without a DB lookup" do
+      patch "/admin/users/#{user.id}/connect",
+            params: { user_name: "" }, headers: admin_auth
+      expect(flash_after_redirect).to include("Enter a collector name")
+    end
+
     it "disconnects the user from its session" do
       collector.update!(user: user)
       patch "/admin/users/#{user.id}/disconnect", headers: admin_auth

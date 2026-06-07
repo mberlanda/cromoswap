@@ -18,12 +18,16 @@ module Admin
     # registration so a backoffice-created account is immediately usable.
     def create
       @user = User.new(user_params)
-      if @user.save
-        Session.create!(user_name: @user.username, user: @user)
-        redirect_to admin_user_path(@user), notice: "User #{@user.username} created."
-      else
-        render :new, status: :unprocessable_content
+      unless @user.valid?
+        return render :new, status: :unprocessable_content
       end
+
+      # Atomic: a user must never persist without its required 1:1 session.
+      ActiveRecord::Base.transaction do
+        @user.save!
+        Session.create!(user_name: @user.username, user: @user)
+      end
+      redirect_to admin_user_path(@user), notice: "User #{@user.username} created."
     end
 
     def destroy
@@ -43,6 +47,10 @@ module Admin
     # Link the user to an existing collector session (backfill). Enforces 1:1 on
     # both sides: the session must be free and the user must not already own one.
     def connect
+      if params[:user_name].blank?
+        return redirect_to admin_user_path(@user), alert: "Enter a collector name to connect."
+      end
+
       session = Session.find_by(user_name: params[:user_name])
       if session.nil?
         redirect_to admin_user_path(@user), alert: "No collector named #{params[:user_name]}."
