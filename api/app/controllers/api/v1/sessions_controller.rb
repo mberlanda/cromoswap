@@ -3,15 +3,12 @@ module Api
     class SessionsController < BaseController
       include Authenticated
 
-      # index/show are public reads (home screen, board); create requires a token
-      # and upserts into the token user's own session.
+      # show/:id/scans are public reads (board); index and create require a token.
       skip_before_action :authenticate_user!, only: %i[show]
 
       # GET /api/v1/sessions?ids[]=id1&ids[]=id2
-      # Returns lightweight session summaries (no full scan list) for the home screen.
+      # Returns lightweight session summaries scoped to the authenticated user.
       def index
-        return render json: [] unless current_user
-
         ids = Array(params[:ids])
         return render json: [] if ids.empty?
 

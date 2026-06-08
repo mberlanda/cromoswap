@@ -34,9 +34,14 @@ RSpec.describe "API V1 Sessions", type: :request do
     end
 
     it "returns an empty array when no IDs are given" do
-      get "/api/v1/sessions"
+      get "/api/v1/sessions", headers: bearer(user)
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body).to eq([])
+    end
+
+    it "401s without a token" do
+      get "/api/v1/sessions?ids[]=#{session.id}"
+      expect(response).to have_http_status(:unauthorized)
     end
 
     it "scopes listed sessions to the authenticated user" do

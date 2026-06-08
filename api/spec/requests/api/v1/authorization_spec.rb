@@ -169,10 +169,9 @@ RSpec.describe "API V1 write authorization", type: :request do
       other_session.scans.create!(normalized_code: "BRA07", source: "ocr", captured_at: Time.current)
     end
 
-    it "returns [] without a token" do
+    it "returns 401 without a token" do
       get "/api/v1/sessions?ids[]=#{owner_session.id}"
-      expect(response).to have_http_status(:ok)
-      expect(json).to eq([])
+      expect(response).to have_http_status(:unauthorized)
     end
 
     it "returns only the token user's sessions even when foreign IDs are requested" do

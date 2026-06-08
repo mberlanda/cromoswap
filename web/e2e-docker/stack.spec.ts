@@ -97,8 +97,7 @@ test('sessions list is auth-scoped for retrieval by ids', async ({ request }) =>
   const withoutToken = await request.get(
     `/api/v1/sessions?ids[]=${ownerSession.id}&ids[]=${otherSession.id}`,
   );
-  expect(withoutToken.ok()).toBeTruthy();
-  expect(await withoutToken.json()).toEqual([]);
+  expect(withoutToken.status()).toBe(401);
 
   const asOwner = await request.get(
     `/api/v1/sessions?ids[]=${ownerSession.id}&ids[]=${otherSession.id}`,
