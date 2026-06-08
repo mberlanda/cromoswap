@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 export type Tab = 'album' | 'reps' | 'board';
 
 interface TabBarProps {
@@ -26,12 +28,12 @@ function AlbumIcon() {
   );
 }
 
-function RepsIcon() {
+function CameraIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-      <rect x="1" y="3" width="11" height="12" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="6" y="1" width="11" height="12" rx="1.5" stroke="currentColor" strokeWidth="1.5" fill="var(--paper)" />
-      <path d="M9 7h5M9 10h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <rect x="2" y="5" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M6 5l1.5-2h3L12 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="9" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   );
 }
@@ -46,24 +48,86 @@ function LeaderboardIcon() {
   );
 }
 
+function MenuIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function labelFor(tab: Tab): string {
+  if (tab === 'album') return 'My Album';
+  if (tab === 'reps') return 'My Stickers';
+  return 'Leaderboard';
+}
+
+function iconFor(tab: Tab): () => ReturnType<typeof AlbumIcon> {
+  if (tab === 'album') return AlbumIcon;
+  if (tab === 'reps') return CameraIcon;
+  return LeaderboardIcon;
+}
+
 export function TabBar({ active, onChange, showBoard = false, onGoHome }: TabBarProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const contentTabs: Array<{ id: Tab; label: string }> = [
     { id: 'album', label: 'My Album' },
-    { id: 'reps', label: 'My Reps' },
+    { id: 'reps', label: 'My Stickers' },
     ...(showBoard ? [{ id: 'board' as const, label: 'Leaderboard' }] : []),
   ];
-  const activeIndex = contentTabs.findIndex((tab) => tab.id === active);
-  const previous = activeIndex > 0 ? contentTabs[activeIndex - 1] : null;
-  const next = activeIndex >= 0 && activeIndex < contentTabs.length - 1 ? contentTabs[activeIndex + 1] : null;
+
+  const menuItems: Array<{ id: 'home' | Tab; label: string; onSelect: () => void }> = [
+    ...(onGoHome
+      ? [
+          {
+            id: 'home' as const,
+            label: 'Home',
+            onSelect: () => onGoHome(),
+          },
+        ]
+      : []),
+    ...contentTabs.map((tab) => ({ id: tab.id, label: tab.label, onSelect: () => onChange(tab.id) })),
+  ];
 
   return (
     <nav aria-label="Primary sections" className="section-nav">
-      <div role="tablist" className="tab-bar">
+      <div className="tab-bar-top">
+        <button
+          type="button"
+          className="tab-menu-btn"
+          aria-label="Open navigation menu"
+          aria-expanded={menuOpen}
+          data-test-id="nav-menu-toggle"
+          onClick={() => setMenuOpen((v) => !v)}
+        >
+          <MenuIcon />
+        </button>
+      </div>
+      {menuOpen && (
+        <div className="tab-menu" role="menu" data-test-id="nav-menu">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              role="menuitem"
+              data-test-id={`menu-${item.id}`}
+              onClick={() => {
+                item.onSelect();
+                setMenuOpen(false);
+              }}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
+      <div role="tablist" className="tab-bar" data-test-id="primary-tablist">
         {onGoHome && (
           <button
             type="button"
             role="tab"
             aria-selected={false}
+            data-test-id="tab-home"
             className="tab-bar-item"
             onClick={onGoHome}
           >
@@ -71,59 +135,23 @@ export function TabBar({ active, onChange, showBoard = false, onGoHome }: TabBar
             <span className="tab-bar-label">Home</span>
           </button>
         )}
-        <button
-          type="button"
-          role="tab"
-          aria-selected={active === 'album'}
-          data-test-id="tab-album"
-          className={`tab-bar-item${active === 'album' ? ' tab-active' : ''}`}
-          onClick={() => onChange('album')}
-        >
-          <AlbumIcon />
-          <span className="tab-bar-label">My Album</span>
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={active === 'reps'}
-          data-test-id="tab-reps"
-          className={`tab-bar-item${active === 'reps' ? ' tab-active' : ''}`}
-          onClick={() => onChange('reps')}
-        >
-          <RepsIcon />
-          <span className="tab-bar-label">My Reps</span>
-        </button>
-        {showBoard && (
-          <button
-            type="button"
-            role="tab"
-            aria-selected={active === 'board'}
-            data-test-id="tab-board"
-            className={`tab-bar-item${active === 'board' ? ' tab-active' : ''}`}
-            onClick={() => onChange('board')}
-          >
-            <LeaderboardIcon />
-            <span className="tab-bar-label">Leaderboard</span>
-          </button>
-        )}
-      </div>
-      <div className="section-stepper">
-        <button
-          type="button"
-          className="quiet"
-          disabled={!previous}
-          onClick={() => previous && onChange(previous.id)}
-        >
-          Previous section
-        </button>
-        <button
-          type="button"
-          className="quiet"
-          disabled={!next}
-          onClick={() => next && onChange(next.id)}
-        >
-          Next section
-        </button>
+        {contentTabs.map((tab) => {
+          const Icon = iconFor(tab.id);
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={active === tab.id}
+              data-test-id={`tab-${tab.id}`}
+              className={`tab-bar-item${active === tab.id ? ' tab-active' : ''}`}
+              onClick={() => onChange(tab.id)}
+            >
+              <Icon />
+              <span className="tab-bar-label">{labelFor(tab.id)}</span>
+            </button>
+          );
+        })}
       </div>
     </nav>
   );

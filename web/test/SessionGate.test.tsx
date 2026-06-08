@@ -37,17 +37,18 @@ describe('SessionGate', () => {
     expect(onCreate).toHaveBeenCalledWith('Mauro');
   });
 
-  it('shows a View board button only when onOpenBoard is provided', async () => {
+  it('shows a leaderboard tab only when onOpenBoard is provided', async () => {
     const onOpenBoard = vi.fn();
     const { rerender } = render(
       <SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} />,
     );
-    expect(screen.queryByRole('button', { name: /view board/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('tablist')).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: /leaderboard/i })).not.toBeInTheDocument();
 
     rerender(
       <SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} onOpenBoard={onOpenBoard} />,
     );
-    await userEvent.click(screen.getByRole('button', { name: /view board/i }));
+    await userEvent.click(screen.getByRole('tab', { name: /leaderboard/i }));
     expect(onOpenBoard).toHaveBeenCalled();
   });
 
@@ -151,7 +152,7 @@ describe('SessionGate', () => {
       render(
         <SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} auth={makeAuth(null)} onOpenBoard={onOpenBoard} />,
       );
-      await userEvent.click(screen.getByRole('button', { name: /view board/i }));
+      await userEvent.click(screen.getByRole('tab', { name: /leaderboard/i }));
       expect(onOpenBoard).toHaveBeenCalled();
     });
 

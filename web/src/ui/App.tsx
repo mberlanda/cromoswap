@@ -15,7 +15,6 @@ import type { RepsMode } from './RepsModeToggle';
 import { REPS_CAP } from './RepsGrid';
 import type { JsonImport } from '../import/parse-import';
 import { BoardPanel } from './BoardPanel';
-import { CameraPermissionPanel } from './CameraPermissionPanel';
 import { StorageModeToggle } from './StorageModeToggle';
 import { SIZE_DEFAULT } from './SizeSlider';
 import type { StorageMode } from '../composition';
@@ -489,19 +488,34 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
       return (
         <main aria-label="Board">
           <div className="app-header">
-            <button
-              type="button"
-              className="app-header-home"
-              aria-label="Home"
-              onClick={() => setHomeView('gate')}
-            >
-              Home
-            </button>
             <img className="app-header-mark" src={CROMOSWAP_MARK_SRC} alt="" aria-hidden="true" />
             <div className="app-header-copy">
               <h1 className="app-header-name">Board</h1>
             </div>
           </div>
+          <nav aria-label="Primary sections" className="section-nav">
+            <div role="tablist" className="tab-bar" data-test-id="primary-tablist">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={false}
+                data-test-id="tab-home"
+                className="tab-bar-item"
+                onClick={() => setHomeView('gate')}
+              >
+                <span className="tab-bar-label">Home</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected
+                data-test-id="tab-board"
+                className="tab-bar-item tab-active"
+              >
+                <span className="tab-bar-label">Leaderboard</span>
+              </button>
+            </div>
+          </nav>
           <BoardPanel
             entries={leaderboard}
             loading={leaderboardLoading}
@@ -563,15 +577,6 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
   return (
     <main aria-label="Scanner">
       <header className="app-header">
-        <button
-          type="button"
-          className="app-header-home"
-          aria-label="Home"
-          data-test-id="home"
-          onClick={handleHome}
-        >
-          Home
-        </button>
         <img className="app-header-mark" src={CROMOSWAP_MARK_SRC} alt="" aria-hidden="true" />
         <div className="app-header-copy">
           <h1 className="app-header-name">{active.userName}</h1>
@@ -616,16 +621,12 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
           statsSeries={statsSeries}
         />
       )}
-      {tab === 'reps' && cameraState !== 'granted' && cameraState !== 'no-camera' && (
-        <CameraPermissionPanel
-          state={cameraState}
-          onRequest={handleRequestCamera}
-          onSkip={handleSkipToManual}
-        />
-      )}
-      {tab === 'reps' && (cameraState === 'granted' || cameraState === 'no-camera') && (
+      {tab === 'reps' && (
         <RepsView
           cameraAvailable={cameraState === 'granted'}
+          cameraState={cameraState}
+          onRequestCamera={handleRequestCamera}
+          onSkipCamera={handleSkipToManual}
           view={repsView}
           onSetView={setRepsView}
           mode={repsMode}

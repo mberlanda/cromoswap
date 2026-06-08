@@ -10,8 +10,7 @@ async function startLocalSession(page: Page, name = 'Mauro') {
   await page.getByTestId('storage-local').click();
   await page.getByTestId('session-name').fill(name);
   await page.getByTestId('start-session').click();
-  // Opt out of the camera — manual entry must be reachable without one.
-  await page.getByTestId('enter-manually').click();
+  await page.getByTestId('reps-view-manual').click();
 }
 
 async function addManually(page: Page, prefix: string, number: string) {
@@ -30,7 +29,7 @@ test('local: manual add persists across reload and exports', async ({ page }) =>
   // Persists across reload -> resume (IndexedDB).
   await page.reload();
   await page.getByTestId('resume-Mauro').click();
-  await page.getByTestId('enter-manually').click();
+  await page.getByTestId('reps-view-manual').click();
   await expect(collection.getByText('ARG01')).toBeVisible();
 
   // Export text contains the code.
@@ -52,6 +51,6 @@ test('local: navigates between album, reps grid, and home', async ({ page }) => 
   await page.getByTestId('reps-view-grid').click();
   await expect(page.getByTestId('reps-mode')).toBeVisible();
 
-  await page.getByTestId('home').click();
+  await page.getByTestId('tab-home').click();
   await expect(page.getByTestId('session-name')).toBeVisible();
 });

@@ -70,6 +70,7 @@ describe('App', () => {
     await startSession();
 
     // idle -> permission panel; the user opts out of the camera.
+    await switchToScanView();
     await userEvent.click(screen.getByRole('button', { name: /enter manually/i }));
 
     // Manual entry is reachable (and the camera scanner is not shown).
@@ -82,13 +83,13 @@ describe('App', () => {
     expect(within(collection).getByText('USA13')).toBeInTheDocument();
   });
 
-  it('returns to the home screen via the header Home button without reload', async () => {
+  it('returns to the home screen via the Home tab without reload', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();
     await switchToScanView();
     expect(screen.getByRole('button', { name: /scan sticker/i })).toBeInTheDocument();
 
-    await userEvent.click(await findButtonByAriaLabel('Home'));
+    await userEvent.click(screen.getByRole('tab', { name: /home/i }));
 
     // Back on the session gate: the name field is shown again.
     expect(await screen.findByLabelText(/your name/i)).toBeInTheDocument();
@@ -178,14 +179,14 @@ describe('App', () => {
     const fetchLeaderboard = vi.fn(async () => [{ userName: 'Ana', owned: 3, missing: 977 }]);
     render(<App deps={makeDeps({ fetchLeaderboard })} />);
 
-    await userEvent.click(screen.getByRole('button', { name: /view board/i }));
+    await userEvent.click(screen.getByRole('tab', { name: /leaderboard/i }));
     expect(await screen.findByText('Ana')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: /open ana selection/i }));
     expect(await screen.findByText(/Ana's selection/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /admin backoffice/i })).toHaveAttribute('href', '/admin');
 
-    await userEvent.click(await findButtonByAriaLabel('Home'));
+    await userEvent.click(screen.getByRole('tab', { name: /home/i }));
     expect(await screen.findByLabelText(/your name/i)).toBeInTheDocument();
   });
 
@@ -257,8 +258,8 @@ describe('App', () => {
 
     await startSession();
     expect(screen.queryByRole('button', { name: /scan sticker/i })).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /allow camera/i }));
     await switchToScanView();
+    await userEvent.click(screen.getByRole('button', { name: /allow camera/i }));
 
     expect(await screen.findByRole('button', { name: /scan sticker/i })).toBeInTheDocument();
     expect(attachVideo.mock.calls.at(-1)?.[0]?.tagName).toBe('VIDEO');
