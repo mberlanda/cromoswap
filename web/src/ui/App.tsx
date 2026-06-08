@@ -24,6 +24,7 @@ import type { AuthClient, AuthResponse } from '../auth/auth';
 import { rememberSessionId } from '../storage/api-repos';
 import { SaveToCloud } from './SaveToCloud';
 import type { CloudSaver } from '../storage/save-to-cloud';
+import { buildCumulativeSeries, type SeriesData } from './StatsChart';
 
 export type Orientation = 'portrait' | 'landscape';
 
@@ -94,6 +95,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
   const [repsMode, setRepsMode] = useState<RepsMode>('add');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+  const [statsSeries, setStatsSeries] = useState<SeriesData[]>([]);
   const [boardSelectionUserName, setBoardSelectionUserName] = useState<string | null>(null);
   // Pre-session home can show the gate or the board (browse the leaderboard
   // without starting a session).
@@ -139,6 +141,24 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
   useEffect(() => {
     void refreshSessions();
   }, [refreshSessions]);
+
+  useEffect(() => {
+    const computeStats = async () => {
+      const series: SeriesData[] = [];
+      for (const session of sessions) {
+        const entries = await deps.albumRepo.listByUser(session.userName);
+        if (entries.length > 0) {
+          series.push({
+            name: session.userName,
+            points: buildCumulativeSeries(entries),
+          });
+        }
+      }
+      setStatsSeries(series);
+    };
+
+    void computeStats();
+  }, [sessions, deps.albumRepo]);
 
   // Bind the camera <video> whenever the granted scanner preview is mounted.
   useEffect(() => {
@@ -499,6 +519,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
             albumRepo={deps.albumRepo}
             downloadText={deps.downloadText}
             now={deps.now}
+            statsSeries={statsSeries}
           />
         </main>
       );
@@ -599,6 +620,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
           albumRepo={deps.albumRepo}
           downloadText={deps.downloadText}
           now={deps.now}
+          statsSeries={statsSeries}
         />
       )}
       {tab === 'reps' && cameraState !== 'granted' && cameraState !== 'no-camera' && (

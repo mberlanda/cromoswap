@@ -2,6 +2,7 @@ import type { AlbumRepo, Clock } from '../storage/types';
 import type { LeaderboardEntry } from '../storage/sync-client';
 import { LeaderboardView } from './LeaderboardView';
 import { AlbumView } from './AlbumView';
+import { StatsChart, type SeriesData } from './StatsChart';
 
 interface BoardPanelProps {
   entries: LeaderboardEntry[];
@@ -13,6 +14,7 @@ interface BoardPanelProps {
   albumRepo: AlbumRepo;
   downloadText: (filename: string, content: string) => void;
   now: Clock;
+  statsSeries?: SeriesData[];
 }
 
 /**
@@ -30,6 +32,7 @@ export function BoardPanel({
   albumRepo,
   downloadText,
   now,
+  statsSeries,
 }: BoardPanelProps) {
   if (selectionUserName) {
     return (
@@ -58,11 +61,19 @@ export function BoardPanel({
   }
 
   return (
-    <LeaderboardView
-      entries={entries}
-      loading={loading}
-      onRefresh={onRefresh}
-      onOpenSelection={onOpenSelection}
-    />
+    <>
+      {statsSeries !== undefined && statsSeries.length > 0 && (
+        <section aria-label="Stats" className="stats-section">
+          <h2 className="stats-title">Progress</h2>
+          <StatsChart series={statsSeries} />
+        </section>
+      )}
+      <LeaderboardView
+        entries={entries}
+        loading={loading}
+        onRefresh={onRefresh}
+        onOpenSelection={onOpenSelection}
+      />
+    </>
   );
 }
