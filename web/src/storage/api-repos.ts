@@ -97,7 +97,9 @@ export class ApiSessionRepo implements SessionRepo {
     const ids = getLocalSessionIds();
     if (ids.length === 0) return [];
     const qs = ids.map((id) => `ids[]=${encodeURIComponent(id)}`).join('&');
-    const res = await fetch(`${this.baseUrl}/api/v1/sessions?${qs}`);
+    const res = await fetch(`${this.baseUrl}/api/v1/sessions?${qs}`, {
+      headers: writeHeaders(this.getToken),
+    });
     if (!res.ok) return [];
     const data = await res.json() as Array<Record<string, unknown>>;
     return data.map(mapSession);

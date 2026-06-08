@@ -67,6 +67,47 @@ test('API + admin round-trip: synced album shows on the board and in the backoff
   expect(await collectors.text()).toContain(collector);
 });
 
+test('sessions list is auth-scoped for retrieval by ids', async ({ request }) => {
+  const owner = `e2escope${Date.now()}`;
+  const other = `e2escopex${Date.now()}`;
+
+  const ownerToken = await registerCollector(request, owner);
+  const otherToken = await registerCollector(request, other);
+
+  const createOwner = await request.post('/api/v1/sessions', {
+    headers: { Authorization: `Bearer ${ownerToken}` },
+    data: {
+      session: { userName: owner },
+      scans: [{ id: crypto.randomUUID(), normalizedCode: 'ARG01', source: 'ocr', confidence: 0.9, capturedAt: new Date().toISOString() }],
+    },
+  });
+  expect(createOwner.ok()).toBeTruthy();
+  const ownerSession = (await createOwner.json()) as { id: string };
+
+  const createOther = await request.post('/api/v1/sessions', {
+    headers: { Authorization: `Bearer ${otherToken}` },
+    data: {
+      session: { userName: other },
+      scans: [{ id: crypto.randomUUID(), normalizedCode: 'BRA07', source: 'ocr', confidence: 0.9, capturedAt: new Date().toISOString() }],
+    },
+  });
+  expect(createOther.ok()).toBeTruthy();
+  const otherSession = (await createOther.json()) as { id: string };
+
+  const withoutToken = await request.get(
+    `/api/v1/sessions?ids[]=${ownerSession.id}&ids[]=${otherSession.id}`,
+  );
+  expect(withoutToken.status()).toBe(401);
+
+  const asOwner = await request.get(
+    `/api/v1/sessions?ids[]=${ownerSession.id}&ids[]=${otherSession.id}`,
+    { headers: { Authorization: `Bearer ${ownerToken}` } },
+  );
+  expect(asOwner.ok()).toBeTruthy();
+  const sessions = (await asOwner.json()) as { id: string }[];
+  expect(sessions.map((s) => s.id)).toEqual([ownerSession.id]);
+});
+
 test('browsing a collector from the board surfaces the admin backoffice link', async ({ page, request }) => {
   const user = `e2eboard${Date.now()}`;
   const token = await registerCollector(request, user);
