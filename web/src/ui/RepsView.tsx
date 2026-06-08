@@ -17,7 +17,7 @@ import { countByCode } from '../domain/counts';
 export type RepsViewMode = 'grid' | 'manual' | 'scan';
 
 export interface RepsViewProps {
-  /** When false, the camera scanner is hidden and only manual entry is shown. */
+  /** When false, the Scan option is hidden and its view falls back to Manual. */
   cameraAvailable?: boolean;
   view: RepsViewMode;
   onSetView: (view: RepsViewMode) => void;
