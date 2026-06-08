@@ -394,7 +394,7 @@ describe('App', () => {
     render(<App deps={deps} />);
     await startSession('Mauro');
 
-    await userEvent.click(screen.getByRole('tab', { name: /board/i }));
+    await userEvent.click(screen.getByRole('tab', { name: /leaderboard/i }));
     await userEvent.click(await screen.findByRole('button', { name: /open alice selection/i }));
 
     const ownedChip = await findButtonByAriaLabel('ARG07 owned');
