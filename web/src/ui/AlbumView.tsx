@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { AlbumRepo } from '../storage/types';
 import type { Clock } from '../storage/types';
-import { stickerNumbers } from '../domain/album-config';
+import { ALBUM_GROUPS, stickerNumbers } from '../domain/album-config';
 import { toAlbumOwnedExport, toAlbumMissingExport } from '../export/album-export';
 import { TeamCard } from './TeamCard';
 import { AlbumGroupedGrid } from './AlbumGroupedGrid';
+import { CommandBar } from './CommandBar';
+
+const ALL_GROUPS = ['FWC', ...ALBUM_GROUPS.map((g) => g.letter)] as const;
 
 interface AlbumViewProps {
   userName: string;
@@ -22,6 +25,17 @@ export function AlbumView({
   readOnly = false,
 }: AlbumViewProps) {
   const [ownedCodes, setOwnedCodes] = useState<Set<string>>(new Set());
+  const [groupFilter, setGroupFilter] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
+
+  function toggleGroup(g: string) {
+    setGroupFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(g)) next.delete(g);
+      else next.add(g);
+      return next;
+    });
+  }
 
   useEffect(() => {
     void albumRepo.listByUser(userName).then((entries) => {
@@ -76,7 +90,17 @@ export function AlbumView({
 
   return (
     <section aria-label="My Album">
+      <CommandBar
+        groups={ALL_GROUPS}
+        activeGroups={groupFilter}
+        onToggleGroup={toggleGroup}
+        onClearFilter={() => setGroupFilter(new Set())}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
       <AlbumGroupedGrid
+        groupFilter={groupFilter}
+        searchQuery={searchQuery}
         renderTeam={({ prefix, fullName, flag }) => (
           <TeamCard
             prefix={prefix}

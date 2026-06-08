@@ -1,5 +1,9 @@
-import { stickerNumbers } from '../domain/album-config';
+import { useState } from 'react';
+import { ALBUM_GROUPS, stickerNumbers } from '../domain/album-config';
 import { AlbumGroupedGrid } from './AlbumGroupedGrid';
+import { CommandBar } from './CommandBar';
+
+const ALL_GROUPS = ['FWC', ...ALBUM_GROUPS.map((g) => g.letter)] as const;
 
 export const REPS_CAP = 7;
 
@@ -70,12 +74,36 @@ function TeamCounts({
 }
 
 export function RepsGrid({ counts, onTap }: RepsGridProps) {
+  const [groupFilter, setGroupFilter] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
+
+  function toggleGroup(g: string) {
+    setGroupFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(g)) next.delete(g);
+      else next.add(g);
+      return next;
+    });
+  }
+
   return (
-    <AlbumGroupedGrid
-      ariaLabel="Reps grid"
-      renderTeam={({ prefix, fullName, flag }) => (
-        <TeamCounts prefix={prefix} fullName={fullName} flag={flag} counts={counts} onTap={onTap} />
-      )}
-    />
+    <>
+      <CommandBar
+        groups={ALL_GROUPS}
+        activeGroups={groupFilter}
+        onToggleGroup={toggleGroup}
+        onClearFilter={() => setGroupFilter(new Set())}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
+      <AlbumGroupedGrid
+        ariaLabel="Reps grid"
+        groupFilter={groupFilter}
+        searchQuery={searchQuery}
+        renderTeam={({ prefix, fullName, flag }) => (
+          <TeamCounts prefix={prefix} fullName={fullName} flag={flag} counts={counts} onTap={onTap} />
+        )}
+      />
+    </>
   );
 }

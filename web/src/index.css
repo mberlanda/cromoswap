@@ -1524,3 +1524,103 @@ section[aria-label="Resume"] li button {
   opacity: 0.7;
   margin: 0;
 }
+
+/* ── Command Bar ─────────────────────────────────────────── */
+.command-bar {
+  margin-bottom: var(--space-3);
+}
+
+.command-bar-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.command-bar-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius);
+  border: 1px solid var(--subtle);
+  background: var(--field);
+  color: var(--muted);
+  padding: 0;
+  cursor: pointer;
+}
+
+.command-bar-btn-active {
+  border-color: var(--info);
+  color: var(--info);
+}
+
+.command-bar-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--info);
+  color: white;
+  font-size: 10px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--paper);
+}
+
+.command-bar-filter-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  padding: var(--space-2) 0 var(--space-1);
+}
+
+.filter-chip {
+  padding: var(--space-1) var(--space-2);
+  border-radius: 999px;
+  border: 1px solid var(--subtle);
+  background: var(--field);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.filter-chip-active {
+  background: var(--info);
+  border-color: var(--info);
+  color: white;
+}
+
+.filter-chip-reset {
+  background: var(--surface);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.command-bar-search-row {
+  padding: var(--space-2) 0 var(--space-1);
+}
+
+.command-bar-search-input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--subtle);
+  border-radius: var(--radius);
+  background: var(--field);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+}
+
+.command-bar-search-input:focus {
+  border-color: var(--info);
+}
