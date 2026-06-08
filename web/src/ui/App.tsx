@@ -90,7 +90,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
   const [cameraPaused, setCameraPaused] = useState(false);
   const [videoMode, setVideoMode] = useState(false);
   const [tab, setTab] = useState<Tab>('reps');
-  const [repsView, setRepsView] = useState<RepsViewMode>('scan');
+  const [repsView, setRepsView] = useState<RepsViewMode>('grid');
   const [repsMode, setRepsMode] = useState<RepsMode>('add');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
@@ -142,12 +142,12 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
 
   // Bind the camera <video> whenever the granted scanner preview is mounted.
   useEffect(() => {
-    if (active && tab === 'reps' && cameraState === 'granted' && !cameraPaused) {
+    if (active && tab === 'reps' && repsView === 'scan' && cameraState === 'granted' && !cameraPaused) {
       deps.attachVideo?.(videoRef.current);
       return () => deps.attachVideo?.(null);
     }
     deps.attachVideo?.(null);
-  }, [active, cameraPaused, cameraState, tab, deps]);
+  }, [active, cameraPaused, cameraState, tab, repsView, deps]);
 
   // Live targeting: poll the framed region so the guide turns green when a
   // sticker is well aligned. Paused while an explicit capture is running.
@@ -157,6 +157,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
     !!detectTargeted &&
     !!active &&
     tab === 'reps' &&
+    repsView === 'scan' &&
     cameraState === 'granted' &&
     !cameraPaused &&
     !scanning;
@@ -450,6 +451,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
 
   function handleSkipToManual() {
     setCameraState('no-camera');
+    setRepsView('manual');
   }
 
   function handleHome() {

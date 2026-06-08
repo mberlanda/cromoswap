@@ -44,6 +44,14 @@ async function startSession(name = 'Mauro') {
   await userEvent.click(screen.getByRole('button', { name: /start/i }));
 }
 
+async function switchToScanView() {
+  await userEvent.click(screen.getByRole('button', { name: /^scan$/i }));
+}
+
+async function switchToManualView() {
+  await userEvent.click(screen.getByRole('button', { name: /^manual$/i }));
+}
+
 beforeEach(() => {
   seq = 0;
 });
@@ -52,6 +60,7 @@ describe('App', () => {
   it('creates a session then shows the scanner', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();
+    await switchToScanView();
     expect(screen.getByRole('button', { name: /scan sticker/i })).toBeInTheDocument();
   });
 
@@ -76,6 +85,7 @@ describe('App', () => {
   it('returns to the home screen via the header Home button without reload', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();
+    await switchToScanView();
     expect(screen.getByRole('button', { name: /scan sticker/i })).toBeInTheDocument();
 
     await userEvent.click(await findButtonByAriaLabel('Home'));
@@ -182,6 +192,7 @@ describe('App', () => {
   it('captures, confirms, and stores a scan that appears in the collection', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();
+    await switchToScanView();
     await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
     expect(await screen.findByText('ARG01')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /^save$/i }));
@@ -194,6 +205,7 @@ describe('App', () => {
     const stopCamera = vi.fn();
     render(<App deps={makeDeps({ stopCamera })} />);
     await startSession();
+    await switchToScanView();
 
     await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
 
@@ -211,6 +223,7 @@ describe('App', () => {
     }));
     render(<App deps={makeDeps({ scanOnce, videoScanIntervalMs: 50 })} />);
     await startSession();
+    await switchToScanView();
 
     await userEvent.click(screen.getByRole('checkbox', { name: /auto collect/i }));
 
@@ -222,6 +235,7 @@ describe('App', () => {
   it('renders the camera preview with the mask overlay over it', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();
+    await switchToScanView();
     const scan = screen.getByRole('region', { name: /scan/i });
     expect(scan.querySelector('video')).toBeInTheDocument();
     expect(within(scan).getByTestId('roi-box')).toBeInTheDocument();
@@ -231,6 +245,7 @@ describe('App', () => {
     const attachVideo = vi.fn();
     render(<App deps={makeDeps({ attachVideo })} />);
     await startSession();
+    await switchToScanView();
     expect(attachVideo).toHaveBeenCalled();
     expect(attachVideo.mock.calls.at(-1)?.[0]?.tagName).toBe('VIDEO');
   });
@@ -243,6 +258,7 @@ describe('App', () => {
     await startSession();
     expect(screen.queryByRole('button', { name: /scan sticker/i })).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /allow camera/i }));
+    await switchToScanView();
 
     expect(await screen.findByRole('button', { name: /scan sticker/i })).toBeInTheDocument();
     expect(attachVideo.mock.calls.at(-1)?.[0]?.tagName).toBe('VIDEO');
@@ -265,6 +281,7 @@ describe('App', () => {
     }));
     render(<App deps={makeDeps({ scanOnce })} />);
     await startSession();
+    await switchToScanView();
 
     // Defaults to portrait, with the current frame size.
     await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
@@ -283,6 +300,7 @@ describe('App', () => {
     const detectTargeted = vi.fn(async () => true);
     render(<App deps={makeDeps({ detectTargeted, targetIntervalMs: 10 })} />);
     await startSession();
+    await switchToScanView();
 
     const frame = await screen.findByTestId('sticker-frame');
     await vi.waitFor(() => expect(frame.className).toContain('targeted'));
@@ -300,6 +318,7 @@ describe('App', () => {
       });
     render(<App deps={makeDeps({ scanOnce })} />);
     await startSession();
+    await switchToScanView();
     await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
 
     expect(await screen.findByText('USA13')).toBeInTheDocument();
@@ -310,6 +329,7 @@ describe('App', () => {
     const scanOnce = vi.fn(async () => null);
     render(<App deps={makeDeps({ scanOnce })} />);
     await startSession();
+    await switchToScanView();
     await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
 
     expect(await screen.findByText(/no code detected/i)).toBeInTheDocument();
@@ -319,6 +339,7 @@ describe('App', () => {
   it('shows a message when no code is detected', async () => {
     render(<App deps={makeDeps({ scanOnce: vi.fn(async () => null) })} />);
     await startSession();
+    await switchToScanView();
     await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
     expect(await screen.findByText(/no code detected/i)).toBeInTheDocument();
   });
@@ -326,6 +347,7 @@ describe('App', () => {
   it('adds, edits, and deletes scans manually', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();
+    await switchToManualView();
 
     // Manual add
     await userEvent.type(screen.getByLabelText(/^prefix$/i), 'USA');
@@ -351,6 +373,7 @@ describe('App', () => {
     const deps = makeDeps();
     render(<App deps={deps} />);
     await startSession();
+    await switchToManualView();
     await userEvent.type(screen.getByLabelText(/^prefix$/i), 'USA');
     await userEvent.selectOptions(screen.getByLabelText(/^number$/i), '13');
     await userEvent.click(screen.getByRole('button', { name: /^add$/i }));
@@ -387,6 +410,7 @@ describe('App', () => {
   it('stores a corrected detection with its captured image', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();
+    await switchToScanView();
     await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
     await screen.findByText('ARG01');
     await userEvent.click(screen.getByRole('button', { name: /correct/i }));
@@ -402,6 +426,7 @@ describe('App', () => {
   it('skips a detection without storing it', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();
+    await switchToScanView();
     await userEvent.click(screen.getByRole('button', { name: /scan sticker/i }));
     await screen.findByText('ARG01');
     await userEvent.click(screen.getByRole('button', { name: /skip/i }));
@@ -414,6 +439,7 @@ describe('App', () => {
     const deps = makeDeps();
     render(<App deps={deps} />);
     await startSession();
+    await switchToManualView();
     await userEvent.type(screen.getByLabelText(/^prefix$/i), 'USA');
     await userEvent.selectOptions(screen.getByLabelText(/^number$/i), '13');
     await userEvent.click(screen.getByRole('button', { name: /^add$/i }));
@@ -429,6 +455,7 @@ describe('App', () => {
     const deps = makeDeps();
     const { unmount } = render(<App deps={deps} />);
     await startSession('Mauro');
+    await switchToManualView();
     await userEvent.type(screen.getByLabelText(/^prefix$/i), 'USA');
     await userEvent.selectOptions(screen.getByLabelText(/^number$/i), '13');
     await userEvent.click(screen.getByRole('button', { name: /^add$/i }));
@@ -436,6 +463,7 @@ describe('App', () => {
 
     render(<App deps={deps} />);
     await userEvent.click(await screen.findByRole('button', { name: /^resume$/i }));
+    await switchToManualView();
     const collection = screen.getByRole('list', { name: /collection/i });
     expect(within(collection).getByText('USA13')).toBeInTheDocument();
   });
