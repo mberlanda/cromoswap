@@ -49,6 +49,7 @@ export function RepsViewSwitch({ value, onChange }: RepsViewSwitchProps) {
           type="button"
           className={`reps-view-btn${value === mode ? ' reps-view-active' : ''}`}
           aria-pressed={value === mode}
+          data-test-id={`reps-view-${mode}`}
           onClick={() => onChange(mode)}
         >
           <Icon />
