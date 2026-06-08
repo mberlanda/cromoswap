@@ -66,6 +66,8 @@ describe('composition camera binding', () => {
     await userEvent.type(screen.getByLabelText(/your name/i), 'Mauro');
     await userEvent.click(screen.getByRole('button', { name: /start/i }));
     await userEvent.click(await screen.findByRole('button', { name: /allow camera/i }));
+    // Camera is only active in scan view; switch to it after granting access.
+    await userEvent.click(screen.getByRole('button', { name: /^scan$/i }));
 
     await waitFor(() => {
       const video = document.querySelector('video') as HTMLVideoElement | null;

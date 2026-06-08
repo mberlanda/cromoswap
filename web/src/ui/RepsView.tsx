@@ -11,9 +11,10 @@ import { SizeSlider } from './SizeSlider';
 import { RepsGrid } from './RepsGrid';
 import { RepsModeToggle } from './RepsModeToggle';
 import type { RepsMode } from './RepsModeToggle';
+import { RepsViewSwitch } from './RepsViewSwitch';
 import { countByCode } from '../domain/counts';
 
-export type RepsViewMode = 'scan' | 'grid';
+export type RepsViewMode = 'grid' | 'manual' | 'scan';
 
 export interface RepsViewProps {
   /** When false, the camera scanner is hidden and only manual entry is shown. */
@@ -72,32 +73,28 @@ export function RepsView({
 
   return (
     <section aria-label="My Reps">
-      <div className="reps-view-switch" role="group" aria-label="Reps view">
-        <button
-          type="button"
-          className={`reps-view-btn${view === 'scan' ? ' reps-view-active' : ''}`}
-          aria-pressed={view === 'scan'}
-          data-test-id="reps-view-scan"
-          onClick={() => onSetView('scan')}
-        >
-          Scan
-        </button>
-        <button
-          type="button"
-          className={`reps-view-btn${view === 'grid' ? ' reps-view-active' : ''}`}
-          aria-pressed={view === 'grid'}
-          data-test-id="reps-view-grid"
-          onClick={() => onSetView('grid')}
-        >
-          Grid
-        </button>
-      </div>
+      <RepsViewSwitch value={view} onChange={onSetView} />
 
       {view === 'grid' && (
         <section aria-label="Reps grid view">
           <RepsModeToggle value={mode} onChange={onSetMode} />
           <RepsGrid counts={counts} onTap={onGridTap} />
         </section>
+      )}
+
+      {view === 'manual' && (
+        <>
+          <section aria-label="Manual entry">
+            <h2>Add manually</h2>
+            <ManualEntry onAdd={onManualAdd} recentPrefixes={recentPrefixes} />
+          </section>
+          <CollectionList
+            scans={scans}
+            thumbnails={thumbnails}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        </>
       )}
 
       {view === 'scan' && (
@@ -160,12 +157,6 @@ export function RepsView({
         </div>
       </section>
       )}
-
-      <section aria-label="Manual entry">
-        <h2>Add manually</h2>
-        <ManualEntry onAdd={onManualAdd} recentPrefixes={recentPrefixes} />
-      </section>
-
       <CollectionList
         scans={scans}
         thumbnails={thumbnails}
