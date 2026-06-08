@@ -577,7 +577,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
           })}
         />
       )}
-      <TabBar active={tab} onChange={handleTabChange} showBoard={!!deps.fetchLeaderboard} />
+      <TabBar active={tab} onChange={handleTabChange} showBoard={!!deps.fetchLeaderboard} onGoHome={handleHome} />
       {tab === 'album' && (
         <AlbumView
           userName={active.userName}

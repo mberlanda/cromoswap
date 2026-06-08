@@ -8,12 +8,22 @@ describe('TabBar', () => {
     render(<TabBar active="reps" onChange={vi.fn()} />);
     expect(screen.getByRole('tab', { name: /my album/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /my reps/i })).toBeInTheDocument();
-    expect(screen.queryByRole('tab', { name: /board/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: /leaderboard/i })).not.toBeInTheDocument();
   });
 
-  it('shows the Board tab when enabled', () => {
+  it('shows the Leaderboard tab when showBoard=true', () => {
     render(<TabBar active="reps" onChange={vi.fn()} showBoard />);
-    expect(screen.getByRole('tab', { name: /board/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /leaderboard/i })).toBeInTheDocument();
+  });
+
+  it('shows the Home tab when onGoHome is provided', () => {
+    render(<TabBar active="album" onChange={vi.fn()} onGoHome={vi.fn()} />);
+    expect(screen.getByRole('tab', { name: /home/i })).toBeInTheDocument();
+  });
+
+  it('hides the Home tab when onGoHome is not provided', () => {
+    render(<TabBar active="album" onChange={vi.fn()} />);
+    expect(screen.queryByRole('tab', { name: /home/i })).not.toBeInTheDocument();
   });
 
   it('marks the active tab as selected', () => {
@@ -29,8 +39,15 @@ describe('TabBar', () => {
     expect(onChange).toHaveBeenCalledWith('album');
     await userEvent.click(screen.getByRole('tab', { name: /my reps/i }));
     expect(onChange).toHaveBeenCalledWith('reps');
-    await userEvent.click(screen.getByRole('tab', { name: /board/i }));
+    await userEvent.click(screen.getByRole('tab', { name: /leaderboard/i }));
     expect(onChange).toHaveBeenCalledWith('board');
+  });
+
+  it('calls onGoHome when Home tab is clicked', async () => {
+    const spy = vi.fn();
+    render(<TabBar active="album" onChange={vi.fn()} onGoHome={spy} />);
+    await userEvent.click(screen.getByRole('tab', { name: /home/i }));
+    expect(spy).toHaveBeenCalled();
   });
 
   it('provides previous and next section controls', async () => {
