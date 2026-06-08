@@ -1035,6 +1035,57 @@ section[aria-label="Resume"] li button {
   margin: 0 0 var(--space-2);
 }
 
+/* ── Stats chart ────────────────────────────────── */
+.stats-section {
+  margin-bottom: var(--space-4);
+}
+
+.stats-title {
+  font-size: 14px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 0 0 var(--space-2);
+}
+
+.stats-chart {
+  border: 1px solid var(--subtle);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: var(--space-3);
+}
+
+.stats-chart-empty {
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+  padding: var(--space-4);
+}
+
+.stats-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.stats-chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.stats-chart-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 /* ── Session resume card ─────────────────────────── */
 .session-card {
   display: grid;

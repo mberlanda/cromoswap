@@ -24,6 +24,8 @@ import type { AuthClient, AuthResponse } from '../auth/auth';
 import { rememberSessionId } from '../storage/api-repos';
 import { SaveToCloud } from './SaveToCloud';
 import type { CloudSaver } from '../storage/save-to-cloud';
+import type { SeriesData } from './StatsChart';
+import { buildCumulativeSeries } from './stats-chart-utils';
 
 export type Orientation = 'portrait' | 'landscape';
 
@@ -94,6 +96,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
   const [repsMode, setRepsMode] = useState<RepsMode>('add');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+  const [statsSeries, setStatsSeries] = useState<SeriesData[]>([]);
   const [boardSelectionUserName, setBoardSelectionUserName] = useState<string | null>(null);
   // Pre-session home can show the gate or the board (browse the leaderboard
   // without starting a session).
@@ -123,16 +126,26 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
     return deps.sessionRepo.list().then(async (list) => {
       const counts: Record<string, number> = {};
       const albumCounts: Record<string, { owned: number; missing: number }> = {};
+      const series: SeriesData[] = [];
       for (const s of list) {
         const sessionScans = await deps.scanRepo.listBySession(s.id);
         counts[s.id] = sessionScans.length;
-        const entries = await deps.albumRepo.listByUser(s.userName);
-        const owned = entries.length;
-        albumCounts[s.id] = { owned, missing: TOTAL_STICKERS - owned };
+        try {
+          const entries = await deps.albumRepo.listByUser(s.userName);
+          const owned = entries.length;
+          albumCounts[s.id] = { owned, missing: TOTAL_STICKERS - owned };
+          if (owned > 0) {
+            series.push({ name: s.userName, points: buildCumulativeSeries(entries) });
+          }
+        } catch {
+          // If one collector read fails, keep the rest of the home data usable.
+          albumCounts[s.id] = { owned: 0, missing: TOTAL_STICKERS };
+        }
       }
       setSessions(list);
       setSessionScanCounts(counts);
       setSessionAlbumCounts(albumCounts);
+      setStatsSeries(series);
     });
   }, [deps]);
 
@@ -499,6 +512,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
             albumRepo={deps.albumRepo}
             downloadText={deps.downloadText}
             now={deps.now}
+            statsSeries={statsSeries}
           />
         </main>
       );
@@ -599,6 +613,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
           albumRepo={deps.albumRepo}
           downloadText={deps.downloadText}
           now={deps.now}
+          statsSeries={statsSeries}
         />
       )}
       {tab === 'reps' && cameraState !== 'granted' && cameraState !== 'no-camera' && (
