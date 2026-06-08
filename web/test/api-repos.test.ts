@@ -59,7 +59,25 @@ describe('ApiSessionRepo', () => {
     const result = await repo().list();
 
     expect(result.map((s) => s.userName)).toEqual(['A', 'B']);
-    expect(fetchMock.mock.calls[0][0]).toBe(`${BASE}/api/v1/sessions?ids[]=s1&ids[]=s2`);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe(`${BASE}/api/v1/sessions?ids[]=s1&ids[]=s2`);
+    expect(init.headers).toEqual({ 'Content-Type': 'application/json' });
+  });
+
+  it('list includes bearer auth context when a token provider is configured', async () => {
+    const authedRepo = new ApiSessionRepo(BASE, () => 'jwt-token');
+    localStorage.setItem('wc-session-ids', JSON.stringify(['s1']));
+    fetchMock.mockResolvedValue(
+      jsonResponse([{ id: 's1', userName: 'A', createdAt: 'c', updatedAt: 'u' }]),
+    );
+
+    await authedRepo.list();
+
+    const [, init] = fetchMock.mock.calls[0];
+    expect(init.headers).toEqual({
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer jwt-token',
+    });
   });
 
   it('list returns [] on a non-ok response', async () => {

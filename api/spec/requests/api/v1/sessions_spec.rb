@@ -25,7 +25,7 @@ RSpec.describe "API V1 Sessions", type: :request do
   describe "GET /api/v1/sessions" do
     it "returns sessions matching the given IDs" do
       post "/api/v1/sessions", params: payload, headers: bearer(user), as: :json
-      get "/api/v1/sessions?ids[]=#{session.id}"
+      get "/api/v1/sessions?ids[]=#{session.id}", headers: bearer(user)
       expect(response).to have_http_status(:ok)
       body = response.parsed_body
       expect(body.length).to eq(1)
@@ -37,6 +37,18 @@ RSpec.describe "API V1 Sessions", type: :request do
       get "/api/v1/sessions"
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body).to eq([])
+    end
+
+    it "scopes listed sessions to the authenticated user" do
+      intruder = register_collector(username: "intruder").first
+      intruder_session = intruder.session
+
+      post "/api/v1/sessions", params: payload, headers: bearer(user), as: :json
+      get "/api/v1/sessions?ids[]=#{session.id}&ids[]=#{intruder_session.id}", headers: bearer(user)
+
+      expect(response).to have_http_status(:ok)
+      body = response.parsed_body
+      expect(body.map { |s| s["id"] }).to eq([ session.id ])
     end
   end
 

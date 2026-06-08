@@ -5,15 +5,17 @@ module Api
 
       # index/show are public reads (home screen, board); create requires a token
       # and upserts into the token user's own session.
-      skip_before_action :authenticate_user!, only: %i[index show]
+      skip_before_action :authenticate_user!, only: %i[show]
 
       # GET /api/v1/sessions?ids[]=id1&ids[]=id2
       # Returns lightweight session summaries (no full scan list) for the home screen.
       def index
+        return render json: [] unless current_user
+
         ids = Array(params[:ids])
         return render json: [] if ids.empty?
 
-        sessions = Session.where(id: ids).order(created_at: :desc)
+        sessions = Session.where(id: ids, user_id: current_user.id).order(created_at: :desc)
         render json: sessions.map { |s| session_summary_json(s) }
       end
 

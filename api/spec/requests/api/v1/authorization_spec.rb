@@ -1,7 +1,7 @@
 require "rails_helper"
 
 # Phase 4 — writes require a token and are scoped to the token's user/session.
-# Reads (leaderboard, album index, session reads) stay public.
+# Reads for board/album stay public; session index is auth-scoped.
 RSpec.describe "API V1 write authorization", type: :request do
   let(:json) { response.parsed_body }
 
@@ -155,13 +155,30 @@ RSpec.describe "API V1 write authorization", type: :request do
       expect(response).to have_http_status(:ok)
     end
 
-    it "GET /api/v1/sessions and /:id and /:id/scans" do
-      get "/api/v1/sessions?ids[]=#{owner_session.id}"
-      expect(response).to have_http_status(:ok)
+    it "GET /api/v1/sessions/:id and /:id/scans" do
       get "/api/v1/sessions/#{owner_session.id}"
       expect(response).to have_http_status(:ok)
       get "/api/v1/sessions/#{owner_session.id}/scans"
       expect(response).to have_http_status(:ok)
+    end
+  end
+
+  describe "GET /api/v1/sessions auth scoping" do
+    before do
+      owner_session.scans.create!(normalized_code: "ARG01", source: "ocr", captured_at: Time.current)
+      other_session.scans.create!(normalized_code: "BRA07", source: "ocr", captured_at: Time.current)
+    end
+
+    it "returns [] without a token" do
+      get "/api/v1/sessions?ids[]=#{owner_session.id}"
+      expect(response).to have_http_status(:ok)
+      expect(json).to eq([])
+    end
+
+    it "returns only the token user's sessions even when foreign IDs are requested" do
+      get "/api/v1/sessions?ids[]=#{owner_session.id}&ids[]=#{other_session.id}", headers: bearer(owner)
+      expect(response).to have_http_status(:ok)
+      expect(json.map { |s| s["id"] }).to eq([ owner_session.id ])
     end
   end
 end
