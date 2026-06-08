@@ -126,40 +126,32 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
     return deps.sessionRepo.list().then(async (list) => {
       const counts: Record<string, number> = {};
       const albumCounts: Record<string, { owned: number; missing: number }> = {};
+      const series: SeriesData[] = [];
       for (const s of list) {
         const sessionScans = await deps.scanRepo.listBySession(s.id);
         counts[s.id] = sessionScans.length;
-        const entries = await deps.albumRepo.listByUser(s.userName);
-        const owned = entries.length;
-        albumCounts[s.id] = { owned, missing: TOTAL_STICKERS - owned };
+        try {
+          const entries = await deps.albumRepo.listByUser(s.userName);
+          const owned = entries.length;
+          albumCounts[s.id] = { owned, missing: TOTAL_STICKERS - owned };
+          if (owned > 0) {
+            series.push({ name: s.userName, points: buildCumulativeSeries(entries) });
+          }
+        } catch {
+          // If one collector read fails, keep the rest of the home data usable.
+          albumCounts[s.id] = { owned: 0, missing: TOTAL_STICKERS };
+        }
       }
       setSessions(list);
       setSessionScanCounts(counts);
       setSessionAlbumCounts(albumCounts);
+      setStatsSeries(series);
     });
   }, [deps]);
 
   useEffect(() => {
     void refreshSessions();
   }, [refreshSessions]);
-
-  useEffect(() => {
-    const computeStats = async () => {
-      const series: SeriesData[] = [];
-      for (const session of sessions) {
-        const entries = await deps.albumRepo.listByUser(session.userName);
-        if (entries.length > 0) {
-          series.push({
-            name: session.userName,
-            points: buildCumulativeSeries(entries),
-          });
-        }
-      }
-      setStatsSeries(series);
-    };
-
-    void computeStats();
-  }, [sessions, deps.albumRepo]);
 
   // Bind the camera <video> whenever the granted scanner preview is mounted.
   useEffect(() => {

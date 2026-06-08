@@ -24,9 +24,10 @@ export function StatsChart({ series }: StatsChartProps) {
 
   const allDates = [...new Set(series.flatMap((s) => s.points.map((p) => p.date)))].sort();
   const maxVal = Math.max(...series.flatMap((s) => s.points.map((p) => p.cumulative)), 1);
+  const dateIndex = new Map(allDates.map((d, i) => [d, i]));
 
   function xScale(date: string): number {
-    const idx = allDates.indexOf(date);
+    const idx = dateIndex.get(date) ?? 0;
     if (allDates.length === 1) return PAD.left + chartW / 2;
     return PAD.left + (idx / (allDates.length - 1)) * chartW;
   }
@@ -77,8 +78,8 @@ export function StatsChart({ series }: StatsChartProps) {
             .join(' ');
           return (
             <polyline
-              key={s.name}
-              data-series={s.name}
+              key={`${s.name}-${idx}`}
+              data-series={`${s.name}-${idx}`}
               points={pts}
               fill="none"
               stroke={SERIES_COLORS[idx % SERIES_COLORS.length]}
