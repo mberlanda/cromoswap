@@ -57,6 +57,7 @@ export function CommandBar({
             type="button"
             className={`command-bar-btn${searchQuery ? ' command-bar-btn-active' : ''}`}
             aria-label="Search teams"
+            aria-expanded={searchOpen}
             onClick={() => setSearchOpen((v) => !v)}
           >
             <SearchIcon />
@@ -96,6 +97,7 @@ export function CommandBar({
           <input
             type="search"
             className="command-bar-search-input"
+            aria-label="Search teams"
             placeholder="Search teams…"
             value={searchQuery}
             onChange={(e) => onSearchChange?.(e.target.value)}

@@ -26,29 +26,32 @@ function matchesSearch(prefix: string, fullName: string, query: string): boolean
 
 export function AlbumGroupedGrid({ ariaLabel, renderTeam, groupFilter, searchQuery = '' }: AlbumGroupedGridProps) {
   const noFilter = !groupFilter || groupFilter.size === 0;
-  const showFwc = (noFilter || groupFilter.has('FWC')) && matchesSearch('FWC', 'FIFA World Cup', searchQuery);
+  const fwcMeta: TeamMeta = { prefix: 'FWC', fullName: 'FIFA World Cup', flag: '🏆' };
+  const showFwc = (noFilter || groupFilter.has('FWC')) && matchesSearch(fwcMeta.prefix, fwcMeta.fullName, searchQuery);
   const visibleGroups = ALBUM_GROUPS
     .filter(({ letter }) => noFilter || groupFilter.has(letter))
     .map(({ letter, prefixes }) => ({
       letter,
-      prefixes: prefixes.filter((p) => matchesSearch(p, teamFullName(p), searchQuery)),
+      teams: prefixes
+        .map((p): TeamMeta => ({ prefix: p, fullName: teamFullName(p), flag: teamFlag(p) }))
+        .filter(({ prefix, fullName }) => matchesSearch(prefix, fullName, searchQuery)),
     }))
-    .filter(({ prefixes }) => prefixes.length > 0);
+    .filter(({ teams }) => teams.length > 0);
 
   return (
     <div className="album-list" aria-label={ariaLabel}>
       {showFwc && (
         <div className="album-group">
           <h3 className="album-group-header">🏆 FIFA World Cup</h3>
-          {renderTeam({ prefix: 'FWC', fullName: 'FIFA World Cup', flag: '🏆' })}
+          {renderTeam(fwcMeta)}
         </div>
       )}
-      {visibleGroups.map(({ letter, prefixes }) => (
+      {visibleGroups.map(({ letter, teams }) => (
         <div key={letter} className="album-group">
           <h3 className="album-group-header">Group {letter}</h3>
-          {prefixes.map((prefix) => (
-            <Fragment key={prefix}>
-              {renderTeam({ prefix, fullName: teamFullName(prefix), flag: teamFlag(prefix) })}
+          {teams.map((team) => (
+            <Fragment key={team.prefix}>
+              {renderTeam(team)}
             </Fragment>
           ))}
         </div>
