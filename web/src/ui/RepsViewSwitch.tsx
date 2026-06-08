@@ -34,7 +34,7 @@ function BarcodeIcon() {
   );
 }
 
-const OPTIONS: Array<{ mode: RepsViewMode; label: string; Icon: () => JSX.Element }> = [
+const OPTIONS: Array<{ mode: RepsViewMode; label: string; Icon: () => ReturnType<typeof GridIcon> }> = [
   { mode: 'grid', label: 'Grid', Icon: GridIcon },
   { mode: 'manual', label: 'Manual', Icon: PenIcon },
   { mode: 'scan', label: 'Scan', Icon: BarcodeIcon },
