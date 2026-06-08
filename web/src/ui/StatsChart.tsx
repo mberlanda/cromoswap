@@ -1,9 +1,4 @@
-import type { AlbumEntry } from '../domain/types';
-
-export interface DataPoint {
-  date: string;
-  cumulative: number;
-}
+import type { DataPoint } from './stats-chart-utils';
 
 export interface SeriesData {
   name: string;
@@ -15,20 +10,6 @@ interface StatsChartProps {
 }
 
 const SERIES_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
-
-export function buildCumulativeSeries(entries: AlbumEntry[]): DataPoint[] {
-  const countByDay: Record<string, number> = {};
-  for (const e of entries) {
-    const day = e.ownedAt.slice(0, 10);
-    countByDay[day] = (countByDay[day] ?? 0) + 1;
-  }
-  const sorted = Object.keys(countByDay).sort();
-  let cumulative = 0;
-  return sorted.map((date) => {
-    cumulative += countByDay[date];
-    return { date, cumulative };
-  });
-}
 
 export function StatsChart({ series }: StatsChartProps) {
   if (series.length === 0) {

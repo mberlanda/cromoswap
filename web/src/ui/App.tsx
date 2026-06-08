@@ -24,7 +24,8 @@ import type { AuthClient, AuthResponse } from '../auth/auth';
 import { rememberSessionId } from '../storage/api-repos';
 import { SaveToCloud } from './SaveToCloud';
 import type { CloudSaver } from '../storage/save-to-cloud';
-import { buildCumulativeSeries, type SeriesData } from './StatsChart';
+import type { SeriesData } from './StatsChart';
+import { buildCumulativeSeries } from './stats-chart-utils';
 
 export type Orientation = 'portrait' | 'landscape';
 

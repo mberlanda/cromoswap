@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { StatsChart, buildCumulativeSeries } from '../src/ui/StatsChart';
+import { StatsChart } from '../src/ui/StatsChart';
+import { buildCumulativeSeries } from '../src/ui/stats-chart-utils';
 import type { SeriesData } from '../src/ui/StatsChart';
 import type { AlbumEntry } from '../src/domain/types';
 
