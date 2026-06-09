@@ -703,6 +703,48 @@ section[aria-label="Resume"] li button {
   margin-bottom: var(--space-4);
 }
 
+.tab-bar-top {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-2);
+}
+
+.tab-menu-btn {
+  min-height: 36px;
+  min-width: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--subtle);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.tab-menu {
+  display: grid;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid var(--subtle);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.tab-menu button {
+  width: 100%;
+  text-align: left;
+  min-height: 36px;
+  padding: 0 var(--space-2);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--field);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .tab-bar {
   display: flex;
   padding: var(--space-1);
@@ -738,19 +780,6 @@ section[aria-label="Resume"] li button {
   background: var(--surface);
   color: var(--ink);
   box-shadow: 0 6px 18px rgb(18 26 47 / 0.08);
-}
-
-.section-stepper {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
-}
-
-.section-stepper button {
-  min-height: 36px;
-  font-size: 12px;
-  background: var(--surface);
 }
 
 /* ── Team card ───────────────────────────────────── */
@@ -1231,17 +1260,6 @@ section[aria-label="Resume"] li button {
   padding: var(--space-3) 0 var(--space-2);
   border-bottom: 1px solid var(--subtle);
   margin-bottom: var(--space-2);
-}
-
-.app-header-home {
-  align-self: center;
-  min-height: 0;
-  padding: var(--space-1) var(--space-3);
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--ink);
-  background: var(--field);
-  border-color: transparent;
 }
 
 .app-header-mark {

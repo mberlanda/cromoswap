@@ -1,6 +1,7 @@
 import type { RefObject } from 'react';
 import type { Scan } from '../domain/types';
 import type { Detection, Orientation } from './App';
+import type { CameraState } from './camera-permission';
 import { MaskOverlay } from './MaskOverlay';
 import { DetectionResult } from './DetectionResult';
 import { ManualEntry } from './ManualEntry';
@@ -12,6 +13,7 @@ import { RepsGrid } from './RepsGrid';
 import { RepsModeToggle } from './RepsModeToggle';
 import type { RepsMode } from './RepsModeToggle';
 import { RepsViewSwitch } from './RepsViewSwitch';
+import { CameraPermissionPanel } from './CameraPermissionPanel';
 import { countByCode } from '../domain/counts';
 
 export type RepsViewMode = 'grid' | 'manual' | 'scan';
@@ -19,6 +21,9 @@ export type RepsViewMode = 'grid' | 'manual' | 'scan';
 export interface RepsViewProps {
   /** When false, the Scan option is hidden and its view falls back to Manual. */
   cameraAvailable?: boolean;
+  cameraState: CameraState;
+  onRequestCamera: () => void;
+  onSkipCamera: () => void;
   view: RepsViewMode;
   onSetView: (view: RepsViewMode) => void;
   mode: RepsMode;
@@ -54,6 +59,9 @@ export interface RepsViewProps {
 
 export function RepsView({
   cameraAvailable = true,
+  cameraState,
+  onRequestCamera,
+  onSkipCamera,
   view, onSetView, mode, onSetMode, onGridTap,
   scans, thumbnails, detection, noDetection, scanning, cameraPaused, videoMode,
   orientation, size, targeted, videoRef, onCapture, onResumeCamera, onPauseCamera,
@@ -99,64 +107,72 @@ export function RepsView({
 
       {view === 'scan' && (
       <>
-      {cameraAvailable && (
       <section aria-label="Scan" className="scan-area">
-        <div className="camera-wrap">
-          <video ref={videoRef} playsInline muted className="camera-preview" />
-          <MaskOverlay orientation={orientation} size={size} targeted={targeted} />
-          {videoMode && !cameraPaused && <div className="camera-pill">Auto collect</div>}
-          {cameraPaused && (
-            <div className="camera-state-overlay" role="status">
-              <p>Camera paused</p>
-              <button type="button" className="primary" onClick={onResumeCamera}>
-                Resume camera
+        {cameraAvailable ? (
+          <>
+            <div className="camera-wrap">
+              <video ref={videoRef} playsInline muted className="camera-preview" />
+              <MaskOverlay orientation={orientation} size={size} targeted={targeted} />
+              {videoMode && !cameraPaused && <div className="camera-pill">Auto collect</div>}
+              {cameraPaused && (
+                <div className="camera-state-overlay" role="status">
+                  <p>Camera paused</p>
+                  <button type="button" className="primary" onClick={onResumeCamera}>
+                    Resume camera
+                  </button>
+                </div>
+              )}
+            </div>
+            <ScanStatus state={scanning ? 'scanning' : noDetection ? 'no-detection' : 'idle'} />
+            {detection && (
+              <DetectionResult
+                candidate={detection.candidate}
+                imageDataUrl={detection.imageDataUrl}
+                onConfirm={onConfirm}
+                onCorrect={onCorrect}
+                onSkip={onSkip}
+                onRescan={onRescan}
+              />
+            )}
+            <div className="scan-bottom">
+              <div className="scan-mode-row">
+                <label className="toggle-control">
+                  <input
+                    type="checkbox"
+                    checked={videoMode}
+                    onChange={(event) => onToggleVideoMode(event.currentTarget.checked)}
+                  />
+                  <span>Auto collect</span>
+                </label>
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={onPauseCamera}
+                  disabled={cameraPaused}
+                >
+                  Pause camera
+                </button>
+              </div>
+              <OrientationToggle value={orientation} onChange={onSetOrientation} />
+              <SizeSlider value={size} onChange={onSetSize} />
+              <button
+                type="button"
+                className="primary full"
+                onClick={onCapture}
+                disabled={scanning || cameraPaused || videoMode}
+              >
+                {scanning ? 'Hold steady…' : videoMode ? 'Auto collect enabled' : 'Scan sticker'}
               </button>
             </div>
-          )}
-        </div>
-        <ScanStatus state={scanning ? 'scanning' : noDetection ? 'no-detection' : 'idle'} />
-        {detection && (
-          <DetectionResult
-            candidate={detection.candidate}
-            imageDataUrl={detection.imageDataUrl}
-            onConfirm={onConfirm}
-            onCorrect={onCorrect}
-            onSkip={onSkip}
-            onRescan={onRescan}
+          </>
+        ) : (
+          <CameraPermissionPanel
+            state={cameraState}
+            onRequest={onRequestCamera}
+            onSkip={onSkipCamera}
           />
         )}
-        <div className="scan-bottom">
-          <div className="scan-mode-row">
-            <label className="toggle-control">
-              <input
-                type="checkbox"
-                checked={videoMode}
-                onChange={(event) => onToggleVideoMode(event.currentTarget.checked)}
-              />
-              <span>Auto collect</span>
-            </label>
-            <button
-              type="button"
-              className="secondary"
-              onClick={onPauseCamera}
-              disabled={cameraPaused}
-            >
-              Pause camera
-            </button>
-          </div>
-          <OrientationToggle value={orientation} onChange={onSetOrientation} />
-          <SizeSlider value={size} onChange={onSetSize} />
-          <button
-            type="button"
-            className="primary full"
-            onClick={onCapture}
-            disabled={scanning || cameraPaused || videoMode}
-          >
-            {scanning ? 'Hold steady…' : videoMode ? 'Auto collect enabled' : 'Scan sticker'}
-          </button>
-        </div>
       </section>
-      )}
       <CollectionList
         scans={scans}
         thumbnails={thumbnails}

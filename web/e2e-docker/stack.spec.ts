@@ -31,7 +31,7 @@ test('the served SPA loads and can open the board', async ({ page }) => {
   // The board stays browsable without an account.
   await expect(page.getByTestId('auth-username')).toBeVisible();
 
-  await page.getByTestId('view-board').click();
+  await page.getByTestId('tab-board').click();
   await expect(page.getByTestId('leaderboard-title')).toBeVisible();
 });
 
@@ -118,7 +118,7 @@ test('browsing a collector from the board surfaces the admin backoffice link', a
   expect(sync.ok()).toBeTruthy();
 
   await page.goto('/');
-  await page.getByTestId('view-board').click();
+  await page.getByTestId('tab-board').click();
   await page.getByTestId(`open-${user}`).click();
 
   const adminLink = page.getByTestId('admin-link');

@@ -14,6 +14,9 @@ function makeScan(id: string, code: string, source: 'ocr' | 'manual' = 'ocr'): S
 }
 
 const baseProps: RepsViewProps = {
+  cameraState: 'granted',
+  onRequestCamera: vi.fn(),
+  onSkipCamera: vi.fn(),
   view: 'scan',
   onSetView: vi.fn(),
   mode: 'add',

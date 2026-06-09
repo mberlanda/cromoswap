@@ -141,11 +141,31 @@ export function SessionGate({
           <StorageModeToggle mode={storageMode} onChange={onChangeMode} />
         )}
       </div>
-      {onOpenBoard && (
-        <button type="button" className="quiet gate-board-link" data-test-id="view-board" onClick={onOpenBoard}>
-          View board
-        </button>
-      )}
+      <nav aria-label="Primary sections" className="section-nav">
+        <div role="tablist" className="tab-bar" data-test-id="gate-tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected
+            data-test-id="tab-home"
+            className="tab-bar-item tab-active"
+          >
+            <span className="tab-bar-label">Home</span>
+          </button>
+          {onOpenBoard && (
+            <button
+              type="button"
+              role="tab"
+              aria-selected={false}
+              data-test-id="tab-board"
+              className="tab-bar-item"
+              onClick={onOpenBoard}
+            >
+              <span className="tab-bar-label">Leaderboard</span>
+            </button>
+          )}
+        </div>
+      </nav>
       {needsAuth && auth ? (
         <AuthPanel auth={auth} onAuthenticated={(res) => onAuthenticated?.(res)} />
       ) : (
