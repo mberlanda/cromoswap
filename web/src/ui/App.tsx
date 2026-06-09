@@ -8,7 +8,7 @@ import type { LeaderboardEntry } from '../storage/sync-client';
 import { SessionGate } from './SessionGate';
 import { TabBar } from './TabBar';
 import type { Tab } from './TabBar';
-import { MenuIcon, PrimaryTabList } from './TabBar';
+import { HomeIcon, LeaderboardIcon, MenuIcon, PrimaryTabList } from './TabBar';
 import { AlbumView } from './AlbumView';
 import { RepsView } from './RepsView';
 import type { RepsViewMode } from './RepsView';
@@ -504,6 +504,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
                   id: 'home',
                   label: 'Home',
                   selected: false,
+                  icon: <HomeIcon />,
                   onClick: () => setHomeView('gate'),
                   testId: 'tab-home',
                 },
@@ -511,6 +512,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
                   id: 'board',
                   label: 'Leaderboard',
                   selected: true,
+                  icon: <LeaderboardIcon />,
                   testId: 'tab-board',
                 },
               ]}

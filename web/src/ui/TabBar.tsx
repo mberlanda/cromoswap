@@ -18,7 +18,7 @@ export interface PrimaryTabListItem {
   testId?: string;
 }
 
-function HomeIcon() {
+export function HomeIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
       <path d="M2 8.5L9 2l7 6.5V16a1 1 0 01-1 1H12v-5H6v5H3a1 1 0 01-1-1V8.5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
@@ -47,7 +47,7 @@ function CameraIcon() {
   );
 }
 
-function LeaderboardIcon() {
+export function LeaderboardIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
       <rect x="1" y="10" width="4" height="7" rx="1" stroke="currentColor" strokeWidth="1.5" />

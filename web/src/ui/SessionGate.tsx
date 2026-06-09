@@ -12,7 +12,12 @@ import { CROMOSWAP_MARK_SRC } from './brand-assets';
 import type { AuthClient, AuthResponse } from '../auth/auth';
 import { AuthPanel } from './AuthPanel';
 import { PasswordChangeForm } from './PasswordChangeForm';
-import { PrimaryTabList, type PrimaryTabListItem } from './TabBar';
+import {
+  HomeIcon,
+  LeaderboardIcon,
+  PrimaryTabList,
+  type PrimaryTabListItem,
+} from './TabBar';
 
 export interface AlbumImport {
   userName: string;
@@ -150,6 +155,7 @@ export function SessionGate({
               id: 'home',
               label: 'Home',
               selected: true,
+              icon: <HomeIcon />,
               testId: 'tab-home',
             },
             ...(onOpenBoard
@@ -158,6 +164,7 @@ export function SessionGate({
                     id: 'board',
                     label: 'Leaderboard',
                     selected: false,
+                    icon: <LeaderboardIcon />,
                     onClick: onOpenBoard,
                     testId: 'tab-board',
                   },
