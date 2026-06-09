@@ -52,6 +52,17 @@ describe('SessionGate', () => {
     expect(onOpenBoard).toHaveBeenCalled();
   });
 
+  it('opens the navigation menu and navigates to leaderboard', async () => {
+    const onOpenBoard = vi.fn();
+    render(<SessionGate sessions={[]} onCreate={vi.fn()} onResume={vi.fn()} onOpenBoard={onOpenBoard} />);
+
+    await userEvent.click(screen.getByRole('button', { name: /open navigation menu/i }));
+    expect(screen.getByRole('menu')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('menuitem', { name: /leaderboard/i }));
+
+    expect(onOpenBoard).toHaveBeenCalled();
+  });
+
   it('lets the user resume an existing session', async () => {
     const onResume = vi.fn();
     render(<SessionGate sessions={[existing]} onCreate={vi.fn()} onResume={onResume} />);

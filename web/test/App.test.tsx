@@ -206,6 +206,20 @@ describe('App', () => {
     expect(await screen.findByLabelText(/your name/i)).toBeInTheDocument();
   });
 
+  it('shows the same header navigation menu in pre-session board view', async () => {
+    const fetchLeaderboard = vi.fn(async () => [{ userName: 'Ana', owned: 3, missing: 977 }]);
+    render(<App deps={makeDeps({ fetchLeaderboard })} />);
+
+    await userEvent.click(screen.getByRole('tab', { name: /leaderboard/i }));
+    expect(await screen.findByText('Ana')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /open navigation menu/i }));
+    expect(screen.getByRole('menu')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('menuitem', { name: /^home$/i }));
+
+    expect(await screen.findByLabelText(/your name/i)).toBeInTheDocument();
+  });
+
   it('captures, confirms, and stores a scan that appears in the collection', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();
