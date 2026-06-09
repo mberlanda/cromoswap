@@ -430,6 +430,8 @@ describe('App', () => {
     render(<App deps={deps} />);
     await startSession('Mauro');
 
+    const nextTabs = screen.queryByRole('button', { name: /show next tabs/i });
+    if (nextTabs) await userEvent.click(nextTabs);
     await userEvent.click(screen.getByRole('tab', { name: /leaderboard/i }));
     await userEvent.click(await screen.findByRole('button', { name: /open alice selection/i }));
 
