@@ -8,7 +8,7 @@ import type { LeaderboardEntry } from '../storage/sync-client';
 import { SessionGate } from './SessionGate';
 import { TabBar } from './TabBar';
 import type { Tab } from './TabBar';
-import { MenuIcon, PrimaryTabList } from './TabBar';
+import { HomeIcon, LeaderboardIcon, MenuIcon, PrimaryTabList } from './TabBar';
 import { AlbumView } from './AlbumView';
 import { RepsView } from './RepsView';
 import type { RepsViewMode } from './RepsView';
@@ -481,6 +481,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
   }
 
   function handleOpenBoard() {
+    setNavMenuOpen(false);
     setHomeView('board');
     setBoardSelectionUserName(null);
     void handleRefreshLeaderboard();
@@ -490,12 +491,45 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
     if (homeView === 'board') {
       return (
         <main aria-label="Board">
-          <div className="app-header">
+          <header className="app-header">
             <img className="app-header-mark" src={CROMOSWAP_MARK_SRC} alt="" aria-hidden="true" />
             <div className="app-header-copy">
               <h1 className="app-header-name">Board</h1>
             </div>
-          </div>
+            <button
+              type="button"
+              className="tab-menu-btn"
+              aria-label="Open navigation menu"
+              aria-expanded={navMenuOpen}
+              data-test-id="nav-menu-toggle"
+              onClick={() => setNavMenuOpen((v) => !v)}
+            >
+              <MenuIcon />
+            </button>
+          </header>
+          {navMenuOpen && (
+            <div className="tab-menu" role="menu" data-test-id="nav-menu">
+              <button
+                type="button"
+                role="menuitem"
+                data-test-id="menu-home"
+                onClick={() => {
+                  setHomeView('gate');
+                  setNavMenuOpen(false);
+                }}
+              >
+                Home
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                data-test-id="menu-board"
+                onClick={() => setNavMenuOpen(false)}
+              >
+                Leaderboard
+              </button>
+            </div>
+          )}
           <nav aria-label="Primary sections" className="section-nav">
             <PrimaryTabList
               dataTestId="primary-tablist"
@@ -504,6 +538,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
                   id: 'home',
                   label: 'Home',
                   selected: false,
+                  icon: <HomeIcon />,
                   onClick: () => setHomeView('gate'),
                   testId: 'tab-home',
                 },
@@ -511,6 +546,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
                   id: 'board',
                   label: 'Leaderboard',
                   selected: true,
+                  icon: <LeaderboardIcon />,
                   testId: 'tab-board',
                 },
               ]}

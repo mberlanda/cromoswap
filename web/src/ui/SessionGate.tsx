@@ -12,7 +12,13 @@ import { CROMOSWAP_MARK_SRC } from './brand-assets';
 import type { AuthClient, AuthResponse } from '../auth/auth';
 import { AuthPanel } from './AuthPanel';
 import { PasswordChangeForm } from './PasswordChangeForm';
-import { PrimaryTabList, type PrimaryTabListItem } from './TabBar';
+import {
+  HomeIcon,
+  LeaderboardIcon,
+  MenuIcon,
+  PrimaryTabList,
+  type PrimaryTabListItem,
+} from './TabBar';
 
 export interface AlbumImport {
   userName: string;
@@ -58,6 +64,7 @@ export function SessionGate({
   onLogout,
 }: SessionGateProps) {
   const [name, setName] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   // Cloud mode (auth set) requires login before scanning; local mode has no auth.
   const cloudUser = auth ? auth.currentUser() : null;
@@ -131,17 +138,50 @@ export function SessionGate({
 
   return (
     <main aria-label="Session">
-      <div className="session-gate-header">
-        <div className="brand-lockup">
-          <img className="brand-mark" src={CROMOSWAP_MARK_SRC} alt="" aria-hidden="true" />
-          <div className="brand-copy">
-            <h1 data-test-id="gate-title">cromoswap</h1>
-          </div>
+      <header className="app-header">
+        <img className="app-header-mark" src={CROMOSWAP_MARK_SRC} alt="" aria-hidden="true" />
+        <div className="app-header-copy">
+          <h1 className="app-header-name" data-test-id="gate-title">cromoswap</h1>
         </div>
+        <button
+          type="button"
+          className="tab-menu-btn"
+          aria-label="Open navigation menu"
+          aria-expanded={menuOpen}
+          data-test-id="nav-menu-toggle"
+          onClick={() => setMenuOpen((v) => !v)}
+        >
+          <MenuIcon />
+        </button>
         {storageMode && onChangeMode && (
           <StorageModeToggle mode={storageMode} onChange={onChangeMode} />
         )}
-      </div>
+      </header>
+      {menuOpen && (
+        <div className="tab-menu" role="menu" data-test-id="nav-menu">
+          <button
+            type="button"
+            role="menuitem"
+            data-test-id="menu-home"
+            onClick={() => setMenuOpen(false)}
+          >
+            Home
+          </button>
+          {onOpenBoard && (
+            <button
+              type="button"
+              role="menuitem"
+              data-test-id="menu-board"
+              onClick={() => {
+                onOpenBoard();
+                setMenuOpen(false);
+              }}
+            >
+              Leaderboard
+            </button>
+          )}
+        </div>
+      )}
       <nav aria-label="Primary sections" className="section-nav">
         <PrimaryTabList
           dataTestId="gate-tablist"
@@ -150,6 +190,7 @@ export function SessionGate({
               id: 'home',
               label: 'Home',
               selected: true,
+              icon: <HomeIcon />,
               testId: 'tab-home',
             },
             ...(onOpenBoard
@@ -158,6 +199,7 @@ export function SessionGate({
                     id: 'board',
                     label: 'Leaderboard',
                     selected: false,
+                    icon: <LeaderboardIcon />,
                     onClick: onOpenBoard,
                     testId: 'tab-board',
                   },
