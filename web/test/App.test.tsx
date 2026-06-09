@@ -104,6 +104,11 @@ describe('App', () => {
     await userEvent.click(screen.getByRole('button', { name: /open navigation menu/i }));
     expect(screen.getByRole('menu')).toBeInTheDocument();
 
+    await userEvent.click(screen.getByRole('menuitem', { name: /stats/i }));
+    expect(await screen.findByRole('heading', { name: /sticker histogram/i })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /open navigation menu/i }));
+
     await userEvent.click(screen.getByRole('menuitem', { name: /leaderboard/i }));
     expect(await screen.findByText('Ana')).toBeInTheDocument();
 
@@ -425,6 +430,8 @@ describe('App', () => {
     render(<App deps={deps} />);
     await startSession('Mauro');
 
+    const nextTabs = screen.queryByRole('button', { name: /show next tabs/i });
+    if (nextTabs) await userEvent.click(nextTabs);
     await userEvent.click(screen.getByRole('tab', { name: /leaderboard/i }));
     await userEvent.click(await screen.findByRole('button', { name: /open alice selection/i }));
 

@@ -54,3 +54,45 @@ test('local: navigates between album, reps grid, and home', async ({ page }) => 
   await page.getByTestId('tab-home').click();
   await expect(page.getByTestId('session-name')).toBeVisible();
 });
+
+test('local: stats tab shows seeded histogram and supports player switch', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('storage-local').click();
+
+  await page.getByTestId('import-name').fill('Mauro');
+  await page.getByTestId('import-owned').click();
+  await page.getByTestId('import-file').setInputFiles({
+    name: 'mauro.txt',
+    mimeType: 'text/plain',
+    buffer: Buffer.from('ARG01\nARG02\nBRA05\n'),
+  });
+  await expect(page.getByTestId('import-result')).toContainText('Imported 3 owned stickers');
+
+  await page.getByTestId('import-name').fill('Luca');
+  await page.getByTestId('import-file').setInputFiles({
+    name: 'luca.txt',
+    mimeType: 'text/plain',
+    buffer: Buffer.from('ARG01\n'),
+  });
+  await expect(page.getByTestId('import-result')).toContainText('Imported 1 owned sticker');
+
+  await page.getByTestId('resume-Mauro').click();
+  await page.getByTestId('tab-stats').click();
+  await expect(page.getByTestId('stats-summary')).toContainText('Mauro: 3 owned stickers');
+
+  await page.getByTestId('stats-player-select').selectOption('Luca');
+  await expect(page.getByTestId('stats-summary')).toContainText('Luca: 1 owned sticker');
+  await expect(page.getByTestId('hist-row-20')).toBeVisible();
+});
+
+test('local: stats and leaderboard are reachable from hamburger menu', async ({ page }) => {
+  await startLocalSession(page);
+
+  await page.getByTestId('nav-menu-toggle').click();
+  await page.getByTestId('menu-stats').click();
+  await expect(page.getByRole('heading', { name: /sticker histogram/i })).toBeVisible();
+
+  await page.getByTestId('nav-menu-toggle').click();
+  await page.getByTestId('menu-home').click();
+  await expect(page.getByTestId('session-name')).toBeVisible();
+});

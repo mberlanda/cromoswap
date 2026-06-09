@@ -808,11 +808,32 @@ section[aria-label="Resume"] li button {
 
 .tab-bar {
   display: flex;
+  flex: 1;
   padding: var(--space-1);
   border: 1px solid var(--subtle);
   border-radius: var(--radius);
   background: var(--field);
   gap: var(--space-1);
+}
+
+.tab-bar-shell {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-1);
+}
+
+.tab-swap-btn {
+  min-height: 52px;
+  min-width: 32px;
+  padding: 0;
+  border: 1px solid var(--subtle);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.tab-swap-btn:disabled {
+  opacity: 0.5;
 }
 
 .tab-bar-item {
@@ -1176,6 +1197,88 @@ section[aria-label="Resume"] li button {
   flex-shrink: 0;
 }
 
+.stats-tab {
+  border: 1px solid var(--subtle);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: var(--space-3);
+}
+
+.stats-tab-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.stats-player-label {
+  justify-self: end;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+#stats-player {
+  grid-column: 2;
+  min-width: 170px;
+  max-width: 100%;
+}
+
+.stats-summary {
+  margin: var(--space-2) 0 var(--space-3);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.histogram {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.histogram-row {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.histogram-label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--muted);
+  text-align: right;
+}
+
+.histogram-track {
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--field);
+  overflow: hidden;
+}
+
+.histogram-bar {
+  height: 100%;
+  min-width: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--info), var(--scan));
+}
+
+.histogram-bar-empty {
+  min-width: 0;
+}
+
+.histogram-value {
+  min-width: 26px;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
 /* ── Session resume card ─────────────────────────── */
 .session-card {
   display: grid;
@@ -1321,6 +1424,7 @@ section[aria-label="Resume"] li button {
   padding: var(--space-3) 0 var(--space-2);
   border-bottom: 1px solid var(--subtle);
   margin-bottom: var(--space-2);
+  min-height: 60px;
 }
 
 .app-header-mark {
@@ -1333,6 +1437,58 @@ section[aria-label="Resume"] li button {
 .app-header-copy {
   min-width: 0;
   flex: 1;
+}
+
+@media (max-width: 680px) {
+  .app-header {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: var(--space-2);
+    row-gap: var(--space-2);
+    min-height: 64px;
+    padding: var(--space-2) 0;
+    margin-bottom: var(--space-2);
+  }
+
+  .app-header .tab-menu-btn {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+  }
+
+  .app-header-mark {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .app-header-copy {
+    grid-column: 3;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .app-header .storage-toggle {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .section-nav {
+    padding: var(--space-2) 0;
+    margin-bottom: var(--space-3);
+  }
+
+  .tab-bar {
+    padding: var(--space-1);
+    gap: var(--space-1);
+  }
+
+  .tab-bar-item {
+    min-height: 50px;
+    padding: 3px 0;
+  }
 }
 
 .app-header-name {
