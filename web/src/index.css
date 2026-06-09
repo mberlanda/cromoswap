@@ -621,6 +621,9 @@ main[aria-label="Session"] h1 {
   margin-bottom: 0;
 }
   padding: var(--space-3);
+  border: 1px solid var(--subtle);
+  border-radius: var(--radius);
+  background: var(--surface);
   box-shadow: 0 8px 20px rgb(18 26 47 / 0.04);
 }
 
@@ -681,7 +684,7 @@ section[aria-label="Import"] .home-card:last-of-type {
 
 section[aria-label="Import"] .home-card:last-of-type .import-label {
   color: color-mix(in srgb, var(--privacy) 72%, var(--ink));
-
+}
 main[aria-label="Session"] > form {
   padding: var(--space-4);
   border: 1px solid var(--subtle);
