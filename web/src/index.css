@@ -1267,6 +1267,10 @@ section[aria-label="Resume"] li button {
   background: linear-gradient(90deg, var(--info), var(--scan));
 }
 
+.histogram-bar-empty {
+  min-width: 0;
+}
+
 .histogram-value {
   min-width: 26px;
   text-align: right;

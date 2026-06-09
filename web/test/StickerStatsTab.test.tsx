@@ -23,6 +23,22 @@ function makeAlbumRepo(): AlbumRepo {
   };
 }
 
+function makeCappedAlbumRepo(): AlbumRepo {
+  return {
+    toggle: vi.fn(async () => 'added'),
+    setMany: vi.fn(async () => {}),
+    listByUser: vi.fn(async (userName: string) => {
+      if (userName !== 'Mauro') return [];
+      return Array.from({ length: 25 }, (_, idx) => ({
+        id: `c-${idx}`,
+        userName,
+        normalizedCode: 'ARG01',
+        ownedAt: `2026-06-01T12:${idx.toString().padStart(2, '0')}:00.000Z`,
+      }));
+    }),
+  };
+}
+
 describe('StickerStatsTab', () => {
   it('renders a 0..20 horizontal histogram and summary for the selected player', async () => {
     render(
@@ -51,5 +67,18 @@ describe('StickerStatsTab', () => {
 
     await user.selectOptions(screen.getByLabelText(/select player/i), 'Luca');
     expect(await screen.findByTestId('stats-summary')).toHaveTextContent('Luca: 1 owned sticker');
+  });
+
+  it('shows exact total and uses 20+ label for capped bucket', async () => {
+    render(
+      <StickerStatsTab
+        albumRepo={makeCappedAlbumRepo()}
+        defaultPlayerName="Mauro"
+        playerNames={['Mauro']}
+      />,
+    );
+
+    expect(await screen.findByTestId('stats-summary')).toHaveTextContent('Mauro: 25 owned stickers');
+    expect(screen.getByText('20+')).toBeInTheDocument();
   });
 });

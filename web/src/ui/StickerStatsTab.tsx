@@ -35,9 +35,23 @@ function buildHistogram(entries: string[]): number[] {
   return bins;
 }
 
+function buildTotalOwned(entries: string[]): number {
+  const countsByCode = new Map<string, number>();
+  for (const code of entries) {
+    countsByCode.set(code, (countsByCode.get(code) ?? 0) + 1);
+  }
+
+  let totalOwned = 0;
+  for (const code of allStickerCodes()) {
+    totalOwned += countsByCode.get(code) ?? 0;
+  }
+  return totalOwned;
+}
+
 export function StickerStatsTab({ albumRepo, playerNames, defaultPlayerName }: StickerStatsTabProps) {
   const [selectedPlayer, setSelectedPlayer] = useState(defaultPlayerName);
   const [histogram, setHistogram] = useState<number[]>(Array.from({ length: MAX_SCALE + 1 }, () => 0));
+  const [totalOwned, setTotalOwned] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const sortedPlayers = useMemo(
@@ -57,10 +71,13 @@ export function StickerStatsTab({ albumRepo, playerNames, defaultPlayerName }: S
       try {
         const entries = await albumRepo.listByUser(effectivePlayer);
         if (cancelled) return;
-        setHistogram(buildHistogram(entries.map((e) => e.normalizedCode)));
+        const normalizedCodes = entries.map((e) => e.normalizedCode);
+        setHistogram(buildHistogram(normalizedCodes));
+        setTotalOwned(buildTotalOwned(normalizedCodes));
       } catch {
         if (cancelled) return;
         setHistogram(Array.from({ length: MAX_SCALE + 1 }, () => 0));
+        setTotalOwned(0);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -73,7 +90,6 @@ export function StickerStatsTab({ albumRepo, playerNames, defaultPlayerName }: S
   }, [albumRepo, effectivePlayer]);
 
   const maxBin = Math.max(...histogram, 1);
-  const totalOwned = histogram.reduce((acc, count, copies) => acc + count * copies, 0);
   const stickerLabel = totalOwned === 1 ? 'sticker' : 'stickers';
 
   return (
@@ -114,10 +130,10 @@ export function StickerStatsTab({ albumRepo, playerNames, defaultPlayerName }: S
               data-test-id={`hist-row-${copies}`}
               data-testid={`hist-row-${copies}`}
             >
-              <span className="histogram-label">{copies}</span>
+              <span className="histogram-label">{copies === MAX_SCALE ? `${MAX_SCALE}+` : copies}</span>
               <div className="histogram-track" aria-hidden="true">
                 <div
-                  className="histogram-bar"
+                  className={`histogram-bar${count === 0 ? ' histogram-bar-empty' : ''}`}
                   style={{ width: `${(count / maxBin) * 100}%` }}
                 />
               </div>

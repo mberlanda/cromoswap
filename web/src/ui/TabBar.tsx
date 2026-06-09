@@ -34,7 +34,6 @@ function useIsMobileViewport(): boolean {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
     const media = window.matchMedia(MOBILE_MEDIA_QUERY);
     const onChange = (event: MediaQueryListEvent) => setIsMobile(event.matches);
-    setIsMobile(media.matches);
     media.addEventListener('change', onChange);
     return () => media.removeEventListener('change', onChange);
   }, []);
