@@ -2,6 +2,7 @@ import { StrictMode, useCallback, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import { App, type AppDeps } from './ui/App';
+import { VisualTestPage } from './ui/VisualTestPage';
 import { createAppDeps, getStorageMode, setStorageMode, type StorageMode } from './composition';
 
 /** Browser bootstrap: build deps, re-building whenever storage mode changes. */
@@ -37,8 +38,11 @@ function Root() {
   return <App deps={deps} storageMode={mode} onChangeMode={handleChangeMode} />;
 }
 
+const params = new URLSearchParams(window.location.search);
+const visualTestMode = params.get('visualTest') === '1';
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Root />
+    {visualTestMode ? <VisualTestPage /> : <Root />}
   </StrictMode>,
 );
