@@ -40,6 +40,8 @@ const MOCK_STATS: SeriesData[] = [
   },
 ];
 
+const NOOP = () => undefined;
+
 export function VisualTestPage() {
   return (
     <main className="visual-test-page" aria-label="Visual component showcase" data-test-id="visual-test-root">
@@ -52,24 +54,24 @@ export function VisualTestPage() {
             'visual-1': { owned: 240, missing: 740 },
             'visual-2': { owned: 180, missing: 800 },
           }}
-          onCreate={() => {}}
-          onResume={() => {}}
-          onImportAlbum={() => {}}
-          onImportJson={() => {}}
-          onOpenBoard={() => {}}
+          onCreate={NOOP}
+          onResume={NOOP}
+          onImportAlbum={NOOP}
+          onImportJson={NOOP}
+          onOpenBoard={NOOP}
           storageMode="local"
-          onChangeMode={() => {}}
+          onChangeMode={NOOP}
         />
       </section>
 
       <section className="visual-test-section" aria-label="Tab bar showcase">
         <h2>Navigation</h2>
-        <TabBar active="reps" onChange={() => {}} showBoard onGoHome={() => {}} />
+        <TabBar active="reps" onChange={NOOP} showBoard onGoHome={NOOP} />
       </section>
 
       <section className="visual-test-section" aria-label="Reps switch showcase">
         <h2>Reps View Switch</h2>
-        <RepsViewSwitch value="grid" onChange={() => {}} />
+        <RepsViewSwitch value="grid" onChange={NOOP} />
       </section>
 
       <section className="visual-test-section" aria-label="Stats chart showcase">
