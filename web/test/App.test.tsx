@@ -104,6 +104,11 @@ describe('App', () => {
     await userEvent.click(screen.getByRole('button', { name: /open navigation menu/i }));
     expect(screen.getByRole('menu')).toBeInTheDocument();
 
+    await userEvent.click(screen.getByRole('menuitem', { name: /stats/i }));
+    expect(await screen.findByRole('heading', { name: /sticker histogram/i })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /open navigation menu/i }));
+
     await userEvent.click(screen.getByRole('menuitem', { name: /leaderboard/i }));
     expect(await screen.findByText('Ana')).toBeInTheDocument();
 

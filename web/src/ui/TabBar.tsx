@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-export type Tab = 'album' | 'reps' | 'board';
+export type Tab = 'album' | 'reps' | 'board' | 'stats';
 
 interface TabBarProps {
   active: Tab;
@@ -17,6 +18,8 @@ export interface PrimaryTabListItem {
   onClick?: () => void;
   testId?: string;
 }
+
+const MAX_VISIBLE_TABS = 4;
 
 export function HomeIcon() {
   return (
@@ -57,6 +60,17 @@ export function LeaderboardIcon() {
   );
 }
 
+function StatsIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <path d="M2 15h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <rect x="3" y="9" width="2.5" height="5" rx="0.8" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="7.75" y="6.5" width="2.5" height="7.5" rx="0.8" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="12.5" y="4" width="2.5" height="10" rx="0.8" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
 export function MenuIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
@@ -68,12 +82,68 @@ export function MenuIcon() {
 interface PrimaryTabListProps {
   items: PrimaryTabListItem[];
   dataTestId: string;
+  activeTabId?: Tab;
 }
 
-export function PrimaryTabList({ items, dataTestId }: PrimaryTabListProps) {
+function ChevronLeftIcon() {
   return (
-    <div role="tablist" className="tab-bar" data-test-id={dataTestId}>
-      {items.map((item) => (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <path d="M11.5 3.5L6 9l5.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ChevronRightIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <path d="M6.5 3.5L12 9l-5.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function PrimaryTabList({ items, dataTestId, activeTabId }: PrimaryTabListProps) {
+  const [windowStart, setWindowStart] = useState(0);
+  const hasOverflow = items.length > MAX_VISIBLE_TABS;
+
+  const maxStart = Math.max(0, items.length - MAX_VISIBLE_TABS);
+
+  useEffect(() => {
+    if (!hasOverflow || !activeTabId) return;
+    const activeIndex = items.findIndex((item) => item.id === activeTabId);
+    if (activeIndex === -1) return;
+    if (activeIndex < windowStart) {
+      setWindowStart(activeIndex);
+      return;
+    }
+    if (activeIndex >= windowStart + MAX_VISIBLE_TABS) {
+      setWindowStart(activeIndex - MAX_VISIBLE_TABS + 1);
+    }
+  }, [activeTabId, hasOverflow, items, windowStart]);
+
+  const visibleItems = useMemo(() => {
+    if (!hasOverflow) return items;
+    return items.slice(windowStart, windowStart + MAX_VISIBLE_TABS);
+  }, [hasOverflow, items, windowStart]);
+
+  const canGoLeft = windowStart > 0;
+  const canGoRight = windowStart < maxStart;
+
+  return (
+    <div className="tab-bar-shell" data-test-id={`${dataTestId}-shell`}>
+      {hasOverflow && (
+        <button
+          type="button"
+          className="tab-swap-btn"
+          aria-label="Show previous tabs"
+          data-test-id="tab-swap-left"
+          onClick={() => setWindowStart((v) => Math.max(0, v - 1))}
+          disabled={!canGoLeft}
+        >
+          <ChevronLeftIcon />
+        </button>
+      )}
+      <div role="tablist" className="tab-bar" data-test-id={dataTestId}>
+        {visibleItems.map((item) => (
         <button
           key={item.id}
           type="button"
@@ -86,7 +156,20 @@ export function PrimaryTabList({ items, dataTestId }: PrimaryTabListProps) {
           {item.icon}
           <span className="tab-bar-label">{item.label}</span>
         </button>
-      ))}
+        ))}
+      </div>
+      {hasOverflow && (
+        <button
+          type="button"
+          className="tab-swap-btn"
+          aria-label="Show next tabs"
+          data-test-id="tab-swap-right"
+          onClick={() => setWindowStart((v) => Math.min(maxStart, v + 1))}
+          disabled={!canGoRight}
+        >
+          <ChevronRightIcon />
+        </button>
+      )}
     </div>
   );
 }
@@ -94,12 +177,14 @@ export function PrimaryTabList({ items, dataTestId }: PrimaryTabListProps) {
 function labelFor(tab: Tab): string {
   if (tab === 'album') return 'My Album';
   if (tab === 'reps') return 'My Stickers';
+  if (tab === 'stats') return 'Stats';
   return 'Leaderboard';
 }
 
 function iconFor(tab: Tab): () => ReturnType<typeof AlbumIcon> {
   if (tab === 'album') return AlbumIcon;
   if (tab === 'reps') return CameraIcon;
+  if (tab === 'stats') return StatsIcon;
   return LeaderboardIcon;
 }
 
@@ -107,6 +192,7 @@ export function TabBar({ active, onChange, showBoard = false, onGoHome }: TabBar
   const contentTabs: Array<{ id: Tab; label: string }> = [
     { id: 'album', label: 'My Album' },
     { id: 'reps', label: 'My Stickers' },
+    { id: 'stats', label: 'Stats' },
     ...(showBoard ? [{ id: 'board' as const, label: 'Leaderboard' }] : []),
   ];
   const items: PrimaryTabListItem[] = [
@@ -137,7 +223,7 @@ export function TabBar({ active, onChange, showBoard = false, onGoHome }: TabBar
 
   return (
     <nav aria-label="Primary sections" className="section-nav">
-      <PrimaryTabList items={items} dataTestId="primary-tablist" />
+      <PrimaryTabList items={items} dataTestId="primary-tablist" activeTabId={active} />
     </nav>
   );
 }
