@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export type Tab = 'album' | 'reps' | 'board' | 'stats';
 
@@ -20,6 +20,27 @@ export interface PrimaryTabListItem {
 }
 
 const MAX_VISIBLE_TABS = 4;
+const MOBILE_MEDIA_QUERY = '(max-width: 680px)';
+
+function useIsMobileViewport(): boolean {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return false;
+    }
+    return window.matchMedia(MOBILE_MEDIA_QUERY).matches;
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    const media = window.matchMedia(MOBILE_MEDIA_QUERY);
+    const onChange = (event: MediaQueryListEvent) => setIsMobile(event.matches);
+    setIsMobile(media.matches);
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, []);
+
+  return isMobile;
+}
 
 export function HomeIcon() {
   return (
@@ -103,7 +124,8 @@ function ChevronRightIcon() {
 
 export function PrimaryTabList({ items, dataTestId, activeTabId }: PrimaryTabListProps) {
   const [windowStart, setWindowStart] = useState(0);
-  const hasOverflow = items.length > MAX_VISIBLE_TABS;
+  const isMobile = useIsMobileViewport();
+  const hasOverflow = isMobile && items.length > MAX_VISIBLE_TABS;
 
   const maxStart = Math.max(0, items.length - MAX_VISIBLE_TABS);
 

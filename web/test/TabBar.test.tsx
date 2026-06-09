@@ -3,7 +3,30 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TabBar } from '../src/ui/TabBar';
 
+function mockMobileViewport(matches: boolean) {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation(() => ({
+      matches,
+      media: '(max-width: 680px)',
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+}
+
 describe('TabBar', () => {
+  it('shows all primary tabs on desktop widths', () => {
+    mockMobileViewport(false);
+    render(<TabBar active="reps" onChange={vi.fn()} showBoard onGoHome={vi.fn()} />);
+    expect(screen.getAllByRole('tab')).toHaveLength(5);
+    expect(screen.queryByRole('button', { name: /show next tabs/i })).not.toBeInTheDocument();
+  });
+
   it('hides the Board tab by default and shows Album + Stickers + Stats', () => {
     render(<TabBar active="reps" onChange={vi.fn()} />);
     expect(screen.getByRole('tablist')).toBeInTheDocument();
@@ -19,6 +42,7 @@ describe('TabBar', () => {
   });
 
   it('caps visible tabs to four and swaps with left/right controls', async () => {
+    mockMobileViewport(true);
     render(<TabBar active="reps" onChange={vi.fn()} showBoard onGoHome={vi.fn()} />);
 
     expect(screen.getAllByRole('tab')).toHaveLength(4);
