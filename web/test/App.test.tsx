@@ -96,6 +96,22 @@ describe('App', () => {
     expect(screen.queryByRole('button', { name: /scan sticker/i })).not.toBeInTheDocument();
   });
 
+  it('opens the navigation menu from the app header and navigates between sections', async () => {
+    const fetchLeaderboard = vi.fn(async () => [{ userName: 'Ana', owned: 3, missing: 977 }]);
+    render(<App deps={makeDeps({ fetchLeaderboard })} />);
+    await startSession();
+
+    await userEvent.click(screen.getByRole('button', { name: /open navigation menu/i }));
+    expect(screen.getByRole('menu')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('menuitem', { name: /leaderboard/i }));
+    expect(await screen.findByText('Ana')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /open navigation menu/i }));
+    await userEvent.click(screen.getByRole('menuitem', { name: /^home$/i }));
+    expect(await screen.findByLabelText(/your name/i)).toBeInTheDocument();
+  });
+
   it('reps grid adds, removes, and clears copies via the tap mode', async () => {
     render(<App deps={makeDeps()} />);
     await startSession();

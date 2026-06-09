@@ -8,6 +8,7 @@ import type { LeaderboardEntry } from '../storage/sync-client';
 import { SessionGate } from './SessionGate';
 import { TabBar } from './TabBar';
 import type { Tab } from './TabBar';
+import { MenuIcon, PrimaryTabList } from './TabBar';
 import { AlbumView } from './AlbumView';
 import { RepsView } from './RepsView';
 import type { RepsViewMode } from './RepsView';
@@ -97,6 +98,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [statsSeries, setStatsSeries] = useState<SeriesData[]>([]);
   const [boardSelectionUserName, setBoardSelectionUserName] = useState<string | null>(null);
+  const [navMenuOpen, setNavMenuOpen] = useState(false);
   // Pre-session home can show the gate or the board (browse the leaderboard
   // without starting a session).
   const [homeView, setHomeView] = useState<'gate' | 'board'>('gate');
@@ -468,6 +470,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
 
   function handleHome() {
     deps.stopCamera?.();
+    setNavMenuOpen(false);
     setActive(null);
     setScans([]);
     setThumbnails({});
@@ -494,27 +497,24 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
             </div>
           </div>
           <nav aria-label="Primary sections" className="section-nav">
-            <div role="tablist" className="tab-bar" data-test-id="primary-tablist">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={false}
-                data-test-id="tab-home"
-                className="tab-bar-item"
-                onClick={() => setHomeView('gate')}
-              >
-                <span className="tab-bar-label">Home</span>
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected
-                data-test-id="tab-board"
-                className="tab-bar-item tab-active"
-              >
-                <span className="tab-bar-label">Leaderboard</span>
-              </button>
-            </div>
+            <PrimaryTabList
+              dataTestId="primary-tablist"
+              items={[
+                {
+                  id: 'home',
+                  label: 'Home',
+                  selected: false,
+                  onClick: () => setHomeView('gate'),
+                  testId: 'tab-home',
+                },
+                {
+                  id: 'board',
+                  label: 'Leaderboard',
+                  selected: true,
+                  testId: 'tab-board',
+                },
+              ]}
+            />
           </nav>
           <BoardPanel
             entries={leaderboard}
@@ -559,6 +559,7 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
   }
 
   function handleTabChange(next: Tab) {
+    setNavMenuOpen(false);
     setTab(next);
     setBoardSelectionUserName(null);
     if (next === 'board') void handleRefreshLeaderboard();
@@ -582,10 +583,63 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
           <h1 className="app-header-name">{active.userName}</h1>
           <p className="app-header-meta">{scans.length} scan{scans.length !== 1 ? 's' : ''}</p>
         </div>
+        <button
+          type="button"
+          className="tab-menu-btn"
+          aria-label="Open navigation menu"
+          aria-expanded={navMenuOpen}
+          data-test-id="nav-menu-toggle"
+          onClick={() => setNavMenuOpen((v) => !v)}
+        >
+          <MenuIcon />
+        </button>
         {storageMode && onChangeMode && (
           <StorageModeToggle mode={storageMode} onChange={onChangeMode} />
         )}
       </header>
+      {navMenuOpen && (
+        <div className="tab-menu" role="menu" data-test-id="nav-menu">
+          {([
+            {
+              id: 'home',
+              label: 'Home',
+              onSelect: handleHome,
+            },
+            {
+              id: 'album',
+              label: 'My Album',
+              onSelect: () => handleTabChange('album'),
+            },
+            {
+              id: 'reps',
+              label: 'My Stickers',
+              onSelect: () => handleTabChange('reps'),
+            },
+            ...(deps.fetchLeaderboard
+              ? [
+                  {
+                    id: 'board',
+                    label: 'Leaderboard',
+                    onSelect: () => handleTabChange('board'),
+                  },
+                ]
+              : []),
+          ] as Array<{ id: 'home' | Tab; label: string; onSelect: () => void }>).map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              role="menuitem"
+              data-test-id={`menu-${item.id}`}
+              onClick={() => {
+                item.onSelect();
+                setNavMenuOpen(false);
+              }}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
       {storageMode === 'local' && deps.saveToCloud && (
         <SaveToCloud
           saver={deps.saveToCloud}
