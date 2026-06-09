@@ -169,132 +169,144 @@ export function SessionGate({
       {needsAuth && auth ? (
         <AuthPanel auth={auth} onAuthenticated={(res) => onAuthenticated?.(res)} />
       ) : (
-       <>
-      {sessions.length > 0 && (
-        <section aria-label="Resume">
-          <h2>Resume a session</h2>
-          <ul>
-            {sessions.map((session) => {
-              const count = scanCounts[session.id] ?? 0;
-              const album = albumCounts[session.id];
-              return (
-                <li key={session.id} className="session-card">
-                  <span className="session-name">{session.userName}</span>
-                  <span className="session-count">{count} scan{count !== 1 ? 's' : ''}</span>
-                  {album !== undefined && (
-                    <span className="session-album-counts">
-                      <span className="session-owned">{album.owned} owned</span>
-                      <span className="session-missing">{album.missing} missing</span>
-                    </span>
-                  )}
+        <>
+          {sessions.length > 0 && (
+            <section aria-label="Resume" className="home-section">
+              <h2 className="home-section-title">Resume a session</h2>
+              <ul>
+                {sessions.map((session) => {
+                  const count = scanCounts[session.id] ?? 0;
+                  const album = albumCounts[session.id];
+                  return (
+                    <li key={session.id} className="session-card">
+                      <span className="session-name">{session.userName}</span>
+                      <span className="session-count">{count} scan{count !== 1 ? 's' : ''}</span>
+                      {album !== undefined && (
+                        <span className="session-album-counts">
+                          <span className="session-owned">{album.owned} owned</span>
+                          <span className="session-missing">{album.missing} missing</span>
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        className="primary"
+                        data-test-id={`resume-${session.userName}`}
+                        onClick={() => onResume(session.id)}
+                      >
+                        Resume
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
+          {auth ? (
+            <section aria-label="Account" className="account-bar home-section">
+              <h2 className="home-section-title">Account</h2>
+              <div className="home-card">
+                <p data-test-id="account-status">Signed in to the cloud.</p>
+                <div className="account-actions">
                   <button
                     type="button"
-                    className="primary"
-                    data-test-id={`resume-${session.userName}`}
-                    onClick={() => onResume(session.id)}
+                    className="quiet"
+                    data-test-id="change-password-toggle"
+                    onClick={() => setShowPasswordForm((v) => !v)}
                   >
-                    Resume
+                    {showPasswordForm ? 'Hide password form' : 'Change password'}
                   </button>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      )}
-      {auth ? (
-        <section aria-label="Account" className="account-bar">
-          <p data-test-id="account-status">Signed in to the cloud.</p>
-          <div className="account-actions">
-            <button
-              type="button"
-              className="quiet"
-              data-test-id="change-password-toggle"
-              onClick={() => setShowPasswordForm((v) => !v)}
-            >
-              {showPasswordForm ? 'Hide password form' : 'Change password'}
-            </button>
-            <button type="button" className="quiet" data-test-id="logout" onClick={handleLogout}>
-              Log out
-            </button>
-          </div>
-          {showPasswordForm && (
-            <PasswordChangeForm onSubmit={(cur, next) => auth.changePassword(cur, next)} />
+                  <button type="button" className="quiet" data-test-id="logout" onClick={handleLogout}>
+                    Log out
+                  </button>
+                </div>
+                {showPasswordForm && (
+                  <PasswordChangeForm onSubmit={(cur, next) => auth.changePassword(cur, next)} />
+                )}
+              </div>
+            </section>
+          ) : (
+            <section aria-label="Start a session" className="home-section">
+              <h2 className="home-section-title">Start a session</h2>
+              <div className="home-card">
+                <form onSubmit={handleSubmit}>
+                  <label htmlFor={inputId}>Your name</label>
+                  <input id={inputId} data-test-id="session-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Luca" />
+                  <button type="submit" data-test-id="start-session" disabled={trimmed === ''}>
+                    Start scanning
+                  </button>
+                </form>
+              </div>
+            </section>
           )}
-        </section>
-      ) : (
-        <form onSubmit={handleSubmit}>
-          <label htmlFor={inputId}>Your name</label>
-          <input id={inputId} data-test-id="session-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Luca" />
-          <button type="submit" data-test-id="start-session" disabled={trimmed === ''}>
-            Start scanning
-          </button>
-        </form>
-      )}
-      {onImportAlbum && (
-        <section aria-label="Import collector list" className="import-section">
-          <h2>Import a collector list</h2>
-          <label htmlFor={importNameId}>Collector name</label>
-          <input
-            id={importNameId}
-            data-test-id="import-name"
-            value={importName}
-            onChange={(e) => setImportName(e.target.value)}
-            placeholder="e.g. Luca"
-          />
-          <fieldset className="import-kind">
-            <legend>These stickers are</legend>
-            <label>
-              <input
-                type="radio"
-                name="import-kind"
-                data-test-id="import-owned"
-                checked={importKind === 'owned'}
-                onChange={() => setImportKind('owned')}
-              />{' '}
-              Owned
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="import-kind"
-                data-test-id="import-missing"
-                checked={importKind === 'missing'}
-                onChange={() => setImportKind('missing')}
-              />{' '}
-              Missing
-            </label>
-          </fieldset>
-          <label htmlFor={importFileId} className="import-label">
-            Choose a .txt file of codes
-          </label>
-          <input
-            id={importFileId}
-            data-test-id="import-file"
-            type="file"
-            accept=".txt,text/plain"
-            onChange={handleAlbumFile}
-          />
-        </section>
-      )}
-      {onImportJson && (
-        <section aria-label="Restore backup" className="import-section">
-          <label htmlFor={backupId} className="import-label">
-            Restore a full backup (.json)
-          </label>
-          <input
-            id={backupId}
-            data-test-id="restore-json"
-            type="file"
-            accept=".json,application/json"
-            onChange={handleBackupFile}
-          />
-        </section>
-      )}
-      {importResult && (
-        <p className="import-result" data-test-id="import-result">✓ {importResult}</p>
-      )}
-      {importError && <p className="import-error" role="alert">{importError}</p>}
-       </>
+          {(onImportAlbum || onImportJson) && (
+            <section aria-label="Import" className="home-section">
+              <h2 className="home-section-title">Import</h2>
+              {onImportAlbum && (
+                <div className="home-card">
+                  <label htmlFor={importNameId}>Collector name</label>
+                  <input
+                    id={importNameId}
+                    data-test-id="import-name"
+                    value={importName}
+                    onChange={(e) => setImportName(e.target.value)}
+                    placeholder="e.g. Luca"
+                  />
+                  <fieldset className="import-kind">
+                    <legend>These stickers are</legend>
+                    <label>
+                      <input
+                        type="radio"
+                        name="import-kind"
+                        data-test-id="import-owned"
+                        checked={importKind === 'owned'}
+                        onChange={() => setImportKind('owned')}
+                      />{' '}
+                      Owned
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="import-kind"
+                        data-test-id="import-missing"
+                        checked={importKind === 'missing'}
+                        onChange={() => setImportKind('missing')}
+                      />{' '}
+                      Missing
+                    </label>
+                  </fieldset>
+                  <label htmlFor={importFileId} className="import-label">
+                    Choose a .txt file of codes
+                  </label>
+                  <input
+                    id={importFileId}
+                    data-test-id="import-file"
+                    type="file"
+                    accept=".txt,text/plain"
+                    onChange={handleAlbumFile}
+                  />
+                </div>
+              )}
+              {onImportJson && (
+                <div className="home-card">
+                  <label htmlFor={backupId} className="import-label">
+                    Restore a full backup (.json)
+                  </label>
+                  <input
+                    id={backupId}
+                    data-test-id="restore-json"
+                    type="file"
+                    accept=".json,application/json"
+                    onChange={handleBackupFile}
+                  />
+                </div>
+              )}
+            </section>
+          )}
+          {importResult && (
+            <p className="import-result" data-test-id="import-result">✓ {importResult}</p>
+          )}
+          {importError && <p className="import-error" role="alert">{importError}</p>}
+        </>
       )}
       <p className="privacy-note">
         {storageMode === 'local'

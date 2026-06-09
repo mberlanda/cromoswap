@@ -608,6 +608,87 @@ main[aria-label="Session"] h1 {
   margin-bottom: 0;
 }
 
+/* ── Home / Session Gate ─────────────────────────────────── */
+.home-section {
+  margin-bottom: var(--space-5);
+}
+
+.home-section-title {
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 0 0 var(--space-2);
+}
+
+.home-card {
+  border: 1px solid var(--subtle);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: var(--space-3);
+  box-shadow: 0 8px 20px rgb(18 26 47 / 0.04);
+}
+
+.home-card + .home-card {
+  margin-top: var(--space-2);
+}
+
+.home-card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.home-card > form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.home-card fieldset,
+.home-card p {
+  margin: 0;
+}
+
+.home-card input[type='file'] {
+  margin-top: var(--space-1);
+}
+
+section[aria-label="Import"] .home-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+section[aria-label="Import"] .home-card:first-of-type {
+  background: var(--import-bg);
+  color: var(--import-text);
+}
+
+section[aria-label="Import"] .home-card:first-of-type .import-label,
+section[aria-label="Import"] .home-card:first-of-type .import-kind legend {
+  color: var(--import-text);
+}
+
+section[aria-label="Import"] .home-card:first-of-type .import-kind {
+  margin-top: var(--space-1);
+}
+
+section[aria-label="Import"] .home-card:first-of-type input[type='file'] {
+  border-color: color-mix(in srgb, var(--info) 18%, var(--import-bg));
+}
+
+section[aria-label="Import"] .home-card:last-of-type {
+  background: color-mix(in srgb, var(--privacy) 8%, white);
+  border-color: color-mix(in srgb, var(--privacy) 24%, white);
+}
+
+section[aria-label="Import"] .home-card:last-of-type .import-label {
+  color: color-mix(in srgb, var(--privacy) 72%, var(--ink));
+}
+
 main[aria-label="Session"] > form {
   padding: var(--space-4);
   border: 1px solid var(--subtle);
