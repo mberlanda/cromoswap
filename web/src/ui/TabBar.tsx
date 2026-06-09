@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import type { ReactNode } from 'react';
 
 export type Tab = 'album' | 'reps' | 'board';
 
@@ -7,6 +7,15 @@ interface TabBarProps {
   onChange: (tab: Tab) => void;
   showBoard?: boolean;
   onGoHome?: () => void;
+}
+
+export interface PrimaryTabListItem {
+  id: string;
+  label: string;
+  selected: boolean;
+  icon?: ReactNode;
+  onClick?: () => void;
+  testId?: string;
 }
 
 function HomeIcon() {
@@ -48,11 +57,37 @@ function LeaderboardIcon() {
   );
 }
 
-function MenuIcon() {
+export function MenuIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
       <path d="M2 4h14M2 9h14M2 14h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
+  );
+}
+
+interface PrimaryTabListProps {
+  items: PrimaryTabListItem[];
+  dataTestId: string;
+}
+
+export function PrimaryTabList({ items, dataTestId }: PrimaryTabListProps) {
+  return (
+    <div role="tablist" className="tab-bar" data-test-id={dataTestId}>
+      {items.map((item) => (
+        <button
+          key={item.id}
+          type="button"
+          role="tab"
+          aria-selected={item.selected}
+          data-test-id={item.testId ?? `tab-${item.id}`}
+          className={`tab-bar-item${item.selected ? ' tab-active' : ''}`}
+          onClick={item.onClick}
+        >
+          {item.icon}
+          <span className="tab-bar-label">{item.label}</span>
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -69,90 +104,40 @@ function iconFor(tab: Tab): () => ReturnType<typeof AlbumIcon> {
 }
 
 export function TabBar({ active, onChange, showBoard = false, onGoHome }: TabBarProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
   const contentTabs: Array<{ id: Tab; label: string }> = [
     { id: 'album', label: 'My Album' },
     { id: 'reps', label: 'My Stickers' },
     ...(showBoard ? [{ id: 'board' as const, label: 'Leaderboard' }] : []),
   ];
-
-  const menuItems: Array<{ id: 'home' | Tab; label: string; onSelect: () => void }> = [
+  const items: PrimaryTabListItem[] = [
     ...(onGoHome
       ? [
           {
-            id: 'home' as const,
+            id: 'home',
             label: 'Home',
-            onSelect: () => onGoHome(),
+            selected: false,
+            icon: <HomeIcon />,
+            onClick: onGoHome,
+            testId: 'tab-home',
           },
         ]
       : []),
-    ...contentTabs.map((tab) => ({ id: tab.id, label: tab.label, onSelect: () => onChange(tab.id) })),
+    ...contentTabs.map((tab) => {
+      const Icon = iconFor(tab.id);
+      return {
+        id: tab.id,
+        label: labelFor(tab.id),
+        selected: active === tab.id,
+        icon: <Icon />,
+        onClick: () => onChange(tab.id),
+        testId: `tab-${tab.id}`,
+      };
+    }),
   ];
 
   return (
     <nav aria-label="Primary sections" className="section-nav">
-      <div className="tab-bar-top">
-        <button
-          type="button"
-          className="tab-menu-btn"
-          aria-label="Open navigation menu"
-          aria-expanded={menuOpen}
-          data-test-id="nav-menu-toggle"
-          onClick={() => setMenuOpen((v) => !v)}
-        >
-          <MenuIcon />
-        </button>
-      </div>
-      {menuOpen && (
-        <div className="tab-menu" role="menu" data-test-id="nav-menu">
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              role="menuitem"
-              data-test-id={`menu-${item.id}`}
-              onClick={() => {
-                item.onSelect();
-                setMenuOpen(false);
-              }}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      )}
-      <div role="tablist" className="tab-bar" data-test-id="primary-tablist">
-        {onGoHome && (
-          <button
-            type="button"
-            role="tab"
-            aria-selected={false}
-            data-test-id="tab-home"
-            className="tab-bar-item"
-            onClick={onGoHome}
-          >
-            <HomeIcon />
-            <span className="tab-bar-label">Home</span>
-          </button>
-        )}
-        {contentTabs.map((tab) => {
-          const Icon = iconFor(tab.id);
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              role="tab"
-              aria-selected={active === tab.id}
-              data-test-id={`tab-${tab.id}`}
-              className={`tab-bar-item${active === tab.id ? ' tab-active' : ''}`}
-              onClick={() => onChange(tab.id)}
-            >
-              <Icon />
-              <span className="tab-bar-label">{labelFor(tab.id)}</span>
-            </button>
-          );
-        })}
-      </div>
+      <PrimaryTabList items={items} dataTestId="primary-tablist" />
     </nav>
   );
 }

@@ -51,19 +51,8 @@ describe('TabBar', () => {
     expect(spy).toHaveBeenCalled();
   });
 
-  it('opens the hamburger menu with the available navigation options', async () => {
-    const onChange = vi.fn();
-    const onGoHome = vi.fn();
-    render(<TabBar active="reps" onChange={onChange} showBoard onGoHome={onGoHome} />);
-
-    await userEvent.click(screen.getByRole('button', { name: /open navigation menu/i }));
-    expect(screen.getByRole('menu')).toBeInTheDocument();
-
-    await userEvent.click(screen.getByRole('menuitem', { name: /home/i }));
-    expect(onGoHome).toHaveBeenCalled();
-
-    await userEvent.click(screen.getByRole('button', { name: /open navigation menu/i }));
-    await userEvent.click(screen.getByRole('menuitem', { name: /leaderboard/i }));
-    expect(onChange).toHaveBeenCalledWith('board');
+  it('does not render the navigation menu button (it lives in app-header)', () => {
+    render(<TabBar active="reps" onChange={vi.fn()} showBoard onGoHome={vi.fn()} />);
+    expect(screen.queryByRole('button', { name: /open navigation menu/i })).not.toBeInTheDocument();
   });
 });

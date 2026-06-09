@@ -12,6 +12,7 @@ import { CROMOSWAP_MARK_SRC } from './brand-assets';
 import type { AuthClient, AuthResponse } from '../auth/auth';
 import { AuthPanel } from './AuthPanel';
 import { PasswordChangeForm } from './PasswordChangeForm';
+import { PrimaryTabList, type PrimaryTabListItem } from './TabBar';
 
 export interface AlbumImport {
   userName: string;
@@ -142,29 +143,28 @@ export function SessionGate({
         )}
       </div>
       <nav aria-label="Primary sections" className="section-nav">
-        <div role="tablist" className="tab-bar" data-test-id="gate-tablist">
-          <button
-            type="button"
-            role="tab"
-            aria-selected
-            data-test-id="tab-home"
-            className="tab-bar-item tab-active"
-          >
-            <span className="tab-bar-label">Home</span>
-          </button>
-          {onOpenBoard && (
-            <button
-              type="button"
-              role="tab"
-              aria-selected={false}
-              data-test-id="tab-board"
-              className="tab-bar-item"
-              onClick={onOpenBoard}
-            >
-              <span className="tab-bar-label">Leaderboard</span>
-            </button>
-          )}
-        </div>
+        <PrimaryTabList
+          dataTestId="gate-tablist"
+          items={[
+            {
+              id: 'home',
+              label: 'Home',
+              selected: true,
+              testId: 'tab-home',
+            },
+            ...(onOpenBoard
+              ? ([
+                  {
+                    id: 'board',
+                    label: 'Leaderboard',
+                    selected: false,
+                    onClick: onOpenBoard,
+                    testId: 'tab-board',
+                  },
+                ] as PrimaryTabListItem[])
+              : []),
+          ]}
+        />
       </nav>
       {needsAuth && auth ? (
         <AuthPanel auth={auth} onAuthenticated={(res) => onAuthenticated?.(res)} />
