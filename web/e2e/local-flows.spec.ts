@@ -81,7 +81,7 @@ test('local: stats tab shows seeded histogram and supports player switch', async
   await expect(page.getByTestId('stats-summary')).toContainText('Mauro: 3 owned stickers');
 
   await page.getByTestId('stats-player-select').selectOption('Luca');
-  await expect(page.getByTestId('stats-summary')).toContainText('Luca: 1 owned stickers');
+  await expect(page.getByTestId('stats-summary')).toContainText('Luca: 1 owned sticker');
   await expect(page.getByTestId('hist-row-20')).toBeVisible();
 });
 

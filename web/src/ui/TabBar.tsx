@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 export type Tab = 'album' | 'reps' | 'board' | 'stats';
 
@@ -107,26 +107,25 @@ export function PrimaryTabList({ items, dataTestId, activeTabId }: PrimaryTabLis
 
   const maxStart = Math.max(0, items.length - MAX_VISIBLE_TABS);
 
-  useEffect(() => {
-    if (!hasOverflow || !activeTabId) return;
+  let displayStart = windowStart;
+  if (hasOverflow && activeTabId) {
     const activeIndex = items.findIndex((item) => item.id === activeTabId);
-    if (activeIndex === -1) return;
-    if (activeIndex < windowStart) {
-      setWindowStart(activeIndex);
-      return;
+    if (activeIndex >= 0) {
+      if (activeIndex < displayStart) displayStart = activeIndex;
+      if (activeIndex >= displayStart + MAX_VISIBLE_TABS) {
+        displayStart = activeIndex - MAX_VISIBLE_TABS + 1;
+      }
+      displayStart = Math.max(0, Math.min(displayStart, maxStart));
     }
-    if (activeIndex >= windowStart + MAX_VISIBLE_TABS) {
-      setWindowStart(activeIndex - MAX_VISIBLE_TABS + 1);
-    }
-  }, [activeTabId, hasOverflow, items, windowStart]);
+  }
 
   const visibleItems = useMemo(() => {
     if (!hasOverflow) return items;
-    return items.slice(windowStart, windowStart + MAX_VISIBLE_TABS);
-  }, [hasOverflow, items, windowStart]);
+    return items.slice(displayStart, displayStart + MAX_VISIBLE_TABS);
+  }, [displayStart, hasOverflow, items]);
 
-  const canGoLeft = windowStart > 0;
-  const canGoRight = windowStart < maxStart;
+  const canGoLeft = displayStart > 0;
+  const canGoRight = displayStart < maxStart;
 
   return (
     <div className="tab-bar-shell" data-test-id={`${dataTestId}-shell`}>
@@ -136,7 +135,7 @@ export function PrimaryTabList({ items, dataTestId, activeTabId }: PrimaryTabLis
           className="tab-swap-btn"
           aria-label="Show previous tabs"
           data-test-id="tab-swap-left"
-          onClick={() => setWindowStart((v) => Math.max(0, v - 1))}
+          onClick={() => setWindowStart(Math.max(0, displayStart - 1))}
           disabled={!canGoLeft}
         >
           <ChevronLeftIcon />
@@ -164,7 +163,7 @@ export function PrimaryTabList({ items, dataTestId, activeTabId }: PrimaryTabLis
           className="tab-swap-btn"
           aria-label="Show next tabs"
           data-test-id="tab-swap-right"
-          onClick={() => setWindowStart((v) => Math.min(maxStart, v + 1))}
+          onClick={() => setWindowStart(Math.min(maxStart, displayStart + 1))}
           disabled={!canGoRight}
         >
           <ChevronRightIcon />

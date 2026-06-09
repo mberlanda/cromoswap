@@ -50,6 +50,6 @@ describe('StickerStatsTab', () => {
     );
 
     await user.selectOptions(screen.getByLabelText(/select player/i), 'Luca');
-    expect(await screen.findByTestId('stats-summary')).toHaveTextContent('Luca: 1 owned stickers');
+    expect(await screen.findByTestId('stats-summary')).toHaveTextContent('Luca: 1 owned sticker');
   });
 });

@@ -45,31 +45,36 @@ export function StickerStatsTab({ albumRepo, playerNames, defaultPlayerName }: S
     [playerNames],
   );
 
-  useEffect(() => {
-    if (!sortedPlayers.includes(selectedPlayer)) {
-      setSelectedPlayer(defaultPlayerName);
-    }
-  }, [defaultPlayerName, selectedPlayer, sortedPlayers]);
+  const effectivePlayer = sortedPlayers.includes(selectedPlayer)
+    ? selectedPlayer
+    : (sortedPlayers[0] ?? defaultPlayerName);
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadHistogram() {
       setLoading(true);
-      const entries = await albumRepo.listByUser(selectedPlayer);
-      if (cancelled) return;
-      setHistogram(buildHistogram(entries.map((e) => e.normalizedCode)));
-      setLoading(false);
+      try {
+        const entries = await albumRepo.listByUser(effectivePlayer);
+        if (cancelled) return;
+        setHistogram(buildHistogram(entries.map((e) => e.normalizedCode)));
+      } catch {
+        if (cancelled) return;
+        setHistogram(Array.from({ length: MAX_SCALE + 1 }, () => 0));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     }
 
     void loadHistogram();
     return () => {
       cancelled = true;
     };
-  }, [albumRepo, selectedPlayer]);
+  }, [albumRepo, effectivePlayer]);
 
   const maxBin = Math.max(...histogram, 1);
   const totalOwned = histogram.reduce((acc, count, copies) => acc + count * copies, 0);
+  const stickerLabel = totalOwned === 1 ? 'sticker' : 'stickers';
 
   return (
     <section aria-label="Sticker stats" className="stats-tab">
@@ -81,7 +86,7 @@ export function StickerStatsTab({ albumRepo, playerNames, defaultPlayerName }: S
         <select
           id="stats-player"
           data-test-id="stats-player-select"
-          value={selectedPlayer}
+          value={effectivePlayer}
           onChange={(e) => setSelectedPlayer(e.target.value)}
           aria-label="Select player"
         >
@@ -94,7 +99,7 @@ export function StickerStatsTab({ albumRepo, playerNames, defaultPlayerName }: S
       </div>
 
       <p className="stats-summary" data-test-id="stats-summary" data-testid="stats-summary">
-        {selectedPlayer}: {totalOwned} owned stickers
+        {effectivePlayer}: {totalOwned} owned {stickerLabel}
       </p>
 
       {loading ? (
