@@ -71,6 +71,17 @@ RSpec.describe "Api::V1::Auth", type: :request do
       post "/api/v1/auth/login", params: { username: "ghost", password: "supersecret" }
       expect(response).to have_http_status(:unauthorized)
     end
+
+    it "still digests the password for an unknown username (no timing oracle)" do
+      expect(BCrypt::Password).to receive(:create).at_least(:once).and_call_original
+      post "/api/v1/auth/login", params: { username: "ghost", password: "supersecret" }
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it "401s on a blank password without leaking whether the user exists" do
+      post "/api/v1/auth/login", params: { username: "collector1", password: "" }
+      expect(response).to have_http_status(:unauthorized)
+    end
   end
 
   describe "GET /api/v1/auth/me" do
