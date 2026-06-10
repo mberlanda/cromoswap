@@ -65,6 +65,13 @@ gated by HTTP Basic auth over HTTPS.
 - **Login timing** uses `User.authenticate_by`, which digests the password even
   for unknown usernames, so response timing can't enumerate accounts.
 - **Host authorization** is set for the production host.
+- **Security headers.** Every response (including the SPA document served from
+  `public/`) gets a strict `Content-Security-Policy` (same-origin by default;
+  `blob:` workers + `wasm-unsafe-eval` only because the self-hosted OCR engine
+  needs them; `frame-ancestors 'none'`), a `Permissions-Policy` that disables
+  everything except the scanner camera, and a
+  `strict-origin-when-cross-origin` referrer policy. A Rails-served bundle
+  calling a different API origin needs that origin in `CSP_CONNECT_SRC`.
 - **CORS** is scoped to configured origins (not `*`).
 - **Dependencies** are clean under `npm audit`, `bundler-audit`, `brakeman`, and
   Trivy (CI `security` job).
