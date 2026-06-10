@@ -1,73 +1,48 @@
-# React + TypeScript + Vite
+# Web Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite application for scanning and managing WC 2026 sticker
+collections.
 
-Currently, two official plugins are available:
+## What lives here
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Camera-based OCR flow with confirm/correct loop.
+- Local-first session + scan persistence (IndexedDB).
+- Album and reps management views.
+- Stats and leaderboard UI.
+- Optional cloud auth/sync integration.
 
-## React Compiler
+## Commands
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+From this folder:
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+nvm use
+npm install
+npm run dev
+npm run test:run
+npm run test:coverage
+npm run lint
+npm run build
+npm run e2e
+npm run e2e:docker
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## E2E modes
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- `npm run e2e`: local-mode Playwright suite against Vite preview.
+- `npm run e2e:docker`: docker/full-stack Playwright suite against the composed
+  app (Rails serving SPA + API).
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Important test-id convention
+
+- Playwright uses `data-test-id` (`testIdAttribute` configured in Playwright).
+- Testing Library defaults to `data-testid`.
+
+When adding selectors for shared coverage, prefer adding both attributes where
+needed.
+
+## Related docs
+
+- Root docs index: `../docs/INDEX.md`
+- Test matrix: `../docs/test-matrix.md`
+- OCR geometry: `../docs/ocr-scanning-geometry.md`

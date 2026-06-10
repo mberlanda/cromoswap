@@ -2,6 +2,9 @@
 
 Status: accepted · Date: 2026-06-04
 
+Note: this is the MVP baseline spec. Cloud authentication and sync shipped post-MVP
+(see ADR-0004), while sharing/matchmaking remains future work.
+
 A mobile-first web app that lets a collector scan the backs of duplicate Panini World
 Cup 2026 stickers, confirm or correct the detected code, and build an editable,
 exportable list for a named collection session.
@@ -14,18 +17,19 @@ exportable list for a named collection session.
 
 ## Non-goals (MVP)
 
-- Authentication, public sharing, or matchmaking.
+- Public sharing or matchmaking.
 - Server-side image storage (images stay on device — privacy-local).
 - Perfect OCR. We optimize the confirm/correct loop instead.
 - Trained/ML sticker detection (design seams for it; do not build).
 
 ## Primary user journey
 
-1. Open app → 2. Enter name (create or resume session) → 3. Grant camera permission →
-4. Place sticker in the scan-area overlay → 5. App extracts the code from the top-right
-region → 6. App shows proposed code + captured image → 7. Confirm / correct / skip /
-rescan → 8. Confirmed scan stored in active session → 9. View / edit / delete / add
-manually → 10. Export the list and evidence.
+1. Open app → 2. Choose storage mode (Local or Cloud) → 3a. Enter name (Local create/
+resume) or 3b. Register/login (Cloud) → 4. Grant camera permission → 5. Place sticker in
+the scan-area overlay → 6. App extracts the code from the top-right region → 7. App shows
+proposed code + captured image → 8. Confirm / correct / skip / rescan → 9. Confirmed scan
+stored in active session → 10. View / edit / delete / add manually → 11. Export the list
+and evidence.
 
 ## Sticker code domain
 
@@ -36,7 +40,7 @@ manually → 10. Export the list and evidence.
   `ALG ARG AUS AUT BEL BIH BRA CAN CPV COL CRO CUW CZE COD ECU EGY ENG FRA GER GHA HAI
   IRN IRQ CIV JPN JOR MEX MAR NED NZL NOR PAN PAR POR QAT KSA SCO SEN RSA KOR ESP SWE
   SUI TUN TUR URU USA UZB FWC`.
-- Number must be `01`–`20`.
+- Number range is prefix-aware: `FWC00`–`FWC19`, all other prefixes `01`–`20`.
 - Code sits near the **top-right corner** of the sticker back. Most national-team
   stickers are portrait; some team stickers are landscape (often `<PREFIX>13`). FWC
   follows the same convention.
@@ -77,7 +81,8 @@ manually → 10. Export the list and evidence.
 - **Asset tool:** build-time TypeScript that turns an annotated corpus into versioned
   static assets (`mask-config.json`, `prefixes.json`, `ocr-profile.json`).
 - **Persistence:** local-first IndexedDB (sessions, scans, images) via typed repos;
-  best-effort `SyncClient` pushes codes+metadata to the API. App works offline.
+  best-effort `SyncClient` pushes codes+metadata to the API. App works offline, and cloud
+  mode uses authenticated API-backed repos.
 
 Repo layout:
 
@@ -94,7 +99,7 @@ docker-compose.yml  db + api + web
 
 `CameraSource → MaskOverlay (UI) → RoiCropper (top-right, from mask-config) →
 Preprocessor (grayscale/threshold/scale) → OcrAdapter [interface] → CodeParser
-(normalize) → CodeValidator (prefix∈dict, 01–20) → CandidateRanker →
+(normalize) → CodeValidator (prefix∈dict, FWC00–19 or 01–20 for others) → CandidateRanker →
 ScanController (debounce, confirm/correct/skip/rescan)`.
 
 Designed extension seams (not built in MVP):
@@ -126,7 +131,8 @@ See ADR-0003 for the mask/corpus rationale.
 ## Acceptance criteria (first working version)
 
 - Create a named session; scan or mock-scan a code.
-- App detects valid codes (known prefix, 01–20) and asks to confirm/correct before saving.
+- App detects valid codes (known prefix, FWC00–19 or 01–20 for others) and asks to
+  confirm/correct before saving.
 - Session survives page reload.
 - Edit, delete, and manually add entries.
 - Export a text list of confirmed codes.
