@@ -40,7 +40,7 @@ function makeCappedAlbumRepo(): AlbumRepo {
 }
 
 describe('StickerStatsTab', () => {
-  it('renders a 0..20 horizontal histogram and summary for the selected player', async () => {
+  it('renders category progress rows and summary for the selected player', async () => {
     render(
       <StickerStatsTab
         albumRepo={makeAlbumRepo()}
@@ -50,8 +50,10 @@ describe('StickerStatsTab', () => {
     );
 
     expect(await screen.findByTestId('stats-summary')).toHaveTextContent('Mauro: 3 owned stickers');
-    expect(screen.getByTestId('hist-row-0')).toBeInTheDocument();
-    expect(screen.getByTestId('hist-row-20')).toBeInTheDocument();
+    expect(screen.getByTestId('stats-row-ARG')).toBeInTheDocument();
+    expect(screen.getByTestId('stats-row-FWC')).toBeInTheDocument();
+    expect(screen.getByTestId('stats-top-completion')).toHaveTextContent('Top completion:');
+    expect(screen.getByTestId('stats-top-missing')).toHaveTextContent('Biggest gap:');
   });
 
   it('allows selecting another player (read-only)', async () => {
@@ -69,7 +71,9 @@ describe('StickerStatsTab', () => {
     expect(await screen.findByTestId('stats-summary')).toHaveTextContent('Luca: 1 owned sticker');
   });
 
-  it('shows exact total and uses 20+ label for capped bucket', async () => {
+  it('supports sorting and caps category completion at 20', async () => {
+    const user = userEvent.setup();
+
     render(
       <StickerStatsTab
         albumRepo={makeCappedAlbumRepo()}
@@ -78,7 +82,10 @@ describe('StickerStatsTab', () => {
       />,
     );
 
-    expect(await screen.findByTestId('stats-summary')).toHaveTextContent('Mauro: 25 owned stickers');
-    expect(screen.getByText('20+')).toBeInTheDocument();
+    expect(await screen.findByTestId('stats-summary')).toHaveTextContent('Mauro: 20 owned stickers');
+    expect(screen.getByTestId('stats-row-ARG')).toHaveTextContent('20/20');
+
+    await user.selectOptions(screen.getByTestId('stats-sort-select'), 'completion-desc');
+    expect(screen.getByTestId('stats-top-completion')).toHaveTextContent('ARG 20/20');
   });
 });

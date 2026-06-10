@@ -84,10 +84,12 @@ test('local: stats tab shows seeded histogram and supports player switch', async
   await page.getByTestId('resume-Mauro').click();
   await page.getByTestId('tab-stats').click();
   await expect(page.getByTestId('stats-summary')).toContainText('Mauro: 3 owned stickers');
+  await expect(page.getByTestId('stats-row-ARG')).toBeVisible();
 
   await page.getByTestId('stats-player-select').selectOption('Luca');
   await expect(page.getByTestId('stats-summary')).toContainText('Luca: 1 owned sticker');
-  await expect(page.getByTestId('hist-row-20')).toBeVisible();
+  await page.getByTestId('stats-sort-select').selectOption('completion-desc');
+  await expect(page.getByTestId('stats-top-completion')).toContainText('ARG 1/20');
 });
 
 test('local: stats and leaderboard are reachable from hamburger menu', async ({ page }) => {
@@ -95,7 +97,7 @@ test('local: stats and leaderboard are reachable from hamburger menu', async ({ 
 
   await page.getByTestId('nav-menu-toggle').click();
   await page.getByTestId('menu-stats').click();
-  await expect(page.getByRole('heading', { name: /sticker histogram/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /sticker category progress/i })).toBeVisible();
 
   await page.getByTestId('nav-menu-toggle').click();
   await page.getByTestId('menu-home').click();

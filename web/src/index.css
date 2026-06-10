@@ -1205,78 +1205,135 @@ section[aria-label="Resume"] li button {
 }
 
 .stats-tab-header {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
   gap: var(--space-2);
 }
 
+.stats-controls {
+  display: grid;
+  grid-template-columns: auto minmax(160px, 1fr);
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+}
+
 .stats-player-label {
-  justify-self: end;
   margin: 0;
   font-size: 12px;
   font-weight: 800;
   color: var(--muted);
 }
 
-#stats-player {
-  grid-column: 2;
-  min-width: 170px;
+#stats-player,
+#stats-sort {
+  min-width: 160px;
   max-width: 100%;
 }
 
 .stats-summary {
-  margin: var(--space-2) 0 var(--space-3);
+  margin: var(--space-2) 0 var(--space-2);
   color: var(--muted);
   font-size: 13px;
   font-weight: 700;
 }
 
-.histogram {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.stats-insights {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-3);
 }
 
-.histogram-row {
+.stats-insight {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.stats-progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.stats-progress-row {
   display: grid;
-  grid-template-columns: 28px 1fr auto;
+  grid-template-columns: minmax(80px, 92px) 1fr minmax(90px, 118px);
   align-items: center;
   gap: var(--space-2);
 }
 
-.histogram-label {
+.stats-progress-code {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
   font-size: 12px;
-  font-weight: 800;
-  color: var(--muted);
-  text-align: right;
+  font-weight: 900;
+  color: var(--ink);
 }
 
-.histogram-track {
+.stats-progress-flag {
+  font-size: 14px;
+}
+
+.stats-progress-track {
   width: 100%;
   height: 12px;
   border-radius: 999px;
   background: var(--field);
   overflow: hidden;
+  display: flex;
 }
 
-.histogram-bar {
+.stats-progress-owned {
   height: 100%;
-  min-width: 2px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--info), var(--scan));
-}
-
-.histogram-bar-empty {
+  background: linear-gradient(90deg, var(--scan-strong), var(--scan));
   min-width: 0;
 }
 
-.histogram-value {
-  min-width: 26px;
-  text-align: right;
+.stats-progress-missing {
+  height: 100%;
+  background: linear-gradient(90deg, #ffd9c2, #ffc247);
+  min-width: 0;
+}
+
+.stats-progress-values {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.stats-progress-owned-value {
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 900;
   color: var(--ink);
+}
+
+.stats-progress-missing-value {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+@media (max-width: 700px) {
+  .stats-controls {
+    width: 100%;
+    grid-template-columns: auto 1fr;
+  }
+
+  .stats-progress-row {
+    grid-template-columns: minmax(72px, 84px) 1fr;
+  }
+
+  .stats-progress-values {
+    grid-column: 1 / -1;
+    align-items: flex-start;
+    flex-direction: row;
+    justify-content: space-between;
+  }
 }
 
 /* ── Session resume card ─────────────────────────── */
