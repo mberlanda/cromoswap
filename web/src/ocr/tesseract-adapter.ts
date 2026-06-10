@@ -1,4 +1,4 @@
-import { createWorker, PSM, type Worker } from 'tesseract.js';
+import { createWorker, OEM, PSM, type Worker } from 'tesseract.js';
 import ocrProfile from '../assets/ocr-profile.json';
 import type { RgbaImage } from './image';
 import type { OcrAdapter, OcrResult } from './ocr-adapter';
@@ -13,7 +13,15 @@ export class TesseractAdapter implements OcrAdapter {
 
   private async getWorker(): Promise<Worker> {
     if (this.worker) return this.worker;
-    const worker = await createWorker('eng');
+    // Self-hosted runtime assets (scripts/copy-tesseract-assets.mjs) — without
+    // explicit paths tesseract.js loads worker/wasm/lang from a CDN at runtime.
+    // Only the LSTM core variants are copied, so the OEM must stay LSTM_ONLY.
+    const base = `${import.meta.env.BASE_URL}tesseract`;
+    const worker = await createWorker('eng', OEM.LSTM_ONLY, {
+      workerPath: `${base}/worker.min.js`,
+      corePath: `${base}/core`,
+      langPath: `${base}/lang`,
+    });
     await worker.setParameters({
       tessedit_char_whitelist: ocrProfile.whitelist,
       tessedit_pageseg_mode: String(ocrProfile.psm) as unknown as PSM,

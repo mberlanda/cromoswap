@@ -68,6 +68,10 @@ gated by HTTP Basic auth over HTTPS.
 - **CORS** is scoped to configured origins (not `*`).
 - **Dependencies** are clean under `npm audit`, `bundler-audit`, `brakeman`, and
   Trivy (CI `security` job).
+- **No third-party code at runtime.** tesseract.js used to pull its worker JS,
+  wasm core, and language data from `cdn.jsdelivr.net` in the browser. Those
+  assets are now copied at build time from the npm packages (integrity-pinned
+  via `package-lock.json`) into `public/tesseract` and served same-origin.
 
 ## Reporting
 

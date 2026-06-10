@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Self-hosted tesseract.js runtime assets (copied from node_modules pre-build)
+/public/tesseract/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
