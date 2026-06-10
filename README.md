@@ -130,5 +130,6 @@ Verified: `GET /` serves the SPA, `/assets/*` static files load, and
 ## Sticker codes
 
 Canonical form `<PREFIX><NN>` (e.g. `ARG01`, `USA13`, `FWC07`): a known 3-letter prefix
-plus a number 01–20. Tolerant input (`ARG 1`, `arg-01`) is normalized; the prefix is
-validated against `assets/prefixes.json` (49 prefixes).
+plus a prefix-aware number range (`FWC00`–`FWC19`, all other prefixes `01`–`20`).
+Tolerant input (`ARG 1`, `arg-01`) is normalized; the prefix is validated against
+`assets/prefixes.json` (49 prefixes).
