@@ -5,6 +5,11 @@ import { readFileSync } from 'node:fs';
 // internal refactors stay safe. Switching to Local rebuilds the deps to use
 // IndexedDB and persists the choice in localStorage.
 
+test.beforeEach(async ({ page }, testInfo) => {
+  void page;
+  test.skip(testInfo.project.name !== 'local-mobile', 'local-mode flow: skip outside local project');
+});
+
 async function startLocalSession(page: Page, name = 'Mauro') {
   await page.goto('/');
   await page.getByTestId('storage-local').click();
