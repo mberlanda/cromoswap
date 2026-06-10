@@ -4,6 +4,11 @@ import { readFile } from 'node:fs/promises';
 // Full-stack smoke against the assembled image: the Rails app serves the web
 // bundle and the API on one origin, with the admin backoffice and Postgres.
 
+test.beforeEach(async ({ page }, testInfo) => {
+  void page;
+  test.skip(testInfo.project.name !== 'docker-chromium', 'docker stack flow: skip outside docker project');
+});
+
 const ADMIN_USER = 'admin@cromoswap.local';
 const ADMIN_PASS = '!cromoswap!';
 const authHeader = 'Basic ' + Buffer.from(`${ADMIN_USER}:${ADMIN_PASS}`).toString('base64');

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Validate end-to-end against the assembled docker stack (Rails serving the web
 # bundle + API + admin + Postgres on one origin). Brings the stack up, runs the
-# Playwright e2e suite, and always tears the stack down.
+# unified Playwright suite in docker mode, and always tears the stack down.
 #
 # Locally this needs port 3000 and 5432 free (stop any conflicting Postgres).
 set -uo pipefail

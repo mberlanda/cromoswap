@@ -1,10 +1,13 @@
 # E2E tests & the test-id naming convention
 
-Two Playwright suites:
+One Playwright suite, two execution modes:
 
-- **`web/e2e/`** — local-mode flows against the Vite preview (`npm run e2e`).
-- **`web/e2e-docker/`** — full-stack flows against the composed image
-  (`npm run e2e:docker`, see `scripts/validate-e2e.sh`).
+- **`npm run e2e`** — local-mode flows against the Vite preview.
+- **`npm run e2e:docker`** — full-stack flows against the composed image
+   (`scripts/validate-e2e.sh` starts/stops the stack).
+
+Specs live under **`web/e2e/`**. Local-only and docker-only specs are guarded by
+project-name skips so one config can serve both modes.
 
 ## ⚠️ Two different test-id attributes — do not confuse them
 
@@ -13,7 +16,7 @@ Library default to different names:
 
 | Attribute | Used by | Why |
 |-----------|---------|-----|
-| **`data-test-id`** (with hyphens) | **Playwright e2e** | Both Playwright configs set `use.testIdAttribute: 'data-test-id'`, so `page.getByTestId('view-board')` resolves `data-test-id="view-board"`. |
+| **`data-test-id`** (with hyphens) | **Playwright e2e** | Playwright config sets `use.testIdAttribute: 'data-test-id'`, so `page.getByTestId('view-board')` resolves `data-test-id="view-board"`. |
 | **`data-testid`** (no hyphen) | **Vitest / Testing Library unit tests** | Testing Library's default `testIdAttribute` is `data-testid`. Only a couple of elements use it (e.g. `MaskOverlay`'s `sticker-frame`, `roi-box`). |
 
 ### Consequences (the trap)
