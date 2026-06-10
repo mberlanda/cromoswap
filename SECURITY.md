@@ -15,16 +15,18 @@ gated by HTTP Basic auth over HTTPS.
 ## Operator checklist (required for a public deployment)
 
 1. **Rotate the leaked Rails key.** `api/config/master.key` was committed to this
-   public repo, so `secret_key_base` is compromised. Regenerate credentials and
-   stop tracking the key:
+   public repo, so `secret_key_base` is compromised. The key is no longer tracked
+   (gitignored and removed from the index), but the historical leak still requires
+   rotation. Regenerate credentials:
    ```bash
    cd api
    rm config/credentials.yml.enc config/master.key
    EDITOR=vi bin/rails credentials:edit         # creates a fresh key + secret_key_base
-   git rm --cached config/master.key            # already gitignored going forward
    ```
    Set the new key as `RAILS_MASTER_KEY` in the deploy environment (Render), and
-   consider purging the old key from git history (`git filter-repo`).
+   consider purging the old key from git history (`git filter-repo`). Until then,
+   set a dedicated `JWT_SECRET` so tokens are not signed with the leaked
+   `secret_key_base`.
 2. **Set a strong `ADMIN_PASSWORD`** (and `ADMIN_EMAIL`) in the deploy env. With
    the default password the backoffice is **disabled in production** (returns
    503) — it can dump and delete every collector's data, so it must not run on a
