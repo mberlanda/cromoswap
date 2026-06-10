@@ -39,9 +39,10 @@ gated by HTTP Basic auth over HTTPS.
 
 ## Known, accepted risks
 
-- **No rate limiting on `/auth/*` or writes.** Auth and write endpoints are not
-  rate-limited; brute-force and spam are possible. For a hardened deployment add
-  rate limiting (e.g. `rack-attack`). Tracked as future hardening.
+- **Rate-limit counters are per process.** `rack-attack` throttles auth and
+  write endpoints (see below) using an in-process memory store; with multiple
+  app processes the effective limit multiplies. Fine for the single-instance
+  deploy — swap in a shared cache store if that changes.
 - **Public reads are open by design.** `GET /leaderboard`, `GET /album_stickers`,
   and session reads require no token, so anyone can browse the board. UUID
   session ids are unguessable but not secret.
@@ -57,6 +58,12 @@ gated by HTTP Basic auth over HTTPS.
 - **No injection:** controllers use strong params; the `pg_dump` export shells
   out via `Open3.capture3` with array args (no shell); no user input is
   interpolated into SQL.
+- **Rate limiting** (`rack-attack`): POSTs to `/api/v1/auth/*` are throttled to
+  10/min per IP and API writes to 120/min per IP (tunable via
+  `RACK_ATTACK_AUTH_LIMIT` / `RACK_ATTACK_WRITE_LIMIT`); throttled requests get
+  a JSON 429 with `Retry-After`. Public reads are unthrottled.
+- **Login timing** uses `User.authenticate_by`, which digests the password even
+  for unknown usernames, so response timing can't enumerate accounts.
 - **Host authorization** is set for the production host.
 - **CORS** is scoped to configured origins (not `*`).
 - **Dependencies** are clean under `npm audit`, `bundler-audit`, `brakeman`, and
