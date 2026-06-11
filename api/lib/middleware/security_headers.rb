@@ -10,7 +10,9 @@
 # them. Existing headers are never overwritten.
 class SecurityHeaders
   HEADERS = {
-    # Everything off except the camera, which the sticker scanner needs.
+    # Camera is allowed (the sticker scanner needs it); the other high-value
+    # features the app never uses are explicitly denied. Features not listed
+    # keep their browser defaults.
     "permissions-policy" => "camera=(self), microphone=(), geolocation=(), payment=(), usb=()",
     "referrer-policy" => "strict-origin-when-cross-origin"
   }.freeze

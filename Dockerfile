@@ -32,8 +32,11 @@ COPY api/ ./
 COPY --from=web-build /web/dist ./public
 
 # Run as a non-root user; only the dirs Rails writes at runtime are writable
-# (db/ because db:prepare dumps schema.rb in the development default).
+# (db/ because db:prepare dumps schema.rb in the development default). tmp/
+# and log/ are untracked locally, so create them — a fresh checkout's build
+# context does not include them.
 RUN useradd --create-home --shell /usr/sbin/nologin app \
+  && mkdir -p /app/tmp /app/log /app/storage /app/db \
   && chown -R app:app /app/tmp /app/log /app/storage /app/db
 USER app
 

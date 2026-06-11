@@ -5,10 +5,15 @@ RSpec.describe "Security headers", type: :request do
     let(:index_path) { Rails.public_path.join("index.html") }
 
     around do |example|
+      original = File.exist?(index_path) ? File.read(index_path) : nil
       File.write(index_path, "<!doctype html><title>Cromoswap</title>")
       example.run
     ensure
-      File.delete(index_path) if File.exist?(index_path)
+      if original
+        File.write(index_path, original)
+      elsif File.exist?(index_path)
+        File.delete(index_path)
+      end
     end
 
     before { get "/" }
