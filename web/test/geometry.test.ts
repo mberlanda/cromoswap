@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { centeredRect, coverMapRect, isWellTargeted } from '../src/ocr/geometry';
+import { centeredRect, coverMapRect, expandRect, isWellTargeted } from '../src/ocr/geometry';
 
 describe('centeredRect', () => {
   it('portrait in a 3:4 box is a centered normalized square', () => {
@@ -79,5 +79,23 @@ describe('isWellTargeted', () => {
   it('is false when the aspect ratio is far from 3:4', () => {
     // A long thin region in a square crop -> pixel aspect ~ 9, way past tolerance.
     expect(isWellTargeted({ x: 0, y: 0.45, w: 0.9, h: 0.1 }, 1)).toBe(false);
+  });
+});
+
+describe('expandRect', () => {
+  it('grows the rect by the margin fraction on every side', () => {
+    const out = expandRect({ x: 0.4, y: 0.4, w: 0.2, h: 0.2 }, 0.5);
+    expect(out.x).toBeCloseTo(0.3);
+    expect(out.y).toBeCloseTo(0.3);
+    expect(out.w).toBeCloseTo(0.4);
+    expect(out.h).toBeCloseTo(0.4);
+  });
+
+  it('clamps to the unit square at the edges', () => {
+    const out = expandRect({ x: 0, y: 0.9, w: 0.2, h: 0.1 }, 1);
+    expect(out.x).toBe(0);
+    expect(out.y).toBeCloseTo(0.8);
+    expect(out.x + out.w).toBeLessThanOrEqual(1);
+    expect(out.y + out.h).toBeLessThanOrEqual(1);
   });
 });

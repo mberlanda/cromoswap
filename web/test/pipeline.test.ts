@@ -93,3 +93,53 @@ describe('runPipeline preprocessing modes and per-attempt options', () => {
     expect(ocr.lastOptions?.psm).toBe(6);
   });
 });
+
+describe('pill refinement', () => {
+  it('crops OCR input to the bright pill region after inverted normalization', async () => {
+    // A dark "pill" (inverts to bright) in the right half of an otherwise
+    // light crop: the adapter should receive roughly the pill, not the full
+    // preprocessed crop with its distracting inverted-black surround.
+    const w = 40;
+    const h = 10;
+    const data = new Uint8ClampedArray(w * h * 4);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const v = x >= 20 && y < 5 ? 40 : 220;
+        const i = (y * w + x) * 4;
+        data[i] = v;
+        data[i + 1] = v;
+        data[i + 2] = v;
+        data[i + 3] = 255;
+      }
+    }
+    let recognized: RgbaImage | null = null;
+    const ocr = {
+      async recognize(image: RgbaImage) {
+        recognized = image;
+        return { text: 'ARG01', confidence: 0.6 };
+      },
+    };
+
+    await runPipeline({ width: w, height: h, data }, { ocr, roi, preprocessScale: 1 });
+
+    expect(recognized).not.toBeNull();
+    expect(recognized!.width).toBeLessThan(w);
+    expect(recognized!.height).toBeLessThanOrEqual(6);
+  });
+
+  it('keeps the full preprocessed crop when no pill stands out', async () => {
+    const uniform: RgbaImage = { width: 8, height: 4, data: new Uint8ClampedArray(8 * 4 * 4).fill(200) };
+    let recognized: RgbaImage | null = null;
+    const ocr = {
+      async recognize(image: RgbaImage) {
+        recognized = image;
+        return { text: '', confidence: 0 };
+      },
+    };
+
+    await runPipeline(uniform, { ocr, roi, preprocessScale: 1 });
+
+    expect(recognized!.width).toBe(8);
+    expect(recognized!.height).toBe(4);
+  });
+});

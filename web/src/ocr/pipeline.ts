@@ -4,7 +4,8 @@ import type { RankedCode } from '../domain/types';
 import { cropRoi } from './roi-cropper';
 import { toGrayscaleThreshold, toNormalizedGrayscale } from './preprocessor';
 import { rotate90 } from './rotate';
-import { composeRect, type Localizer } from './localizer';
+import { composeRect, BrightnessLocalizer, type Localizer } from './localizer';
+import { expandRect } from './geometry';
 import { parseCandidates } from '../domain/parser';
 import { rankCandidates } from '../domain/ranker';
 
@@ -39,6 +40,13 @@ export interface MultiOrientationOptions extends PipelineOptions {
  * Extension seams (not implemented): an OrientationStrategy could call this
  * for 0/90/180/270deg, and a Localizer could replace the static ROI crop.
  */
+// Second-stage localizer for the code pill itself: after inverted
+// normalization the pill is the dominant bright region of the ROI crop, while
+// the sticker edge inverts to a black band that breaks Tesseract's block/line
+// segmentation. Cropping to the pill removes that band (docs/ocr-recognition.md).
+const PILL_LOCALIZER = new BrightnessLocalizer({ threshold: 160, minAreaFraction: 0.05 });
+const PILL_MARGIN = 0.08;
+
 export async function runPipeline(
   frame: RgbaImage,
   { ocr, roi, threshold, invert = true, preprocessScale = 4, psm, localizer }: PipelineOptions,
@@ -46,10 +54,16 @@ export async function runPipeline(
   const sticker = localizer?.locate(frame) ?? null;
   const region = sticker ? composeRect(sticker, roi) : roi;
   const cropped = cropRoi(frame, region);
-  const preprocessed =
+  let preprocessed =
     threshold === undefined
       ? toNormalizedGrayscale(cropped, invert, preprocessScale)
       : toGrayscaleThreshold(cropped, threshold, invert, preprocessScale);
+  if (threshold === undefined) {
+    const pill = PILL_LOCALIZER.locate(preprocessed);
+    if (pill && pill.w < 1 && pill.h < 1) {
+      preprocessed = cropRoi(preprocessed, expandRect(pill, PILL_MARGIN));
+    }
+  }
   const { text, confidence } = await ocr.recognize(preprocessed, { psm });
   const candidates = parseCandidates(text).map((raw) => ({ raw, confidence }));
   return rankCandidates(candidates);

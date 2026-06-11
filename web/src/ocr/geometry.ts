@@ -96,3 +96,22 @@ export function isWellTargeted(bbox: RelativeRect, cropAspect: number): boolean 
   const ratio = Math.max(pixelAspect, 1 / pixelAspect);
   return ratio >= MIN_ASPECT_RATIO && ratio <= MAX_ASPECT_RATIO;
 }
+
+/**
+ * Grow a relative rect by `margin` (fraction of its own size) on every side,
+ * clamped to the unit square. Used to turn a tight sticker bbox into a
+ * guide-like crop that keeps some context around the sticker (mirrors how the
+ * user frames the sticker inside the scan guide with breathing room).
+ */
+export function expandRect(rect: RelativeRect, margin: number): RelativeRect {
+  const dx = rect.w * margin;
+  const dy = rect.h * margin;
+  const x = clamp01(rect.x - dx);
+  const y = clamp01(rect.y - dy);
+  return {
+    x,
+    y,
+    w: clamp01(rect.x + rect.w + dx) - x,
+    h: clamp01(rect.y + rect.h + dy) - y,
+  };
+}

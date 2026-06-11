@@ -23,8 +23,10 @@ export class TesseractAdapter implements OcrAdapter {
       corePath: `${base}/core`,
       langPath: `${base}/lang`,
     });
+    // The space joins the whitelist so Tesseract may emit separators — the
+    // parser needs token boundaries to pick the code out of surrounding noise.
     await worker.setParameters({
-      tessedit_char_whitelist: ocrProfile.whitelist,
+      tessedit_char_whitelist: ocrProfile.whitelist + ' ',
       tessedit_pageseg_mode: String(ocrProfile.psm) as unknown as PSM,
     });
     this.worker = worker;
