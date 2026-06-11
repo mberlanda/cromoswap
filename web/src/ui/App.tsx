@@ -3,7 +3,8 @@ import type { RankedCode, Scan, Session } from '../domain/types';
 import type { Clock, ImageStore, ScanRepo, SessionRepo, AlbumRepo } from '../storage/types';
 import { toTextExport } from '../export/text-export';
 import { toJsonExport } from '../export/json-export';
-import type { CameraResult, CameraState } from './camera-permission';
+import type { CameraQuality, CameraResult, CameraState } from './camera-permission';
+import { DEFAULT_CAMERA_QUALITY } from './camera-permission';
 import type { LeaderboardEntry } from '../storage/sync-client';
 import { SessionGate } from './SessionGate';
 import { TabBar } from './TabBar';
@@ -57,6 +58,9 @@ export interface AppDeps {
   startCamera?: () => Promise<CameraResult>;
   /** Optional: stop camera tracks and detach the current preview stream. */
   stopCamera?: () => void;
+  /** Optional: read/persist the capture-resolution preset (camera restarts on change). */
+  getCameraQuality?: () => CameraQuality;
+  setCameraQuality?: (quality: CameraQuality) => void;
   /** Auto-collect scan interval (injectable for tests). */
   videoScanIntervalMs?: number;
   /** Optional: fetch the global leaderboard from the backend. */
@@ -106,6 +110,9 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
   // When startCamera is provided, camera starts only on user action; tests without it skip the panel.
   const [cameraState, setCameraState] = useState<CameraState>(
     deps.startCamera ? 'idle' : 'granted',
+  );
+  const [cameraQuality, setCameraQualityState] = useState<CameraQuality>(
+    () => deps.getCameraQuality?.() ?? DEFAULT_CAMERA_QUALITY,
   );
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoScanBusyRef = useRef(false);
@@ -278,6 +285,20 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
     }
     setCameraPaused(false);
   }, [deps]);
+
+  // Capture-resolution preset: persist the choice and restart the stream so
+  // the new constraints take effect (getUserMedia reads them at start time).
+  const changeCameraQuality = useCallback(
+    (quality: CameraQuality) => {
+      setCameraQualityState(quality);
+      deps.setCameraQuality?.(quality);
+      if (cameraState === 'granted' && !cameraPaused) {
+        deps.stopCamera?.();
+        void resumeCamera();
+      }
+    },
+    [deps, cameraState, cameraPaused, resumeCamera],
+  );
 
   const autoCollectActive =
     !!active &&
@@ -739,6 +760,8 @@ export function App({ deps, storageMode, onChangeMode }: AppProps) {
           onCapture={handleCapture}
           onResumeCamera={() => void resumeCamera()}
           onPauseCamera={pauseCamera}
+          cameraQuality={cameraQuality}
+          onSetCameraQuality={changeCameraQuality}
           onToggleVideoMode={handleToggleVideoMode}
           onConfirm={handleConfirm}
           onCorrect={handleCorrect}

@@ -93,4 +93,35 @@ describe('composition camera binding', () => {
     expect(stop).toHaveBeenCalledOnce();
     expect(video.srcObject).toBeNull();
   });
+
+  it('persists a camera-quality change and restarts the stream with it', async () => {
+    const stop = vi.fn();
+    const stream = { getTracks: () => [{ stop }] } as unknown as MediaStream;
+    vi.mocked(navigator.mediaDevices.getUserMedia).mockResolvedValue(stream);
+    const setCameraQuality = vi.fn();
+    const deps = await buildCameraDeps();
+    deps.stopCamera = () => stream.getTracks().forEach((t) => t.stop());
+    deps.getCameraQuality = () => 'fhd';
+    deps.setCameraQuality = setCameraQuality;
+
+    render(<App deps={deps} />);
+    await userEvent.type(screen.getByLabelText(/your name/i), 'Mauro');
+    await userEvent.click(screen.getByRole('button', { name: /start/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^scan$/i }));
+    await userEvent.click(await screen.findByRole('button', { name: /allow camera/i }));
+    await screen.findByLabelText('Camera quality');
+
+    const callsBefore = vi.mocked(navigator.mediaDevices.getUserMedia).mock.calls.length;
+    await userEvent.selectOptions(screen.getByLabelText('Camera quality'), 'hd');
+
+    expect(setCameraQuality).toHaveBeenCalledWith('hd');
+    // Old tracks stopped, stream re-requested (composition reads the persisted
+    // quality at request time, so the new constraints apply on restart).
+    expect(stop).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(vi.mocked(navigator.mediaDevices.getUserMedia).mock.calls.length).toBeGreaterThan(
+        callsBefore,
+      );
+    });
+  });
 });

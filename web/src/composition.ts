@@ -18,7 +18,12 @@ import {
   PREVIEW_BOX_ASPECT,
   type Orientation,
 } from './ocr/geometry';
-import { requestCamera, type CameraResult } from './ui/camera-permission';
+import {
+  requestCamera,
+  DEFAULT_CAMERA_QUALITY,
+  type CameraQuality,
+  type CameraResult,
+} from './ui/camera-permission';
 import type { RgbaImage } from './ocr/image';
 
 // Empty string means same-origin (relative `/api/...`), which is how the
@@ -41,6 +46,25 @@ export function getStorageMode(): StorageMode {
 export function setStorageMode(mode: StorageMode): void {
   try {
     localStorage.setItem(STORAGE_MODE_KEY, mode);
+  } catch {
+    // ignore
+  }
+}
+
+const CAMERA_QUALITY_KEY = 'wc-camera-quality';
+
+export function getCameraQuality(): CameraQuality {
+  try {
+    const v = localStorage.getItem(CAMERA_QUALITY_KEY);
+    return v === 'sd' || v === 'hd' || v === 'fhd' ? v : DEFAULT_CAMERA_QUALITY;
+  } catch {
+    return DEFAULT_CAMERA_QUALITY;
+  }
+}
+
+export function setCameraQuality(quality: CameraQuality): void {
+  try {
+    localStorage.setItem(CAMERA_QUALITY_KEY, quality);
   } catch {
     // ignore
   }
@@ -119,8 +143,10 @@ export async function createAppDeps(mode: StorageMode = getStorageMode()): Promi
   const localizer = new BrightnessLocalizer();
 
   let video: HTMLVideoElement | null = null;
+  // Quality is read at request time so a setting change + camera restart
+  // picks up the new resolution without rebuilding the deps.
   const camera = createCameraBinding(() =>
-    requestCamera((c) => navigator.mediaDevices.getUserMedia(c)),
+    requestCamera((c) => navigator.mediaDevices.getUserMedia(c), getCameraQuality()),
   );
   const attachVideo = (element: HTMLVideoElement | null): void => {
     video = element;
@@ -197,6 +223,8 @@ export async function createAppDeps(mode: StorageMode = getStorageMode()): Promi
     attachVideo,
     startCamera: camera.startCamera,
     stopCamera: camera.stopCamera,
+    getCameraQuality,
+    setCameraQuality,
     now: nowIso,
     downloadText: (name, content) => triggerDownload(name, content, 'text/plain'),
     downloadJson: (name, content) => triggerDownload(name, content, 'application/json'),
