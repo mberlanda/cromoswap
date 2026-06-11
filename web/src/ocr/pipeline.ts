@@ -60,7 +60,10 @@ export async function runPipeline(
       : toGrayscaleThreshold(cropped, threshold, invert, preprocessScale);
   if (threshold === undefined) {
     const pill = PILL_LOCALIZER.locate(preprocessed);
-    if (pill && pill.w < 1 && pill.h < 1) {
+    // Crop whenever the pill is smaller than the crop in either dimension —
+    // trimming just one axis still removes the inverted-black band. Only a
+    // full-image result (nothing to trim) is skipped.
+    if (pill && (pill.w < 1 || pill.h < 1)) {
       preprocessed = cropRoi(preprocessed, expandRect(pill, PILL_MARGIN));
     }
   }
