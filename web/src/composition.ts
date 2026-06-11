@@ -1,4 +1,5 @@
 import maskConfig from './assets/mask-config.json';
+import ocrProfile from './assets/ocr-profile.json';
 import type { AppDeps, Detection } from './ui/App';
 import { openStickerDb } from './storage/db';
 import { IdbSessionRepo, IdbScanRepo, IdbImageStore, IdbAlbumRepo } from './storage/idb-repos';
@@ -17,7 +18,12 @@ import {
   PREVIEW_BOX_ASPECT,
   type Orientation,
 } from './ocr/geometry';
-import { requestCamera, type CameraResult } from './ui/camera-permission';
+import {
+  requestCamera,
+  DEFAULT_CAMERA_QUALITY,
+  type CameraQuality,
+  type CameraResult,
+} from './ui/camera-permission';
 import type { RgbaImage } from './ocr/image';
 
 // Empty string means same-origin (relative `/api/...`), which is how the
@@ -40,6 +46,25 @@ export function getStorageMode(): StorageMode {
 export function setStorageMode(mode: StorageMode): void {
   try {
     localStorage.setItem(STORAGE_MODE_KEY, mode);
+  } catch {
+    // ignore
+  }
+}
+
+const CAMERA_QUALITY_KEY = 'wc-camera-quality';
+
+export function getCameraQuality(): CameraQuality {
+  try {
+    const v = localStorage.getItem(CAMERA_QUALITY_KEY);
+    return v === 'sd' || v === 'hd' || v === 'fhd' ? v : DEFAULT_CAMERA_QUALITY;
+  } catch {
+    return DEFAULT_CAMERA_QUALITY;
+  }
+}
+
+export function setCameraQuality(quality: CameraQuality): void {
+  try {
+    localStorage.setItem(CAMERA_QUALITY_KEY, quality);
   } catch {
     // ignore
   }
@@ -118,8 +143,10 @@ export async function createAppDeps(mode: StorageMode = getStorageMode()): Promi
   const localizer = new BrightnessLocalizer();
 
   let video: HTMLVideoElement | null = null;
+  // Quality is read at request time so a setting change + camera restart
+  // picks up the new resolution without rebuilding the deps.
   const camera = createCameraBinding(() =>
-    requestCamera((c) => navigator.mediaDevices.getUserMedia(c)),
+    requestCamera((c) => navigator.mediaDevices.getUserMedia(c), getCameraQuality()),
   );
   const attachVideo = (element: HTMLVideoElement | null): void => {
     video = element;
@@ -133,16 +160,24 @@ export async function createAppDeps(mode: StorageMode = getStorageMode()): Promi
     return coverMapRect(guide, image.width, image.height, PREVIEW_BOX_ASPECT);
   };
 
+  // Single-shot recognition is unstable on phone frames, so each call cycles
+  // through the next {scale, psm} attempt from the shared OCR profile — the
+  // hold/auto-collect loops already retry, which sweeps the whole matrix over
+  // a few ticks without making any single tick slower. Preprocessing contrast-
+  // stretches instead of hard-thresholding (see docs/ocr-recognition.md).
+  let attemptIndex = 0;
   const scanOnce = async (orientation: Orientation, size: number): Promise<Detection | null> => {
     if (!video) return null;
     const captured = drawFrame(video);
     if (!captured) return null;
     const cropped = cropRoi(captured.image, framedRegion(captured.image, orientation, size));
     const roi = maskConfig.orientations[orientation].roi;
+    const attempt = ocrProfile.attempts[attemptIndex++ % ocrProfile.attempts.length];
     const ranked = await runPipelineMultiOrientation(cropped, {
       ocr,
       roi,
-      threshold: 128,
+      preprocessScale: attempt.scale,
+      psm: attempt.psm,
       localizer,
     });
     if (ranked.length === 0) return null;
@@ -188,6 +223,8 @@ export async function createAppDeps(mode: StorageMode = getStorageMode()): Promi
     attachVideo,
     startCamera: camera.startCamera,
     stopCamera: camera.stopCamera,
+    getCameraQuality,
+    setCameraQuality,
     now: nowIso,
     downloadText: (name, content) => triggerDownload(name, content, 'text/plain'),
     downloadJson: (name, content) => triggerDownload(name, content, 'application/json'),

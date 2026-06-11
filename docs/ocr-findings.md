@@ -49,3 +49,23 @@ The fixtures are full phone photos (a sticker on dark fabric), so the harness:
 
 The harness (`web/scripts/validate-ocr.ts`) stays as the tuning/regression tool — drop
 more annotated backs into the fixtures folder and re-run.
+
+## Follow-up (2026-06-11): live pipeline rework — 4/4 fixtures
+
+The blockers above were largely addressed in the OCR accuracy rework
+(documented in [`ocr-recognition.md`](ocr-recognition.md)):
+
+- The harness now runs the **shipped pipeline** (it previously ran its own
+  sharp recipe, so tuning didn't transfer to the app).
+- Fixed threshold-128 binarization → **percentile contrast stretch**.
+- New **second-stage pill crop**: the inverted sticker edge produced a black
+  band that made PSM 6/7 return empty text; cropping to the bright pill fixed
+  `CRO 20`, `GHA 1`, and `GHA 7` outright.
+- The live loop sweeps the shared **{scale, psm} attempt matrix** (one
+  attempt per tick) instead of repeating one recipe.
+- **Camera quality presets** (default Full HD) replace unconstrained
+  `getUserMedia`.
+
+Result: **4/4 fixtures recognized** (`npm run validate:ocr`), three of them on
+the first attempt (scale 3, PSM 6). Stylized-digit confusion remains the next
+accuracy frontier (see plan 01).

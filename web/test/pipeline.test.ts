@@ -57,3 +57,123 @@ describe('runPipeline', () => {
     expect(recognized?.height).toBe(8);
   });
 });
+
+describe('runPipeline preprocessing modes and per-attempt options', () => {
+  it('normalizes (contrast-stretch) instead of binarizing when no threshold is given', async () => {
+    // Three gray levels: a hard threshold can only emit 0/255, while the
+    // normalize path keeps the middle level as an intermediate gray. The
+    // single brightest pixel stays under the pill localizer's minimum area,
+    // so no pill crop kicks in and the middle pixel stays observable.
+    const data = new Uint8ClampedArray(25 * 4);
+    for (let i = 0; i < 25; i++) {
+      const v = i === 0 ? 140 : i === 1 ? 120 : 100;
+      data[i * 4] = v;
+      data[i * 4 + 1] = v;
+      data[i * 4 + 2] = v;
+      data[i * 4 + 3] = 255;
+    }
+    const grays: RgbaImage = { width: 5, height: 5, data };
+    let recognized: RgbaImage | null = null;
+    const ocr = {
+      async recognize(image: RgbaImage) {
+        recognized = image;
+        return { text: 'ARG01', confidence: 0.6 };
+      },
+    };
+
+    await runPipeline(grays, { ocr, roi, invert: false, preprocessScale: 1 });
+
+    expect(recognized).not.toBeNull();
+    const middle = recognized!.data[4];
+    expect(middle).toBeGreaterThan(0);
+    expect(middle).toBeLessThan(255);
+  });
+
+  it('forwards the requested page-segmentation mode to the OCR adapter', async () => {
+    const ocr = new MockOcrAdapter({ text: 'ARG01', confidence: 0.6 });
+    await runPipeline(frame, { ocr, roi, psm: 6 });
+    expect(ocr.lastOptions?.psm).toBe(6);
+  });
+});
+
+describe('pill refinement', () => {
+  it('crops OCR input to the bright pill region after inverted normalization', async () => {
+    // A dark "pill" (inverts to bright) in the right half of an otherwise
+    // light crop: the adapter should receive roughly the pill, not the full
+    // preprocessed crop with its distracting inverted-black surround.
+    const w = 40;
+    const h = 10;
+    const data = new Uint8ClampedArray(w * h * 4);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const v = x >= 20 && y < 5 ? 40 : 220;
+        const i = (y * w + x) * 4;
+        data[i] = v;
+        data[i + 1] = v;
+        data[i + 2] = v;
+        data[i + 3] = 255;
+      }
+    }
+    let recognized: RgbaImage | null = null;
+    const ocr = {
+      async recognize(image: RgbaImage) {
+        recognized = image;
+        return { text: 'ARG01', confidence: 0.6 };
+      },
+    };
+
+    await runPipeline({ width: w, height: h, data }, { ocr, roi, preprocessScale: 1 });
+
+    expect(recognized).not.toBeNull();
+    expect(recognized!.width).toBeLessThan(w);
+    expect(recognized!.height).toBeLessThanOrEqual(6);
+  });
+
+  it('keeps the full preprocessed crop when no pill stands out', async () => {
+    const uniform: RgbaImage = { width: 8, height: 4, data: new Uint8ClampedArray(8 * 4 * 4).fill(200) };
+    let recognized: RgbaImage | null = null;
+    const ocr = {
+      async recognize(image: RgbaImage) {
+        recognized = image;
+        return { text: '', confidence: 0 };
+      },
+    };
+
+    await runPipeline(uniform, { ocr, roi, preprocessScale: 1 });
+
+    expect(recognized!.width).toBe(8);
+    expect(recognized!.height).toBe(4);
+  });
+});
+
+describe('pill refinement on one axis', () => {
+  it('still crops when the pill spans the full width but not the full height', async () => {
+    // Dark band (inverts to bright) across the full width, top half only:
+    // the crop should trim the height even though the width matches.
+    const w = 10;
+    const h = 10;
+    const data = new Uint8ClampedArray(w * h * 4);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const v = y < 5 ? 40 : 220;
+        const i = (y * w + x) * 4;
+        data[i] = v;
+        data[i + 1] = v;
+        data[i + 2] = v;
+        data[i + 3] = 255;
+      }
+    }
+    let recognized: RgbaImage | null = null;
+    const ocr = {
+      async recognize(image: RgbaImage) {
+        recognized = image;
+        return { text: 'ARG01', confidence: 0.6 };
+      },
+    };
+
+    await runPipeline({ width: w, height: h, data }, { ocr, roi, preprocessScale: 1 });
+
+    expect(recognized!.width).toBe(w);
+    expect(recognized!.height).toBeLessThan(h);
+  });
+});

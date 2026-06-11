@@ -1,7 +1,8 @@
 import type { RefObject } from 'react';
 import type { Scan } from '../domain/types';
 import type { Detection, Orientation } from './App';
-import type { CameraState } from './camera-permission';
+import type { CameraQuality, CameraState } from './camera-permission';
+import { CameraQualitySelect } from './CameraQualitySelect';
 import { MaskOverlay } from './MaskOverlay';
 import { DetectionResult } from './DetectionResult';
 import { ManualEntry } from './ManualEntry';
@@ -43,6 +44,8 @@ export interface RepsViewProps {
   onCapture: () => void;
   onResumeCamera: () => void;
   onPauseCamera: () => void;
+  cameraQuality: CameraQuality;
+  onSetCameraQuality: (quality: CameraQuality) => void;
   onToggleVideoMode: (enabled: boolean) => void;
   onConfirm: (code: string) => void;
   onCorrect: (code: string) => void;
@@ -65,6 +68,7 @@ export function RepsView({
   view, onSetView, mode, onSetMode, onGridTap,
   scans, thumbnails, detection, noDetection, scanning, cameraPaused, videoMode,
   orientation, size, targeted, videoRef, onCapture, onResumeCamera, onPauseCamera,
+  cameraQuality, onSetCameraQuality,
   onToggleVideoMode, onConfirm, onCorrect, onSkip, onRescan,
   onManualAdd, onEdit, onDelete, onExportText, onExportJson, onSetOrientation, onSetSize,
 }: RepsViewProps) {
@@ -155,6 +159,7 @@ export function RepsView({
               </div>
               <OrientationToggle value={orientation} onChange={onSetOrientation} />
               <SizeSlider value={size} onChange={onSetSize} />
+              <CameraQualitySelect value={cameraQuality} onChange={onSetCameraQuality} />
               <button
                 type="button"
                 className="primary full"

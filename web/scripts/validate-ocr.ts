@@ -1,32 +1,33 @@
 /**
- * OCR validation harness: runs the real Tesseract engine against the local
- * sticker-back fixtures and reports recognized vs expected codes. Not part of
- * the unit-test gate (slow, downloads language data, needs local images).
+ * OCR validation harness: runs the *live* recognition pipeline (the exact
+ * functions the app ships — localizer, ROI, preprocessing, attempt matrix,
+ * parser, ranker) against the local sticker-back fixtures, so fixture results
+ * predict app behavior. Only the I/O differs from the phone: frames come from
+ * photo files instead of the camera, and OCR goes through a sharp-PNG node
+ * adapter instead of a canvas (see node-ocr-adapter.ts). The approach is
+ * documented in docs/ocr-recognition.md.
  *
  *   cd web && npm run validate:ocr
  *
- * The fixtures are full photos (sticker on a background), so the harness first
- * auto-detects the sticker (the large bright region on the dark fabric — a
- * stand-in for the future Localizer / the user filling the camera frame), then
- * applies the same orientation ROI from mask-config.json before OCR. This
- * mirrors the live camera flow and keeps the ROI proportion.
+ * The fixtures are full photos (sticker on a background). The harness stands
+ * in for the user's framing by locating the sticker (BrightnessLocalizer, the
+ * same detector the app uses) and cropping to it with guide-like margin, then
+ * — exactly like the hold/auto-collect loops — sweeps the shared {scale, psm}
+ * attempt matrix until a valid code is recognized.
  */
-import { readFileSync, existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createWorker, PSM } from 'tesseract.js';
 import sharp from 'sharp';
 import maskConfig from '../src/assets/mask-config.json';
 import ocrProfile from '../src/assets/ocr-profile.json';
-import { parseCandidates } from '../src/domain/parser';
-import { rankCandidates } from '../src/domain/ranker';
+import { BrightnessLocalizer } from '../src/ocr/localizer';
+import { cropRoi } from '../src/ocr/roi-cropper';
+import { expandRect } from '../src/ocr/geometry';
+import { runPipelineMultiOrientation } from '../src/ocr/pipeline';
+import type { RgbaImage } from '../src/ocr/image';
+import { NodeOcrAdapter } from './node-ocr-adapter';
 
-interface Rect {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
 type Orientation = keyof typeof maskConfig.orientations;
 interface Sample {
   file: string;
@@ -40,82 +41,20 @@ const manifest = JSON.parse(readFileSync(resolve(fixturesDir, 'manifest.json'), 
   samples: Sample[];
 };
 
-/** Detect the sticker as the largest bright connected component on dark fabric. */
-async function detectStickerBbox(path: string): Promise<Rect> {
-  const targetW = 200;
+/** Photos are downscaled to this width — roughly what a Full HD capture gives. */
+const FRAME_WIDTH = 1080;
+/** Guide-like breathing room kept around the located sticker. */
+const GUIDE_MARGIN = 0.08;
+
+/** Load a photo as the RgbaImage the live pipeline consumes (EXIF-rotated). */
+async function loadFrame(path: string): Promise<RgbaImage> {
   const { data, info } = await sharp(path)
-    .resize({ width: targetW })
-    .greyscale()
+    .rotate()
+    .resize({ width: FRAME_WIDTH, withoutEnlargement: true })
+    .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
-  const w = info.width;
-  const h = info.height;
-  const threshold = 110;
-  const bright = new Uint8Array(w * h);
-  for (let i = 0; i < w * h; i++) bright[i] = data[i] > threshold ? 1 : 0;
-
-  const seen = new Uint8Array(w * h);
-  const stack: number[] = [];
-  let best = { area: 0, minx: 0, miny: 0, maxx: 0, maxy: 0 };
-  for (let start = 0; start < w * h; start++) {
-    if (!bright[start] || seen[start]) continue;
-    let area = 0;
-    let minx = w;
-    let miny = h;
-    let maxx = 0;
-    let maxy = 0;
-    stack.length = 0;
-    stack.push(start);
-    seen[start] = 1;
-    while (stack.length) {
-      const p = stack.pop()!;
-      const x = p % w;
-      const y = (p / w) | 0;
-      area++;
-      if (x < minx) minx = x;
-      if (x > maxx) maxx = x;
-      if (y < miny) miny = y;
-      if (y > maxy) maxy = y;
-      if (x > 0 && bright[p - 1] && !seen[p - 1]) {
-        seen[p - 1] = 1;
-        stack.push(p - 1);
-      }
-      if (x < w - 1 && bright[p + 1] && !seen[p + 1]) {
-        seen[p + 1] = 1;
-        stack.push(p + 1);
-      }
-      if (y > 0 && bright[p - w] && !seen[p - w]) {
-        seen[p - w] = 1;
-        stack.push(p - w);
-      }
-      if (y < h - 1 && bright[p + w] && !seen[p + w]) {
-        seen[p + w] = 1;
-        stack.push(p + w);
-      }
-    }
-    if (area > best.area) best = { area, minx, miny, maxx, maxy };
-  }
-  return {
-    x: best.minx / w,
-    y: best.miny / h,
-    w: (best.maxx - best.minx) / w,
-    h: (best.maxy - best.miny) / h,
-  };
-}
-
-/**
- * Compose the orientation ROI (relative to the sticker) onto the photo, with
- * extra vertical slack: sticker auto-detection can run a little high (glare or
- * stacked edges), so the pill may sit lower than the nominal ROI.
- */
-function composeRoi(bbox: Rect, roi: Rect): Rect {
-  const slack = roi.h * bbox.h * 0.6;
-  return {
-    x: bbox.x + roi.x * bbox.w,
-    y: bbox.y + roi.y * bbox.h,
-    w: roi.w * bbox.w,
-    h: roi.h * bbox.h + slack,
-  };
+  return { width: info.width, height: info.height, data: new Uint8ClampedArray(data) };
 }
 
 async function main() {
@@ -125,55 +64,37 @@ async function main() {
     return;
   }
 
-  const worker = await createWorker('eng');
-  await worker.setParameters({ tessedit_char_whitelist: ocrProfile.whitelist + ' ' });
-
-  // Single-shot OCR on these hard photos is unstable, so — like the live
-  // hold-while-focused loop — try a few scale/PSM combos and accept the first
-  // that reads the expected code.
-  const combos: { scale: number; psm: PSM }[] = [
-    { scale: 3, psm: PSM.SINGLE_LINE },
-    { scale: 4, psm: PSM.SINGLE_LINE },
-    { scale: 2, psm: PSM.SINGLE_LINE },
-    { scale: 3, psm: PSM.SINGLE_BLOCK },
-    { scale: 4, psm: PSM.SPARSE_TEXT },
-  ];
+  const ocr = new NodeOcrAdapter();
+  const localizer = new BrightnessLocalizer();
 
   let passed = 0;
   for (const sample of present) {
-    const path = resolve(fixturesDir, sample.file);
-    const { width = 0, height = 0 } = await sharp(path).metadata();
-    const bbox = await detectStickerBbox(path);
-    const roi = composeRoi(bbox, maskConfig.orientations[sample.orientation].roi as Rect);
-    const rectangle = {
-      left: Math.round(roi.x * width),
-      top: Math.round(roi.y * height),
-      width: Math.round(roi.w * width),
-      height: Math.round(roi.h * height),
-    };
+    const frame = await loadFrame(resolve(fixturesDir, sample.file));
+
+    // Stand-in for the user's framing: crop to the located sticker plus
+    // guide-like margin. The pipeline then re-locates within the crop, just
+    // like the live scan does inside the guide region.
+    const sticker = localizer.locate(frame);
+    const guide = sticker ? cropRoi(frame, expandRect(sticker, GUIDE_MARGIN)) : frame;
+    const roi = maskConfig.orientations[sample.orientation].roi;
 
     let found: string[] = [];
     let winner = '';
-    for (const combo of combos) {
-      // The code is light text on a dark pill; invert for Tesseract.
-      const processed = await sharp(path)
-        .extract(rectangle)
-        .resize({ width: rectangle.width * combo.scale })
-        .greyscale()
-        .negate()
-        .normalise()
-        .png()
-        .toBuffer();
-      await worker.setParameters({ tessedit_pageseg_mode: combo.psm });
-      const { data } = await worker.recognize(processed);
-      found = rankCandidates(
-        parseCandidates(data.text).map((raw) => ({ raw, confidence: data.confidence / 100 })),
-      ).map((r) => r.code.canonical);
+    for (const attempt of ocrProfile.attempts) {
+      const ranked = await runPipelineMultiOrientation(guide, {
+        ocr,
+        roi,
+        localizer,
+        preprocessScale: attempt.scale,
+        psm: attempt.psm,
+      });
+      found = ranked.map((r) => r.code.canonical);
       if (found.includes(sample.expectedCode)) {
-        winner = `scale=${combo.scale} psm=${combo.psm}`;
+        winner = `scale=${attempt.scale} psm=${attempt.psm}`;
         break;
       }
     }
+
     const ok = found.includes(sample.expectedCode);
     if (ok) passed += 1;
     console.log(
@@ -182,7 +103,7 @@ async function main() {
     );
   }
 
-  await worker.terminate();
+  await ocr.dispose();
   console.log(`\n${passed}/${present.length} fixtures recognized.`);
   if (passed < present.length) process.exitCode = 1;
 }

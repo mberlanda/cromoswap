@@ -41,6 +41,7 @@ not TODOs (proposed ones are pending implementation).
 
 ## OCR
 
+- [ocr-recognition.md](ocr-recognition.md) — the recognition approach: quality presets, adaptive preprocessing, pill crop, attempt matrix, harness parity ✅
 - [ocr-findings.md](ocr-findings.md) — empirical accuracy notes on the code pill 📖
 - [ocr-scanning-geometry.md](ocr-scanning-geometry.md) — frame/crop ROI geometry ✅
 - [plans/01-tesseract-fine-tuning.md](plans/01-tesseract-fine-tuning.md) — font-tuned LSTM model 💡 (proposed)

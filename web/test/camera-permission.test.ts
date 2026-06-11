@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { requestCamera } from '../src/ui/camera-permission';
+import { cameraConstraints, requestCamera } from '../src/ui/camera-permission';
 
 const fakeStream = {} as MediaStream;
 
@@ -35,5 +35,49 @@ describe('requestCamera', () => {
   it('handles a non-Error rejection with a fallback message', async () => {
     const result = await requestCamera(() => Promise.reject('boom'));
     expect(result).toEqual({ state: 'error', message: 'Unknown error' });
+  });
+});
+
+describe('camera quality presets', () => {
+  it('requests Full HD ideal dimensions by default', async () => {
+    let constraints: MediaStreamConstraints | undefined;
+    await requestCamera(async (c) => {
+      constraints = c;
+      return fakeStream;
+    });
+    const video = constraints?.video as MediaTrackConstraints;
+    expect(video.facingMode).toBe('environment');
+    expect(video.width).toEqual({ ideal: 1920 });
+    expect(video.height).toEqual({ ideal: 1080 });
+  });
+
+  it('maps each named preset to its ideal resolution', () => {
+    expect(cameraConstraints('sd').video).toMatchObject({
+      width: { ideal: 640 },
+      height: { ideal: 480 },
+    });
+    expect(cameraConstraints('hd').video).toMatchObject({
+      width: { ideal: 1280 },
+      height: { ideal: 720 },
+    });
+    expect(cameraConstraints('fhd').video).toMatchObject({
+      width: { ideal: 1920 },
+      height: { ideal: 1080 },
+    });
+  });
+
+  it('uses ideal (not exact) constraints so unsupported cameras still open', () => {
+    const video = cameraConstraints('fhd').video as MediaTrackConstraints;
+    expect(video.width).not.toHaveProperty('exact');
+    expect(video.height).not.toHaveProperty('exact');
+  });
+
+  it('passes the requested preset through requestCamera', async () => {
+    let constraints: MediaStreamConstraints | undefined;
+    await requestCamera(async (c) => {
+      constraints = c;
+      return fakeStream;
+    }, 'sd');
+    expect((constraints?.video as MediaTrackConstraints).width).toEqual({ ideal: 640 });
   });
 });
