@@ -1,4 +1,11 @@
 {
   "whitelist": "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-  "psm": 7
+  "psm": 7,
+  "attempts": [
+    { "scale": 3, "psm": 6 },
+    { "scale": 4, "psm": 7 },
+    { "scale": 3, "psm": 7 },
+    { "scale": 2, "psm": 7 },
+    { "scale": 4, "psm": 6 }
+  ]
 }

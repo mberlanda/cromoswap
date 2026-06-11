@@ -1,4 +1,5 @@
 import maskConfig from './assets/mask-config.json';
+import ocrProfile from './assets/ocr-profile.json';
 import type { AppDeps, Detection } from './ui/App';
 import { openStickerDb } from './storage/db';
 import { IdbSessionRepo, IdbScanRepo, IdbImageStore, IdbAlbumRepo } from './storage/idb-repos';
@@ -133,16 +134,24 @@ export async function createAppDeps(mode: StorageMode = getStorageMode()): Promi
     return coverMapRect(guide, image.width, image.height, PREVIEW_BOX_ASPECT);
   };
 
+  // Single-shot recognition is unstable on phone frames, so each call cycles
+  // through the next {scale, psm} attempt from the shared OCR profile — the
+  // hold/auto-collect loops already retry, which sweeps the whole matrix over
+  // a few ticks without making any single tick slower. Preprocessing contrast-
+  // stretches instead of hard-thresholding (see docs/ocr-recognition.md).
+  let attemptIndex = 0;
   const scanOnce = async (orientation: Orientation, size: number): Promise<Detection | null> => {
     if (!video) return null;
     const captured = drawFrame(video);
     if (!captured) return null;
     const cropped = cropRoi(captured.image, framedRegion(captured.image, orientation, size));
     const roi = maskConfig.orientations[orientation].roi;
+    const attempt = ocrProfile.attempts[attemptIndex++ % ocrProfile.attempts.length];
     const ranked = await runPipelineMultiOrientation(cropped, {
       ocr,
       roi,
-      threshold: 128,
+      preprocessScale: attempt.scale,
+      psm: attempt.psm,
       localizer,
     });
     if (ranked.length === 0) return null;

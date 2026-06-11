@@ -57,3 +57,39 @@ describe('runPipeline', () => {
     expect(recognized?.height).toBe(8);
   });
 });
+
+describe('runPipeline preprocessing modes and per-attempt options', () => {
+  it('normalizes (contrast-stretch) instead of binarizing when no threshold is given', async () => {
+    // Three gray levels: a hard threshold can only emit 0/255, while the
+    // normalize path keeps the middle level as an intermediate gray.
+    const grays: RgbaImage = {
+      width: 3,
+      height: 1,
+      data: new Uint8ClampedArray([
+        100, 100, 100, 255,
+        120, 120, 120, 255,
+        140, 140, 140, 255,
+      ]),
+    };
+    let recognized: RgbaImage | null = null;
+    const ocr = {
+      async recognize(image: RgbaImage) {
+        recognized = image;
+        return { text: 'ARG01', confidence: 0.6 };
+      },
+    };
+
+    await runPipeline(grays, { ocr, roi, invert: false, preprocessScale: 1 });
+
+    expect(recognized).not.toBeNull();
+    const middle = recognized!.data[4];
+    expect(middle).toBeGreaterThan(0);
+    expect(middle).toBeLessThan(255);
+  });
+
+  it('forwards the requested page-segmentation mode to the OCR adapter', async () => {
+    const ocr = new MockOcrAdapter({ text: 'ARG01', confidence: 0.6 });
+    await runPipeline(frame, { ocr, roi, psm: 6 });
+    expect(ocr.lastOptions?.psm).toBe(6);
+  });
+});

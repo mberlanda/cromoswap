@@ -2,7 +2,7 @@ import type { RgbaImage, RelativeRect } from './image';
 import type { OcrAdapter } from './ocr-adapter';
 import type { RankedCode } from '../domain/types';
 import { cropRoi } from './roi-cropper';
-import { toGrayscaleThreshold } from './preprocessor';
+import { toGrayscaleThreshold, toNormalizedGrayscale } from './preprocessor';
 import { rotate90 } from './rotate';
 import { composeRect, type Localizer } from './localizer';
 import { parseCandidates } from '../domain/parser';
@@ -11,11 +11,18 @@ import { rankCandidates } from '../domain/ranker';
 export interface PipelineOptions {
   ocr: OcrAdapter;
   roi: RelativeRect;
-  threshold: number;
+  /**
+   * When set, binarize with this fixed luminance threshold (legacy mode).
+   * When omitted, preprocessing contrast-stretches instead (the default —
+   * adapts to the crop's lighting; see docs/ocr-recognition.md).
+   */
+  threshold?: number;
   /** Invert preprocessing for light-on-dark code pills. Defaults to true. */
   invert?: boolean;
   /** Upscale the tiny code-pill crop before OCR. Defaults to 4x. */
   preprocessScale?: number;
+  /** Tesseract page-segmentation mode for this attempt, forwarded to the adapter. */
+  psm?: number;
   /** Optional sticker localizer; the ROI is taken relative to what it finds. */
   localizer?: Localizer;
 }
@@ -34,13 +41,16 @@ export interface MultiOrientationOptions extends PipelineOptions {
  */
 export async function runPipeline(
   frame: RgbaImage,
-  { ocr, roi, threshold, invert = true, preprocessScale = 4, localizer }: PipelineOptions,
+  { ocr, roi, threshold, invert = true, preprocessScale = 4, psm, localizer }: PipelineOptions,
 ): Promise<RankedCode[]> {
   const sticker = localizer?.locate(frame) ?? null;
   const region = sticker ? composeRect(sticker, roi) : roi;
   const cropped = cropRoi(frame, region);
-  const preprocessed = toGrayscaleThreshold(cropped, threshold, invert, preprocessScale);
-  const { text, confidence } = await ocr.recognize(preprocessed);
+  const preprocessed =
+    threshold === undefined
+      ? toNormalizedGrayscale(cropped, invert, preprocessScale)
+      : toGrayscaleThreshold(cropped, threshold, invert, preprocessScale);
+  const { text, confidence } = await ocr.recognize(preprocessed, { psm });
   const candidates = parseCandidates(text).map((raw) => ({ raw, confidence }));
   return rankCandidates(candidates);
 }
@@ -58,6 +68,7 @@ export async function runPipelineMultiOrientation(
     threshold,
     invert,
     preprocessScale,
+    psm,
     localizer,
     rotations = [0, 1, 2, 3],
   }: MultiOrientationOptions,
@@ -71,6 +82,7 @@ export async function runPipelineMultiOrientation(
       threshold,
       invert,
       preprocessScale,
+      psm,
       localizer,
     });
     for (const candidate of ranked) {
