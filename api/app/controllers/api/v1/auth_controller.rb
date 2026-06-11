@@ -18,9 +18,14 @@ module Api
       end
 
       # POST /api/v1/auth/login
+      # `authenticate_by` digests the password even when the username does not
+      # exist, so response timing can't be used to enumerate accounts.
       def login
-        user = User.find_by(username: params[:username].to_s.downcase)
-        if user&.authenticate(params[:password])
+        user = User.authenticate_by(
+          username: params[:username].to_s.downcase,
+          password: params[:password].to_s
+        )
+        if user
           render json: auth_payload(user, user.session)
         else
           render json: { error: "invalid credentials" }, status: :unauthorized

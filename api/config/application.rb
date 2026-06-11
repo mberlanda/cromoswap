@@ -26,7 +26,7 @@ module Api
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
-    config.autoload_lib(ignore: %w[assets tasks])
+    config.autoload_lib(ignore: %w[assets tasks middleware])
 
     # Configuration for the application, engines, and railties goes here.
     #
@@ -48,5 +48,16 @@ module Api
     config.middleware.use ActionDispatch::Cookies
     config.middleware.use ActionDispatch::Session::CookieStore, key: "_cromoswap_admin"
     config.middleware.use ActionDispatch::Flash
+
+    # api_only strips the CSP middleware; the app serves HTML (SPA + admin), so
+    # add it back, above Static so the header also reaches documents served
+    # straight from public/. The policy lives in
+    # config/initializers/content_security_policy.rb. SecurityHeaders adds
+    # Permissions-Policy and Referrer-Policy the same way (Rails' own
+    # PermissionsPolicy middleware still emits the deprecated Feature-Policy
+    # header, so it is not used).
+    require_relative "../lib/middleware/security_headers"
+    config.middleware.insert_before ActionDispatch::Static, ActionDispatch::ContentSecurityPolicy::Middleware
+    config.middleware.insert_before ActionDispatch::Static, SecurityHeaders
   end
 end
