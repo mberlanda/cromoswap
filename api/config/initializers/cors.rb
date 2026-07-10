@@ -13,12 +13,14 @@ allowed_origins = ENV.fetch("CORS_ORIGINS", "http://localhost:5173,http://localh
   .map(&:strip)
   .reject(&:empty?)
 
-Rails.application.config.middleware.insert_before 0, Rack::Cors do
-  allow do
-    origins(*allowed_origins)
+if allowed_origins.any?
+  Rails.application.config.middleware.insert_before 0, Rack::Cors do
+    allow do
+      origins(*allowed_origins)
 
-    resource "/api/*",
-      headers: :any,
-      methods: %i[get post patch delete options]
+      resource "/api/*",
+        headers: :any,
+        methods: %i[get post patch delete options]
+    end
   end
 end

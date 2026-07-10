@@ -1,0 +1,62 @@
+name: wc-sticker-scanner-prod
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME:-api_production}
+      POSTGRES_USER: ${DATABASE_USER:-api}
+      POSTGRES_PASSWORD: ${API_DATABASE_PASSWORD:?Set API_DATABASE_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"${DATABASE_USER:-api}\" -d \"${DATABASE_NAME:-api_production}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: ${APP_IMAGE:-wc-sticker-scanner:prod}
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+      args:
+        RUBY_VERSION: ${RUBY_VERSION:-3.3.6}
+        NODE_VERSION: ${NODE_VERSION:-22}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+    restart: unless-stopped
+    environment:
+      RAILS_ENV: production
+      RACK_ENV: production
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY:?Set RAILS_MASTER_KEY}
+      RAILS_LOG_LEVEL: ${RAILS_LOG_LEVEL:-info}
+      RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-3}
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}
+      SOLID_QUEUE_IN_PUMA: ${SOLID_QUEUE_IN_PUMA:-true}
+      DATABASE_HOST: ${DATABASE_HOST:-db}
+      DATABASE_PORT: ${DATABASE_PORT:-5432}
+      DATABASE_NAME: ${DATABASE_NAME:-api_production}
+      DATABASE_USER: ${DATABASE_USER:-api}
+      CACHE_DATABASE_NAME: ${CACHE_DATABASE_NAME:-api_production_cache}
+      QUEUE_DATABASE_NAME: ${QUEUE_DATABASE_NAME:-api_production_queue}
+      CABLE_DATABASE_NAME: ${CABLE_DATABASE_NAME:-api_production_cable}
+      API_DATABASE_PASSWORD: ${API_DATABASE_PASSWORD:?Set API_DATABASE_PASSWORD}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+    ports:
+      - "${APP_PORT:-3000}:80"
+    volumes:
+      - rails-storage:/rails/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost/up || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  postgres-data:
+  rails-storage:
